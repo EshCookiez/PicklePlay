@@ -20,7 +20,7 @@ export default function CourtCard({
 }: CourtCardProps) {
   return (
     <div className="group bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
-      <div className="relative h-48 bg-gray-200 overflow-hidden">
+      <div className="relative h-40 md:h-48 bg-gray-200 overflow-hidden">
         <Image
           src={image}
           alt={name}
