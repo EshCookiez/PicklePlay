@@ -13,8 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PicklePlay",
-  description: "Your New Pickleball Playground. Get ready to serve, volley, and smash your way to victory at the heart of Cebu's newest and most thrilling pickleball destination.",
+  title: "PicklePlay Philippines - Find Pickleball Courts Near You",
+  description:
+    "PicklePlay.ph helps you discover pickleball courts across the Philippines. Search by location, view court details, and get directions to start playing pickleball anywhere in the country!",
+  openGraph: {
+    title: "PicklePlay Philippines - Find Pickleball Courts Near You",
+    description:
+      "PicklePlay.ph helps you discover pickleball courts across the Philippines. Search by location, view court details, and get directions to start playing pickleball anywhere in the country!",
+    url: "https://pickleplay.ph",
+    siteName: "PicklePlay Philippines",
+    locale: "en_PH",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
