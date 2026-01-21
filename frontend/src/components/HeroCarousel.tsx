@@ -4,57 +4,34 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const slides = [
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner2-9udq6hGbqmfwbCgB0GZdznI0Og0YVD.png",
-    alt: "Pickleball players at net",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner4-asoJBfEYYmJRVg9Y0AKkiOr0dA73GV.png",
-    alt: "Players playing pickleball",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner5-SwAiVYRMsfUCqZMBq1uTm9yK0DsC3F.png",
-    alt: "Pickleball on court",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner3-8TIlKFgqX304DRHWOmnB9ShvykMTdd.png",
-    alt: "Yellow pickleball on blue court",
-  },
-];
-
 export default function HeroCarousel() {
-  const [current, setCurrent] = useState(2);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const prev = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
-  const next = () => setCurrent((prev) => (prev + 1) % slides.length);
-
   return (
-    <section className="relative w-full h-lvh md:h-screen bg-gray-200 overflow-hidden">
-      {/* Carousel Images */}
-      {slides.map((slide, idx) => (
-        <div
-          key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            idx === current ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <Image
-            src={slide.src}
-            alt={slide.alt}
-            fill
-            className="object-cover"
-            priority={idx === current}
-          />
-        </div>
-      ))}
+    <>
+      <style jsx>{`
+        @keyframes bounceInCircle {
+          0%,
+          100% {
+            transform: translateY(0) scale(1.02, 0.98);
+          }
+          50% {
+            transform: translateY(-18%) scale(0.96, 1.05);
+          }
+        }
+
+        .ballBounce {
+          animation: bounceInCircle 1.2s ease-in-out infinite;
+        }
+      `}</style>
+      <section className="relative w-full h-lvh md:h-screen bg-gray-200 overflow-hidden">
+      {/* Video Background */}
+      <video
+        src="/images/home-video.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      />
 
       {/* Navigation Buttons */}
       {/* <button
@@ -91,11 +68,17 @@ export default function HeroCarousel() {
       <div className="absolute inset-0 flex items-center justify-center z-30 px-4">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex flex-col items-center justify-center text-center">
-            <h1 className="text-3xl md:text-3xl lg:text-7xl font-black mb-4 text-white drop-shadow-lg">
-              FIND A LOCAL COURT 
-            </h1>
-            <h1 className="text-3xl md:text-3xl lg:text-7xl font-black mb-4 text-white drop-shadow-lg">
-              NEAR YOU
+            <h1 className="text-3xl md:text-3xl lg:text-7xl font-black mb-4 text-white drop-shadow-lg relative">
+              FIND A LOCAL C
+              <span className="ballBounce relative inline-flex w-[0.95em] h-[0.95em] items-center justify-center translate-y-[0.06em]">
+                <Image
+                  src="/images/Ball.png"
+                  alt="Bouncing ball"
+                  fill
+                  className="object-contain"
+                />
+              </span>
+              URT
             </h1>
             <p className="text-xl md:text-2xl text-white mb-12 max-w-2xl drop-shadow-lg">
               Connect with pickleball courts in your area and start playing today
@@ -117,5 +100,6 @@ export default function HeroCarousel() {
         </div>
       </div>
     </section>
+    </>
   );
 }
