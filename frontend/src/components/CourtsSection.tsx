@@ -1,4 +1,7 @@
+"use client";
+
 import CourtCard from "./CourtCard";
+import CurvedLoop from "../animate/CurvedLoop";
 
 const courts = [
   {
@@ -29,8 +32,20 @@ const courts = [
 
 export default function CourtsSection() {
   return (
-    <section className="py-16 md:py-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
+      {/* Curved Loop Background */}
+      <div className="absolute inset-0 -top-10 opacity-20">
+        <CurvedLoop 
+          marqueeText="PicklePlay     PicklePlay     PicklePlay"
+          speed={2}
+          curveAmount={400}
+          direction="right"
+          interactive={false}
+          textColor="#0a56a7"
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0a56a7]">
             Court Finder / Location Directory

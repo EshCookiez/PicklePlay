@@ -3,6 +3,47 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import SplitText from "../animate/SplitText";
+const slides = [
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner2-9udq6hGbqmfwbCgB0GZdznI0Og0YVD.png",
+    alt: "Pickleball players at net",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner4-asoJBfEYYmJRVg9Y0AKkiOr0dA73GV.png",
+    alt: "Players playing pickleball",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner5-SwAiVYRMsfUCqZMBq1uTm9yK0DsC3F.png",
+    alt: "Pickleball on court",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner3-8TIlKFgqX304DRHWOmnB9ShvykMTdd.png",
+    alt: "Yellow pickleball on blue court",
+  },
+];
+const handleAnimationComplete = () => {
+  console.log('All letters have animated!');
+};
+
+export default function HeroCarousel() {
+  const [current, setCurrent] = useState(2);
+  const [showDescription, setShowDescription] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleFirstAnimationComplete = () => {
+    setShowDescription(true);
+  };
+
+  const prev = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+  const next = () => setCurrent((prev) => (prev + 1) % slides.length);
+
 
 export default function HeroCarousel() {
   return (
@@ -68,6 +109,36 @@ export default function HeroCarousel() {
       <div className="absolute inset-0 flex items-center justify-center z-30 px-4">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex flex-col items-center justify-center text-center">
+            
+            <SplitText
+              text="FIND A LOCAL COURT NEAR YOU"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-7xl font-black mb-4 text-white drop-shadow-lg"
+              delay={50}
+              duration={1.25}
+              ease="power3.out"
+              splitType="chars"
+              from={{ opacity: 0, y: 40 }}
+              to={{ opacity: 1, y: 0 }}
+              threshold={0.1}
+              rootMargin="-100px"
+              tag="h1"
+              onLetterAnimationComplete={handleAnimationComplete}
+            />
+            <div className="h-24 flex items-center justify-center">
+              
+                <SplitText
+                  text="Connect with pickleball courts in your area and start playing today"
+                  className="text-base sm:text-lg md:text-2xl text-white drop-shadow-lg max-w-2xl px-4"
+                  delay={30}
+                  duration={1.25}
+                  ease="power3.out"
+                  splitType="chars"
+                  threshold={0}
+                  rootMargin="-100px"
+                  tag="p"
+                />
+              
+            </div>
             <h1 className="text-3xl md:text-3xl lg:text-7xl font-black mb-4 text-white drop-shadow-lg relative">
               FIND A LOCAL C
               <span className="ballBounce relative inline-flex w-[0.95em] h-[0.95em] items-center justify-center translate-y-[0.06em]">
