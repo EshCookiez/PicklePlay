@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "PicklePlay Philippines",
+    "slug": "pickleplay-ph",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light"
+  }
+}
