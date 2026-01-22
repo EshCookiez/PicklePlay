@@ -50,7 +50,7 @@ export default function FeaturesSection() {
                 threshold={0.1}
                 delay={idx * 0.15}
               >
-                <div className="group bg-white rounded-xl border border-gray-200 p-6 shadow-md hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
+                <div className="group bg-white rounded-xl border border-gray-200 p-6 shadow-md hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out">
                   <div className="flex justify-center mb-4">
                     <div className="p-4 bg-[#0a56a7] text-white rounded-full group-hover:bg-[#a3ff01] group-hover:text-[#0a56a7] group-hover:scale-125 transition-all duration-300 shadow-lg group-hover:shadow-xl">
                       <IconComponent className="w-8 h-8 group-hover:rotate-12 transition-transform duration-300" />
