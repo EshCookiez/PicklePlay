@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,8 +7,6 @@ import {
   ScrollView,
   StatusBar,
   Image,
-  Animated,
-  PanResponder,
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {MaterialIcons} from '@expo/vector-icons';
@@ -19,77 +17,39 @@ import Colors from '../constants/Colors';
 const thematicBlue = '#0A56A7';
 const activeColor = '#a3ff01';
 
-const CourtDetailScreen = ({route, navigation}) => {
-  const {court} = route.params;
-  const [currentScreenIndex, setCurrentScreenIndex] = useState(2);
+const CourtDetailScreen = ({ navigation }) => {
+  const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const screens = ['Home', 'Find', 'Map', 'Shop'];
-  
-  const translateX = useRef(new Animated.Value(0)).current;
-  
-  const onPanGestureMove = Animated.event(
-    [],
-    { listener: (evt, gestureState) => {
-      const {dx} = gestureState;
-      translateX.setValue(dx);
-    }, useNativeDriver: false },
-  );
-  
-  const onPanGestureRelease = (evt, gestureState) => {
-    const {dx, vx} = gestureState;
+
+  const navigateWithDirection = (targetIndex) => {
+    if (targetIndex === currentScreenIndex) return;
     
-    // Determine swipe direction
-    if (Math.abs(dx) > 50) {
-      if (dx < 0 && currentScreenIndex > 0) {
-        // Swipe left - go to previous screen
-        setCurrentScreenIndex(currentScreenIndex - 1);
-        navigateToScreen(currentScreenIndex - 1);
-      } else if (dx > 0 && currentScreenIndex < screens.length - 1) {
-        // Swipe right - go to next screen
-        setCurrentScreenIndex(currentScreenIndex + 1);
-        navigateToScreen(currentScreenIndex + 1);
-      }
-    }
+    // Determine transition direction
+    const isMovingForward = targetIndex > currentScreenIndex;
     
-    // Reset position with spring animation
-    Animated.spring(translateX, {
-      toValue: 0,
-      useNativeDriver: false,
-    }).start();
+    // Set the target screen index first
+    setCurrentScreenIndex(targetIndex);
+    
+    // Navigate with appropriate direction parameter and screen index
+    const direction = isMovingForward ? 'right' : 'left';
+    navigation.navigate(screens[targetIndex], { direction, screenIndex: targetIndex });
   };
-  
-  const navigateToScreen = (index) => {
-    // Animate screen transition
-    Animated.spring(translateX, {
-      toValue: index > currentScreenIndex ? -300 : 300,
-      useNativeDriver: false,
-      duration: 300,
-    }).start(() => {
-      setCurrentScreenIndex(index);
-      setTimeout(() => {
-        switch (index) {
-          case 0:
-            navigation.navigate('Home');
-            break;
-          case 1:
-            navigation.navigate('FindCourts');
-            break;
-          case 2:
-            // Map screen - not implemented yet
-            break;
-          case 3:
-            // Shop screen - not implemented yet
-            break;
-        }
-      }, 350);
-    });
+
+  const handleBackPress = () => {
+    navigation.navigate('Home');
   };
-  
-  const panResponder = useRef(
-    PanResponder.create({
-      onMove: onPanGestureMove,
-      onRelease: onPanGestureRelease,
-    })
-  ).current;
+
+  // Sample court data since we're not using route params
+  const court = {
+    name: 'Banawa Community Court',
+    location: 'Cebu City',
+    rating: 4.5,
+    imageUrl: 'https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=1200&q=60',
+    description: 'A beautiful community court with excellent facilities.',
+    amenities: ['Parking', 'Restrooms', 'Lighting', 'Water Fountain'],
+    hours: '6:00 AM - 10:00 PM',
+    phone: '+63 123 456 7890',
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -103,7 +63,7 @@ const CourtDetailScreen = ({route, navigation}) => {
         <View style={styles.headerContent}>
           <TouchableOpacity 
             style={styles.backButton}
-            onPress={() => navigation.goBack()}>
+            onPress={handleBackPress}>
             <MaterialIcons name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <View style={styles.logoContainer}>
@@ -175,9 +135,7 @@ const CourtDetailScreen = ({route, navigation}) => {
       </ScrollView>
 
       {/* Bottom Navigation with Swipe Gestures */}
-      <Animated.View 
-        style={[styles.bottomNav, {transform: [{translateX}]}]}
-        {...panResponder.panHandlers}>
+      <View style={styles.bottomNav}>
         <TouchableOpacity 
           style={styles.navItem}
           onPress={() => {
@@ -187,7 +145,7 @@ const CourtDetailScreen = ({route, navigation}) => {
           <View style={[styles.navIconContainer, currentScreenIndex === 0 && styles.activeNavIcon]}>
             <MaterialIcons name="home" size={24} color={currentScreenIndex === 0 ? activeColor : thematicBlue} />
           </View>
-          <Text style={[styles.navText, currentScreenIndex === 0 && styles.activeNavText]}>Home</Text>
+          <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.navItem}
@@ -198,13 +156,13 @@ const CourtDetailScreen = ({route, navigation}) => {
           <View style={[styles.navIconContainer, currentScreenIndex === 1 && styles.activeNavIcon]}>
             <MaterialIcons name="search" size={24} color={currentScreenIndex === 1 ? activeColor : thematicBlue} />
           </View>
-          <Text style={[styles.navText, currentScreenIndex === 1 && styles.activeNavText]}>Find</Text>
+          <Text style={styles.navText}>Find</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.navItem, styles.activeNavItem]}>
           <View style={[styles.navIconContainer, currentScreenIndex === 2 && styles.activeNavIcon]}>
             <MaterialIcons name="map" size={24} color={currentScreenIndex === 2 ? activeColor : thematicBlue} />
           </View>
-          <Text style={[styles.navText, currentScreenIndex === 2 && styles.activeNavText]}>Map</Text>
+          <Text style={styles.navText}>Map</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <View style={[styles.navIconContainer, currentScreenIndex === 3 && styles.activeNavIcon]}>
@@ -214,9 +172,9 @@ const CourtDetailScreen = ({route, navigation}) => {
               color={currentScreenIndex === 3 ? activeColor : thematicBlue}
             />
           </View>
-          <Text style={[styles.navText, currentScreenIndex === 3 && styles.activeNavText]}>Shop</Text>
+          <Text style={styles.navText}>Shop</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };

@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,90 +7,35 @@ import {
   ScrollView,
   StatusBar,
   Image,
-  Animated,
-  PanResponder,
+  BackHandler,
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {MaterialIcons} from '@expo/vector-icons';
-import {Video} from 'expo-av';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {BlurView} from 'expo-blur';
 import Colors from '../constants/Colors';
-
 // Define the new color constants for easy reuse
 const thematicBlue = '#0A56A7';
 const activeColor = '#a3ff01';
 
 const HomeScreen = ({navigation}) => {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
-  const screens = ['Home', 'Find', 'Map', 'Shop'];
-  
-  const translateX = useRef(new Animated.Value(0)).current;
-  
-  const onPanGestureMove = Animated.event(
-    [],
-    { listener: (evt, gestureState) => {
-      const {dx} = gestureState;
-      translateX.setValue(dx);
-    }, useNativeDriver: false },
-  );
-  
-  const onPanGestureRelease = (evt, gestureState) => {
-    const {dx, vx} = gestureState;
+  const screens = ['Home', 'FindCourts', 'Map', 'Shop'];
+
+  const navigateWithDirection = (targetIndex) => {
+    if (targetIndex === currentScreenIndex) return;
     
-    // Determine swipe direction
-    if (Math.abs(dx) > 50) {
-      if (dx < 0 && currentScreenIndex > 0) {
-        // Swipe left - go to previous screen
-        setCurrentScreenIndex(currentScreenIndex - 1);
-        navigateToScreen(currentScreenIndex - 1);
-      } else if (dx > 0 && currentScreenIndex < screens.length - 1) {
-        // Swipe right - go to next screen
-        setCurrentScreenIndex(currentScreenIndex + 1);
-        navigateToScreen(currentScreenIndex + 1);
-      }
-    }
+    // Determine transition direction
+    const isMovingForward = targetIndex > currentScreenIndex;
     
-    // Reset position with spring animation
-    Animated.spring(translateX, {
-      toValue: 0,
-      useNativeDriver: false,
-    }).start();
+    // Set the target screen index first
+    setCurrentScreenIndex(targetIndex);
+    
+    // Navigate with appropriate direction parameter and screen index
+    const direction = isMovingForward ? 'right' : 'left';
+    navigation.navigate(screens[targetIndex], { direction, screenIndex: targetIndex });
   };
-  
-  const navigateToScreen = (index) => {
-    // Animate screen transition
-    Animated.spring(translateX, {
-      toValue: index > currentScreenIndex ? 300 : -300,
-      useNativeDriver: false,
-      duration: 300,
-    }).start(() => {
-      setCurrentScreenIndex(index);
-      setTimeout(() => {
-        switch (index) {
-          case 0:
-            navigation.navigate('Home');
-            break;
-          case 1:
-            navigation.navigate('FindCourts');
-            break;
-          case 2:
-            // Map screen - not implemented yet
-            break;
-          case 3:
-            // Shop screen - not implemented yet
-            break;
-        }
-      }, 350);
-    });
-  };
-  
-  const panResponder = useRef(
-    PanResponder.create({
-      onMove: onPanGestureMove,
-      onRelease: onPanGestureRelease,
-    })
-  ).current;
+
   const features = [
     {
       icon: 'location-on',
@@ -156,18 +101,8 @@ const HomeScreen = ({navigation}) => {
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Hero Section with Video and Blurred Background */}
+        {/* Hero Section with Blurred Background */}
         <View style={styles.heroSection}>
-          <Video
-            source={{uri: 'https://assets.mixkit.co/videos/preview/mixkit-people-playing-tennis-on-a-court-4795-large.mp4'}}
-            rate={1.0}
-            volume={1.0}
-            isMuted={true}
-            resizeMode="cover"
-            shouldPlay
-            isLooping
-            style={styles.videoBackground}
-          />
           <Image
             source={{uri: 'https://images.unsplash.com/photo-1559826263-a639d6fb4f0?auto=format&fit=crop&w=1200&q=80'}}
             style={styles.heroImage}
@@ -248,55 +183,12 @@ const HomeScreen = ({navigation}) => {
           </Text>
           <TouchableOpacity
             style={styles.ctaButton}
-            onPress={() => navigation.navigate('FindCourts')}>
+            onPress={() => navigation.navigate('Home')}>
             <Text style={styles.ctaButtonText}>Get Started</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation with Swipe Gestures */}
-      <Animated.View 
-        style={[styles.bottomNav, {transform: [{translateX}]}]}
-        {...panResponder.panHandlers}>
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => {
-            setCurrentScreenIndex(0);
-            navigation.navigate('Home');
-          }}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 0 && styles.activeNavIcon]}>
-            <MaterialIcons name="home" size={24} color={currentScreenIndex === 0 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={[styles.navText, currentScreenIndex === 0 && styles.activeNavText]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setCurrentScreenIndex(1);
-            navigation.navigate('FindCourts');
-          }}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 1 && styles.activeNavIcon]}>
-            <MaterialIcons name="search" size={24} color={currentScreenIndex === 1 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={[styles.navText, currentScreenIndex === 1 && styles.activeNavText]}>Find</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 2 && styles.activeNavIcon]}>
-            <MaterialIcons name="map" size={24} color={currentScreenIndex === 2 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={[styles.navText, currentScreenIndex === 2 && styles.activeNavText]}>Map</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 3 && styles.activeNavIcon]}>
-            <MaterialIcons
-              name="shopping-cart"
-              size={24}
-              color={currentScreenIndex === 3 ? activeColor : thematicBlue}
-            />
-          </View>
-          <Text style={[styles.navText, currentScreenIndex === 3 && styles.activeNavText]}>Shop</Text>
-        </TouchableOpacity>
-      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -330,12 +222,11 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.white, // Keep white for contrast on blue header
+    color: Colors.white,
     letterSpacing: 2,
   },
   content: {
     flex: 1,
-    marginBottom: 70,
   },
   heroSection: {
     backgroundColor: Colors.surface,
@@ -381,27 +272,27 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 0,
   },
   heroSubtitle: {
     fontSize: 14,
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 20,
   },
   findCourtsButton: {
     flexDirection: 'row',
-    backgroundColor: thematicBlue, // Changed background to blue
+    backgroundColor: thematicBlue,
     paddingHorizontal: 25,
     paddingVertical: 12,
     borderRadius: 25,
     alignItems: 'center',
   },
   findCourtsText: {
-    color: Colors.white, // Keep white for contrast
+    color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -412,7 +303,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     marginBottom: 15,
   },
   featureCard: {
@@ -443,12 +334,12 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     marginBottom: 3,
   },
   featureDescription: {
     fontSize: 13,
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     lineHeight: 18,
   },
   courtsSection: {
@@ -481,7 +372,7 @@ const styles = StyleSheet.create({
   courtName: {
     fontSize: 16,
     fontWeight: '600',
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     marginBottom: 5,
   },
   courtLocation: {
@@ -490,7 +381,7 @@ const styles = StyleSheet.create({
   },
   courtLocationText: {
     fontSize: 13,
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     marginLeft: 3,
   },
   courtRating: {
@@ -499,12 +390,12 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 14,
-    color: thematicBlue, // Changed to blue
+    color: thematicBlue,
     marginLeft: 3,
     fontWeight: '500',
   },
   ctaSection: {
-    backgroundColor: thematicBlue, // Changed background to blue
+    backgroundColor: thematicBlue,
     margin: 15,
     padding: 25,
     borderRadius: 12,
@@ -512,7 +403,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: 16,
-    color: Colors.white, // Keep white for contrast
+    color: Colors.white,
     textAlign: 'center',
     marginBottom: 15,
     fontWeight: '500',
@@ -524,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   ctaButtonText: {
-    color: thematicBlue, // Changed text to blue
+    color: thematicBlue,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -535,8 +426,6 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: Colors.white,
     flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
     paddingBottom: 10,
     paddingTop: 8,
   },
