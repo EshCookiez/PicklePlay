@@ -20,7 +20,7 @@ const activeColor = '#a3ff01';
 
 const HomeScreen = ({navigation}) => {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
-  const screens = ['Home', 'FindCourts', 'Map', 'Shop'];
+  const screens = ['Home', 'FindCourts', 'Map', 'Shop', 'Profile'];
 
   const navigateWithDirection = (targetIndex) => {
     if (targetIndex === currentScreenIndex) return;
@@ -418,46 +418,6 @@ const styles = StyleSheet.create({
     color: thematicBlue,
     fontSize: 16,
     fontWeight: '600',
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.white,
-    flexDirection: 'row',
-    paddingBottom: 10,
-    paddingTop: 8,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  activeNavItem: {
-    backgroundColor: thematicBlue,
-  },
-  navIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeNavIcon: {
-    backgroundColor: thematicBlue,
-    borderRadius: 20,
-  },
-  navText: {
-    fontSize: 11,
-    color: thematicBlue,
-    marginTop: 4,
-  },
-  activeNavText: {
-    color: activeColor,
-    fontWeight: 'bold',
   },
 });
 
