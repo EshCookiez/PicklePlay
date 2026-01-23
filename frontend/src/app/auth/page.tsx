@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import Image from "next/image";
 import logo from "../../images/PicklePlayLogo.jpg";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -104,8 +106,21 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      console.log("Login attempt:", loginData);
+      // Simulate backend login
       await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      // Store user in localStorage
+      const userData = {
+        id: "user123",
+        name: "Jea Bayona",
+        email: loginData.email,
+        avatar: "JB",
+        memberSince: "Jan 2025"
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Redirect to profile
+      router.push("/profile");
     } catch (error) {
       console.error("Login error:", error);
     } finally {
@@ -119,8 +134,21 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      console.log("Signup attempt:", signupData);
+      // Simulate backend signup
       await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      // Store user in localStorage
+      const userData = {
+        id: "user123",
+        name: `${signupData.firstName} ${signupData.lastName}`,
+        email: signupData.email,
+        avatar: signupData.firstName[0] + signupData.lastName[0],
+        memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" })
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Redirect to profile
+      router.push("/profile");
     } catch (error) {
       console.error("Signup error:", error);
     } finally {

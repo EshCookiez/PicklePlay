@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -38,6 +38,12 @@ function RecenterMap({ position }: { position: [number, number] }) {
   return null;
 }
 
+export default function MapView({ center, userLocation, courts }: MapViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
 export default function MapView({ center, userLocation, courts, onViewDetails }: MapViewProps) {
   // Create custom paddle icon for pickleball courts
   const customPaddleIcon = useMemo(() => {
@@ -70,12 +76,14 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
   }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: markerIcon2x.src,
       iconUrl: markerIcon.src,
       shadowUrl: markerShadow.src,
     });
-  }, []);
+  }, [isClient]);
 
   const courtMarkers = useMemo(
     () =>
@@ -170,7 +178,44 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
     [courts]
   );
 
+  if (!isClient) {
+    return (
+      <div 
+        ref={containerRef} 
+        className="h-[600px] w-full relative bg-gray-200 rounded-lg flex items-center justify-center text-gray-500"
+      >
+        Loading map...
+      </div>
+    );
+  }
+
   return (
+    <div ref={containerRef} className="h-[600px] w-full relative z-10">
+      <MapContainer 
+        center={center} 
+        zoom={12} 
+        scrollWheelZoom={false} 
+        style={{ height: "100%", width: "100%" }}
+        className="leaflet-container"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <RecenterMap position={center} />
+        {courtMarkers}
+        {userLocation && (
+          <Marker position={userLocation}>
+            <Popup>
+              <div className="space-y-1">
+                <p className="font-semibold text-[#0a56a7]">You are here</p>
+                <p className="text-sm text-gray-600">Showing nearby courts</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+      </MapContainer>
+    </div>
     <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-[420px] w-full">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
