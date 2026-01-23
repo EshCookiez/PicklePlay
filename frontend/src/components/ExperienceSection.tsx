@@ -77,6 +77,7 @@ export default function ExperienceSection() {
               alt="Background paddle"
               width={item.size}
               height={item.size}
+              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
         ))}
@@ -99,9 +100,36 @@ export default function ExperienceSection() {
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner5-SwAiVYRMsfUCqZMBq1uTm9yK0DsC3F.png"
                 alt="PicklePlay Experience"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
+                loading="eager"
                 className="object-cover"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="w-full py-0 bg-gray-50 -mt-8 relative">
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#a3ff01]/50 via-[#84cc16]/30 to-transparent z-20"></div>
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-10">
+          <div className="flex-1 w-full max-w-none">
+            <div className="relative rounded-xl overflow-hidden">
+              <img
+                src="/images/Mowdel.png"
+                alt="PicklePlay Community"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 text-left mt-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0a56a7]">
+              Build Friendships Through Pickleball
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Meet amazing people who share your passion. Join our growing pickleball family across the Philippines and build lasting friendships while enjoying the sport you love.
+            </p>
           </div>
         </div>
       </section>
