@@ -3,6 +3,7 @@ import HeroCarousel from "@/components/HeroCarousel";
 import ExperienceSection from "@/components/ExperienceSection";
 import CourtsSection from "@/components/CourtsSection";
 import MapSection from "@/components/MapSection";
+import DownloadAppSection from "@/components/DownloadAppSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
@@ -18,6 +19,7 @@ export default function Home() {
       <ExperienceSection />
       <CourtsSection />
       <MapSection />
+      <DownloadAppSection />
       <FeaturesSection />
       <About />
       <Contact />

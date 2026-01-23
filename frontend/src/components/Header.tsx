@@ -6,7 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X, LogOut, Settings, User, ChevronDown, LayoutGrid, BarChart3, Users, MessageSquare, Trophy, Zap, Award, Calendar, Briefcase, ShoppingBag, BookOpen } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Menu, X, ChevronUp } from "lucide-react";
 import logo from "../images/PicklePlayLogo.jpg"
+import { useAuth } from "@/contexts/AuthContext";
 
 interface User {
   id: string;
@@ -18,6 +20,8 @@ interface User {
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrollingUp, setIsScrollingUp] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
@@ -79,6 +83,7 @@ export default function Header() {
         item.desc.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
+  const { openAuthModal } = useAuth();
 
   useEffect(() => {
     // Get user from localStorage
@@ -88,12 +93,21 @@ export default function Header() {
     }
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      const scrolled = currentScrollY > 50;
+      
+      setIsScrolled(scrolled);
+      setIsScrollingUp(currentScrollY < lastScrollY && lastScrollY > 100);
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const throttledHandleScroll = () => {
+      requestAnimationFrame(handleScroll);
+    };
+
+    window.addEventListener("scroll", throttledHandleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", throttledHandleScroll);
+  }, [lastScrollY]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -104,30 +118,40 @@ export default function Header() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
-    <header className={`sticky top-0 z-50 text-white transition-all duration-500 ${isScrolled ? "py-3 px-4" : "py-0 px-0"}`} >
-      <div className={`mx-auto flex items-center justify-between gap-4 relative h-16 transition-all duration-500 ${isScrolled ? "max-w-5xl rounded-2xl px-5 bg-[#0a56a7]/80 backdrop-blur-md border border-[#0a56a7]/60 shadow-2xl" : "max-w-full px-4 md:px-8 bg-[#0a56a7]"}`}>
-        {/* Logo - Static on mobile, animated on desktop */}
-        <div className={`absolute z-40 transition-all duration-500 ease-in-out ${
-          isScrolled 
-            ? "left-4 md:left-5 top-1/2 -translate-y-1/2" 
-            : "left-4 md:left-8 top-1/2 -translate-y-1/2 md:top-auto md:-translate-y-0 md:-bottom-8"
-        }`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 text-white transition-all duration-700 ease-in-out transform ${
+      isScrolled && !isScrollingUp ? "-translate-y-full" : "translate-y-0"
+    } ${isScrolled ? "py-3 px-4" : "py-0 px-0"}`}>
+      <div className={`mx-auto flex items-center justify-between gap-4 relative h-24 transition-all duration-700 ease-in-out ${
+        isScrolled 
+          ? "max-w-5xl rounded-2xl px-5 bg-[#0a56a7]/90 backdrop-blur-xl border border-white/20 shadow-2xl" 
+          : "max-w-full px-4 md:px-8 bg-[#0a56a7]/95 backdrop-blur-lg border border-white/10"
+      }`}>
+        {/* Logo */}
+        <div className="flex items-center mr-4">
           <Image
             alt="PicklePlay Logo"
             width={isScrolled ? 40 : 80}
             height={isScrolled ? 40 : 80}
             src={logo}
-            className="rounded-full shadow-2xl transition-all duration-500 ease-in-out w-10 h-10 md:w-auto md:h-auto"
+            className="rounded-full shadow-2xl transition-all duration-700 ease-in-out hover:scale-110"
           />
         </div>
 
         {/* Desktop Navigation */}
-        <nav className={`hidden md:flex gap-8 flex-1 transition-all text-white duration-500 ease-in-out ${isScrolled ? "pl-16" : "pl-40"}`}>
+        <nav className={`hidden md:flex gap-8 flex-1 transition-all text-white duration-700 ease-in-out`}>
           <Link href="/" className="hover:text-yellow-300 transition font-semibold">
             HOME
           </Link>
           <Link href="/courts" className="hover:text-yellow-300 transition font-semibold">
+          <a href="#map" className="hover:text-yellow-300 transition font-semibold">
             FIND COURTS
           </Link>
           <Link href="/players" className="hover:text-yellow-300 transition font-semibold">
@@ -360,6 +384,21 @@ export default function Header() {
               </button>
             </>
           )}
+          <button 
+            onClick={() => openAuthModal("login")}
+            className="px-3 py-2 text-sm border border-transparent text-white rounded-md font-semibold hover:bg-[#a3ff01] hover:text-[#0a56a7] transition cursor-pointer"
+          >
+            Log in
+          </button>
+          <button 
+            onClick={() => openAuthModal("signup")}
+            className="px-3 py-2 text-sm border border-transparent text-white rounded-md font-semibold hover:bg-[#a3ff01] hover:text-[#0a56a7] transition cursor-pointer"
+          >
+            Sign Up
+          </button>
+          <button className="px-3 py-2 text-sm bg-white text-[#0a56a7] rounded-md font-semibold hover:bg-[#a3ff01] transition cursor-pointer">
+            Download App
+          </button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -389,6 +428,8 @@ export default function Header() {
             </Link>
             <Link
               href="/courts"
+            <a
+              href="#map"
               onClick={() => setIsMobileMenuOpen(false)}
               className="hover:text-yellow-300 transition font-semibold py-2 w-full"
             >
@@ -462,6 +503,27 @@ export default function Header() {
                 </button>
               </>
             )}
+            <button 
+              onClick={() => {
+                openAuthModal("login");
+                setIsMobileMenuOpen(false);
+              }} 
+              className="block w-full px-4 py-2 text-white rounded-md font-semibold hover:bg-white/10 transition text-center"
+            >
+              Log in
+            </button>
+            <button 
+              onClick={() => {
+                openAuthModal("signup");
+                setIsMobileMenuOpen(false);
+              }} 
+              className="block w-full px-4 py-2 text-white rounded-md font-semibold hover:bg-white/10 transition text-center"
+            >
+              Sign Up
+            </button>
+            <button className="w-full px-4 py-2 bg-white text-[#0a56a7] rounded-md font-semibold hover:bg-[#a3ff01] transition">
+              Download App
+            </button>
           </div>
         </nav>
       )}
