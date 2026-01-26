@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicklePlay - Test Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #000;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #000;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #000;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #000;
+            color: #fff;
+            border: 2px solid #000;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            border: 2px solid #000;
+        }
+
+        .response.success {
+            background: #fff;
+            color: #000;
+        }
+
+        .response.error {
+            background: #000;
+            color: #fff;
+        }
+
+        .response h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .response pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #000;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 10px;
+            color: #000;
+        }
+
+        .response.error pre {
+            background: #333;
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .role-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border: 2px solid #000;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #000;
+        }
+
+        .role-info strong {
+            color: #000;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #000;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #000;
+            border-bottom-color: #000;
+        }
+
+        .tab:hover {
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .logged-in-section {
+            display: none;
+            border: 2px solid #000;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background: #f5f5f5;
+        }
+
+        .logged-in-section.active {
+            display: block;
+        }
+
+        .user-details {
+            margin-bottom: 15px;
+        }
+
+        .user-details h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .user-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-detail-label {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .user-detail-value {
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            margin-top: 15px;
+        }
+
+        .logout-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .auth-forms {
+            display: block;
+        }
+
+        .auth-forms.hidden {
+            display: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-full {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PicklePlay API - Dev Test</h1>
+        <p class="subtitle">Development testing tool for user registration and login</p>
+
+        <!-- Logged In Section -->
+        <div id="loggedInSection" class="logged-in-section">
+            <div class="user-details">
+                <h3>✓ Logged In</h3>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">ID:</span>
+                    <span class="user-detail-value" id="userId">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">Name:</span>
+                    <span class="user-detail-value" id="userName">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">Email:</span>
+                    <span class="user-detail-value" id="userEmail">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">Role:</span>
+                    <span class="user-detail-value" id="userRole">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">Phone:</span>
+                    <span class="user-detail-value" id="userPhone">-</span>
+                </div>
+                <div class="user-detail-item">
+                    <span class="user-detail-label">Status:</span>
+                    <span class="user-detail-value" id="userStatus">-</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div id="authForms" class="auth-forms">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('register')">Register</button>
+            <button class="tab" onclick="switchTab('login')">Login</button>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-tab" class="tab-content active">
+            <div class="role-info">
+                <strong>Available Roles:</strong><br>
+                • user (Customer)<br>
+                • coach (Coach)<br>
+                • court_owner (Court Owner)<br>
+                • admin (Admin)<br>
+                • super_admin (Super Admin)
+            </div>
+
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name *</label>
+                        <input type="text" id="first_name" name="first_name" required placeholder="John">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name *</label>
+                        <input type="text" id="last_name" name="last_name" required placeholder="Doe">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="tel" id="phone_number" name="phone_number" placeholder="+1234567890">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" id="password" name="password" required placeholder="Min. 8 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password *</label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="Confirm password">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="role">Role *</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select a role</option>
+                            <option value="user">User (Customer)</option>
+                            <option value="coach">Coach</option>
+                            <option value="court_owner">Court Owner</option>
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div></div>
+                </div>
+
+                <button type="submit">Register User</button>
+            </form>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-tab" class="tab-content">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="login_email">Email *</label>
+                    <input type="email" id="login_email" name="email" required placeholder="john@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="login_password">Password *</label>
+                    <input type="password" id="login_password" name="password" required placeholder="Your password">
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+        <div id="response" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+
+        // Check if user is logged in on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+        });
+
+        // Check login status
+        async function checkLoginStatus() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                try {
+                    const response = await fetch(`${API_URL}/auth/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayUserDetails(data.data.user);
+                    } else {
+                        // Token invalid, clear it
+                        localStorage.removeItem('auth_token');
+                    }
+                } catch (error) {
+                    console.error('Error checking login status:', error);
+                }
+            }
+        }
+
+        // Display user details
+        function displayUserDetails(user) {
+            document.getElementById('userId').textContent = user.id;
+            document.getElementById('userName').textContent = user.full_name || `${user.first_name} ${user.last_name}`;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userRole').textContent = user.role.toUpperCase();
+            document.getElementById('userPhone').textContent = user.phone_number || 'N/A';
+            document.getElementById('userStatus').textContent = user.status.toUpperCase();
+
+            // Show logged in section, hide auth forms
+            document.getElementById('loggedInSection').classList.add('active');
+            document.getElementById('authForms').classList.add('hidden');
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Logout function
+        async function logout() {
+            const token = localStorage.getItem('auth_token');
+            
+            if (token) {
+                try {
+                    await fetch(`${API_URL}/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json',
+                        }
+                    });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+
+            // Clear local storage
+            localStorage.removeItem('auth_token');
+
+            // Hide logged in section, show auth forms
+            document.getElementById('loggedInSection').classList.remove('active');
+            document.getElementById('authForms').classList.remove('hidden');
+
+            // Show success message
+            showResponse({
+                success: true,
+                message: 'Logged out successfully'
+            }, true);
+        }
+
+        // Switch between tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            // Clear response
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = 'Registering...';
+
+            const formData = {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                password_confirmation: document.getElementById('password_confirmation').value,
+                role: document.getElementById('role').value,
+                phone_number: document.getElementById('phone_number').value || null,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+
+                if (response.ok) {
+                    e.target.reset();
+                    // Store token for testing
+                    localStorage.setItem('auth_token', data.data.token);
+                    
+                    // Display user details after successful registration
+                    setTimeout(() => {
+                        displayUserDetails(data.data.user);
+                    }, 2000);
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Register User';
+            }
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = 'Logging in...';
+
+            const formData = {
+                email: document.getElementById('login_email').value,
+                password: document.getElementById('login_password').value,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+
+                if (response.ok) {
+                    // Store token for testing
+                    localStorage.setItem('auth_token', data.data.token);
+                    
+                    // Display user details after successful login
+                    setTimeout(() => {
+                        displayUserDetails(data.data.user);
+                    }, 2000);
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Login';
+            }
+        });
+
+        // Show response
+        function showResponse(data, isSuccess) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.className = 'response ' + (isSuccess ? 'success' : 'error');
+            responseDiv.innerHTML = `
+                <h3>${isSuccess ? '✅ Success!' : '❌ Error'}</h3>
+                <p><strong>Message:</strong> ${data.message}</p>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            responseDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

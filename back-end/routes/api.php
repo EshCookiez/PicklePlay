@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,10 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 // Public API routes
 Route::get('/health', function () {
     return response()->json([
@@ -25,6 +22,26 @@ Route::get('/health', function () {
         'message' => 'PicklePlay API is running',
         'timestamp' => now()->toISOString()
     ]);
+});
+
+// Authentication routes (public)
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Protected routes (require authentication)
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth routes
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'profile']);
+    });
+    
+    // Legacy user route
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 });
 
 // API v1 routes group
