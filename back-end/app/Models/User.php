@@ -124,4 +124,25 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    /**
+     * Get the player profile associated with the user
+     */
+    public function playerProfile()
+    {
+        return $this->hasOne(PlayerProfile::class);
+    }
+
+    /**
+     * Get or create player profile
+     */
+    public function getOrCreatePlayerProfile()
+    {
+        if (!$this->playerProfile) {
+            return $this->playerProfile()->create([
+                'profile_status' => 'incomplete'
+            ]);
+        }
+        return $this->playerProfile;
+    }
 }

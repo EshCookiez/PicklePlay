@@ -243,6 +243,182 @@
             color: #fff;
         }
 
+        .edit-btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #000;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+
+        .edit-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin-top: 15px;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .edit-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .edit-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .edit-form input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 4px;
+        }
+
+        .edit-form .button-group {
+            margin-top: 20px;
+        }
+
+        .delete-btn {
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            margin-top: 15px;
+        }
+
+        .delete-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .danger-zone {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+
+        .danger-zone h4 {
+            color: #000;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .danger-zone p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 4px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: #000;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-content .button-group {
+            margin-top: 20px;
+        }
+
+        .modal-content .button-group button {
+            margin-top: 0;
+        }
+
+        .forgot-password-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password-link a {
+            color: #000;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+
+        .forgot-password-link a:hover {
+            color: #666;
+        }
+
+        .verification-status {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .verification-status.verified {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .verification-status p {
+            margin: 0 0 10px 0;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .verification-status button {
+            margin-top: 5px;
+        }
+
+        #refreshProfileBtn:hover {
+            background: #000 !important;
+            color: #fff !important;
+        }
+
         .auth-forms {
             display: block;
         }
@@ -275,7 +451,16 @@
 
         <!-- Logged In Section -->
         <div id="loggedInSection" class="logged-in-section">
-            <div class="user-details">
+            <!-- Email Verification Status -->
+            <div id="verificationStatus" class="verification-status">
+                <p id="verificationMessage">⚠️ Email not verified</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button id="resendVerificationBtn" onclick="resendVerificationEmail()">Resend Verification Email</button>
+                    <button id="refreshProfileBtn" onclick="refreshProfile()" style="background: #fff; color: #000; border: 2px solid #000;">Refresh Status</button>
+                </div>
+            </div>
+
+            <div id="userDetailsView" class="user-details">
                 <h3>✓ Logged In</h3>
                 <div class="user-detail-item">
                     <span class="user-detail-label">ID:</span>
@@ -302,13 +487,287 @@
                     <span class="user-detail-value" id="userStatus">-</span>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+
+            <!-- Edit Form -->
+            <div id="editForm" class="edit-form">
+                <h3>Edit Profile</h3>
+                <form id="updateProfileForm">
+                    <div class="form-group">
+                        <label for="edit_first_name">First Name *</label>
+                        <input type="text" id="edit_first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_last_name">Last Name *</label>
+                        <input type="text" id="edit_last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_phone_number">Phone Number</label>
+                        <input type="tel" id="edit_phone_number" name="phone_number">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit">Save Changes</button>
+                        <button type="button" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Form -->
+            <div id="changePasswordForm" class="edit-form">
+                <h3>Change Password</h3>
+                <form id="updatePasswordForm">
+                    <div class="form-group">
+                        <label for="current_password">Current Password *</label>
+                        <input type="password" id="current_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password *</label>
+                        <input type="password" id="new_password" required minlength="8">
+                        <small style="color: #666; font-size: 12px;">Minimum 8 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password_confirmation">Confirm New Password *</label>
+                        <input type="password" id="new_password_confirmation" required minlength="8">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit">Update Password</button>
+                        <button type="button" onclick="cancelPasswordChange()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="button-group">
+                <button class="edit-btn" onclick="showEditForm()">Edit Profile</button>
+                <button class="edit-btn" onclick="showPasswordForm()">Change Password</button>
+                <button class="edit-btn" onclick="showPlayerProfile()">🎾 Player Profile</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <h4>⚠ Danger Zone</h4>
+                <p>Once you delete your account, there is no going back. Please be certain.</p>
+                <button class="delete-btn" onclick="showDeleteModal()">Delete Account</button>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h3>Delete Account?</h3>
+                <p>Are you sure you want to delete your account? This action cannot be undone and will permanently delete:</p>
+                <ul style="margin: 15px 0; padding-left: 20px; color: #666;">
+                    <li>Your profile information</li>
+                    <li>All your data</li>
+                    <li>Your authentication tokens</li>
+                </ul>
+                <div class="button-group">
+                    <button onclick="confirmDelete()" style="background: #000; color: #fff;">Yes, Delete</button>
+                    <button onclick="closeDeleteModal()" style="background: #fff; color: #000;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Profile Section -->
+        <div id="playerProfileSection" class="logged-in-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>🎾 Player Profile</h3>
+                <button class="edit-btn" onclick="backToUserProfile()">← Back to Account</button>
+            </div>
+
+            <!-- Profile Completion Status -->
+            <div id="profileCompletion" style="background: #fff; border: 2px solid #000; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong>Profile Completion:</strong>
+                    <span id="completionPercentage" style="font-size: 18px; font-weight: bold;">0%</span>
+                </div>
+                <div style="background: #f5f5f5; height: 20px; border: 2px solid #000; border-radius: 4px; overflow: hidden;">
+                    <div id="completionBar" style="height: 100%; background: #000; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <div id="missingFields" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
+            </div>
+
+            <!-- Player Profile Display -->
+            <div id="playerProfileView" class="user-details">
+                <h4 style="margin-bottom: 15px; color: #000;">Profile Information</h4>
+                <div id="playerProfileData"></div>
+                <button class="edit-btn" onclick="showPlayerProfileForm()" style="margin-top: 15px;">Edit Player Profile</button>
+            </div>
+
+            <!-- Player Profile Edit Form -->
+            <div id="playerProfileEditForm" class="edit-form">
+                <h3>Edit Player Profile</h3>
+                <form id="updatePlayerProfileForm">
+                    <!-- Basic Information -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">1. Basic Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date_of_birth">Date of Birth</label>
+                            <input type="date" id="date_of_birth" name="date_of_birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="location_city">Location/City</label>
+                            <input type="text" id="location_city" name="location_city" placeholder="New York">
+                        </div>
+                    </div>
+
+                    <!-- Playing Profile -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">2. Playing Profile</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="skill_level">Skill Level</label>
+                            <select id="skill_level" name="skill_level">
+                                <option value="">Select Level</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="professional">Professional</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="years_playing">Years Playing</label>
+                            <input type="number" id="years_playing" name="years_playing" min="0" max="100" placeholder="3">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="play_frequency">Play Frequency</label>
+                            <select id="play_frequency" name="play_frequency">
+                                <option value="">Select Frequency</option>
+                                <option value="casual">Casual</option>
+                                <option value="regular_1_2">Regular (1-2x/week)</option>
+                                <option value="frequent_3_4">Frequent (3-4x/week)</option>
+                                <option value="competitive">Competitive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="primary_position">Primary Position</label>
+                            <select id="primary_position" name="primary_position">
+                                <option value="">Select Position</option>
+                                <option value="none_mix">None/Mix</option>
+                                <option value="dinking_net">Dinking/Net</option>
+                                <option value="aggressive_baseline">Aggressive/Baseline</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Experience & Achievements -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">3. Experience & Achievements</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tournament_participation">Tournament Participation</label>
+                            <select id="tournament_participation" name="tournament_participation">
+                                <option value="">Select Level</option>
+                                <option value="never">Never</option>
+                                <option value="local">Local</option>
+                                <option value="regional">Regional</option>
+                                <option value="national">National</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="certifications">Certifications/Rankings</label>
+                            <input type="text" id="certifications" name="certifications" placeholder="USAPA Level 2">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tournament_results">Tournament Results</label>
+                        <input type="text" id="tournament_results" name="tournament_results" placeholder="Won local tournament 2025">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="achievements">Notable Achievements</label>
+                        <input type="text" id="achievements" name="achievements" placeholder="MVP of NYC League">
+                    </div>
+
+                    <!-- Preferred Play Style -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">4. Preferred Play Style</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="preferred_court_type">Preferred Court Type</label>
+                            <select id="preferred_court_type" name="preferred_court_type">
+                                <option value="">Select Type</option>
+                                <option value="indoor">Indoor</option>
+                                <option value="outdoor">Outdoor</option>
+                                <option value="either">Either</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preferred_match_format">Preferred Match Format</label>
+                            <select id="preferred_match_format" name="preferred_match_format">
+                                <option value="">Select Format</option>
+                                <option value="singles">Singles</option>
+                                <option value="doubles">Doubles</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">5. Profile Details</h4>
+                    <div class="form-group">
+                        <label for="bio">Bio/About Me</label>
+                        <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself..." style="width: 100%; padding: 12px; border: 2px solid #000; border-radius: 4px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                    </div>
+
+                    <!-- Agreements -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">6. Agreements & Terms</h4>
+                    <div style="background: #f5f5f5; padding: 15px; border: 2px solid #000; border-radius: 4px; margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer;">
+                            <input type="checkbox" id="agree_code_of_conduct" name="agree_code_of_conduct" style="width: auto; margin-right: 10px;">
+                            <span>I agree to the Player Code of Conduct</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer;">
+                            <input type="checkbox" id="agree_community_guidelines" name="agree_community_guidelines" style="width: auto; margin-right: 10px;">
+                            <span>I accept the Community Guidelines</span>
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer;">
+                            <input type="checkbox" id="agree_ranking_rules" name="agree_ranking_rules" style="width: auto; margin-right: 10px;">
+                            <span>I acknowledge the Ranking System Rules</span>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="agree_fair_play" name="agree_fair_play" style="width: auto; margin-right: 10px;">
+                            <span>I agree to Fair Play Standards</span>
+                        </label>
+                    </div>
+
+                    <!-- Optional Fields -->
+                    <h4 style="margin: 20px 0 10px 0; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px;">7. Optional Information</h4>
+                    <div class="form-group">
+                        <label for="team_club_affiliation">Team/Club Affiliation</label>
+                        <input type="text" id="team_club_affiliation" name="team_club_affiliation" placeholder="NYC Pickleball Club">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emergency_contact_name">Emergency Contact Name</label>
+                            <input type="text" id="emergency_contact_name" name="emergency_contact_name" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="emergency_contact_phone">Emergency Contact Phone</label>
+                            <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" placeholder="+1234567890">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medical_conditions">Medical Conditions/Limitations</label>
+                        <textarea id="medical_conditions" name="medical_conditions" rows="2" placeholder="Any medical conditions we should know about..." style="width: 100%; padding: 12px; border: 2px solid #000; border-radius: 4px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit">Save Player Profile</button>
+                        <button type="button" class="logout-btn" onclick="cancelPlayerProfileEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div id="authForms" class="auth-forms">
         <div class="tabs">
             <button class="tab active" onclick="switchTab('register')">Register</button>
             <button class="tab" onclick="switchTab('login')">Login</button>
+            <button class="tab" onclick="switchTab('forgot')">Forgot Password</button>
         </div>
 
         <!-- Register Form -->
@@ -392,6 +851,30 @@
                 </div>
 
                 <button type="submit">Login</button>
+                
+                <div class="forgot-password-link">
+                    <a href="#" onclick="switchTab('forgot'); return false;">Forgot your password?</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div id="forgot-tab" class="tab-content">
+            <form id="forgotPasswordForm">
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    Enter your email address and we'll send you a link to reset your password.
+                </p>
+                
+                <div class="form-group">
+                    <label for="forgot_email">Email *</label>
+                    <input type="email" id="forgot_email" name="email" required placeholder="john@example.com">
+                </div>
+
+                <button type="submit">Send Reset Link</button>
+                
+                <div class="forgot-password-link">
+                    <a href="#" onclick="switchTab('login'); return false;">Back to Login</a>
+                </div>
             </form>
         </div>
 
@@ -432,8 +915,13 @@
             }
         }
 
+        // Store current user data
+        let currentUser = null;
+
         // Display user details
         function displayUserDetails(user) {
+            currentUser = user;
+            
             document.getElementById('userId').textContent = user.id;
             document.getElementById('userName').textContent = user.full_name || `${user.first_name} ${user.last_name}`;
             document.getElementById('userEmail').textContent = user.email;
@@ -441,11 +929,243 @@
             document.getElementById('userPhone').textContent = user.phone_number || 'N/A';
             document.getElementById('userStatus').textContent = user.status.toUpperCase();
 
+            // Update email verification status
+            const verificationStatus = document.getElementById('verificationStatus');
+            const verificationMessage = document.getElementById('verificationMessage');
+            const resendBtn = document.getElementById('resendVerificationBtn');
+            
+            if (user.email_verified_at) {
+                verificationStatus.classList.add('verified');
+                verificationMessage.textContent = '✓ Email Verified';
+                resendBtn.style.display = 'none';
+            } else {
+                verificationStatus.classList.remove('verified');
+                verificationMessage.textContent = '⚠️ Email Not Verified';
+                resendBtn.style.display = 'inline-block';
+            }
+
             // Show logged in section, hide auth forms
             document.getElementById('loggedInSection').classList.add('active');
             document.getElementById('authForms').classList.add('hidden');
             document.getElementById('response').style.display = 'none';
+            
+            // Hide edit form and password form if they were open
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('changePasswordForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'block';
         }
+
+        // Show edit form
+        function showEditForm() {
+            if (!currentUser) return;
+            
+            // Populate form with current values
+            document.getElementById('edit_first_name').value = currentUser.first_name;
+            document.getElementById('edit_last_name').value = currentUser.last_name;
+            document.getElementById('edit_phone_number').value = currentUser.phone_number || '';
+            
+            // Show edit form, hide details view and password form
+            document.getElementById('editForm').classList.add('active');
+            document.getElementById('changePasswordForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'block';
+        }
+
+        // Show password change form
+        function showPasswordForm() {
+            // Clear password fields
+            document.getElementById('current_password').value = '';
+            document.getElementById('new_password').value = '';
+            document.getElementById('new_password_confirmation').value = '';
+            
+            // Show password form, hide details view and edit form
+            document.getElementById('changePasswordForm').classList.add('active');
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Cancel password change
+        function cancelPasswordChange() {
+            document.getElementById('changePasswordForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'block';
+        }
+
+        // Show delete modal
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                closeDeleteModal();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Clear local storage
+                    localStorage.removeItem('auth_token');
+                    
+                    // Close modal
+                    closeDeleteModal();
+                    
+                    // Hide logged in section, show auth forms
+                    document.getElementById('loggedInSection').classList.remove('active');
+                    document.getElementById('authForms').classList.remove('hidden');
+                    
+                    // Show success message
+                    showResponse({
+                        success: true,
+                        message: 'Account deleted successfully'
+                    }, true);
+                } else {
+                    closeDeleteModal();
+                    showResponse(data, false);
+                }
+            } catch (error) {
+                closeDeleteModal();
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            }
+        }
+
+        // Update password form submission
+        document.getElementById('updatePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
+
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const newPasswordConfirmation = document.getElementById('new_password_confirmation').value;
+
+            // Client-side validation
+            if (newPassword !== newPasswordConfirmation) {
+                showResponse({
+                    success: false,
+                    message: 'New passwords do not match'
+                }, false);
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showResponse({
+                    success: false,
+                    message: 'New password must be at least 8 characters'
+                }, false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        new_password_confirmation: newPasswordConfirmation
+                    })
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+                
+                if (response.ok) {
+                    // Hide password form, show user details
+                    document.getElementById('changePasswordForm').classList.add('hidden');
+                    document.getElementById('userDetailsView').classList.remove('hidden');
+                    
+                    // Clear form
+                    document.getElementById('updatePasswordForm').reset();
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            }
+        });
+
+        // Update profile form submission
+        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Saving...';
+
+            const token = localStorage.getItem('auth_token');
+            const formData = {
+                first_name: document.getElementById('edit_first_name').value,
+                last_name: document.getElementById('edit_last_name').value,
+                phone_number: document.getElementById('edit_phone_number').value || null,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+
+                if (response.ok) {
+                    // Update displayed user details
+                    setTimeout(() => {
+                        displayUserDetails(data.data.user);
+                    }, 2000);
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Save Changes';
+            }
+        });
 
         // Logout function
         async function logout() {
@@ -597,6 +1317,125 @@
             }
         });
 
+        // Forgot password form submission
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = 'Sending...';
+
+            const formData = {
+                email: document.getElementById('forgot_email').value,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+
+                if (response.ok) {
+                    // Clear form
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Send Reset Link';
+            }
+        });
+
+        // Refresh profile data
+        async function refreshProfile() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
+
+            const button = document.getElementById('refreshProfileBtn');
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Refreshing...';
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayUserDetails(data.data.user);
+                    
+                    // Show success message
+                    showResponse({
+                        success: true,
+                        message: 'Profile refreshed successfully'
+                    }, true);
+                } else {
+                    const data = await response.json();
+                    showResponse(data, false);
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Refresh Status';
+                }
+            }
+        }
+
+        // Resend verification email
+        async function resendVerificationEmail() {
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
+
+            const button = document.getElementById('resendVerificationBtn');
+            button.disabled = true;
+            button.textContent = 'Sending...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/email/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Resend Verification Email';
+            }
+        }
+
         // Show response
         function showResponse(data, isSuccess) {
             const responseDiv = document.getElementById('response');
@@ -608,6 +1447,333 @@
             `;
             responseDiv.style.display = 'block';
         }
+
+        // ============================================
+        // PLAYER PROFILE FUNCTIONS
+        // ============================================
+
+        async function showPlayerProfile() {
+            // Hide user details, show player profile
+            document.getElementById('loggedInSection').classList.remove('active');
+            document.getElementById('playerProfileSection').classList.add('active');
+            
+            // Load player profile data
+            await loadPlayerProfile();
+        }
+
+        function backToUserProfile() {
+            // Hide player profile, show user details
+            document.getElementById('playerProfileSection').classList.remove('active');
+            document.getElementById('loggedInSection').classList.add('active');
+        }
+
+        async function loadPlayerProfile() {
+            const token = localStorage.getItem('auth_token');
+            
+            try {
+                // Load profile completion status
+                const completionResponse = await fetch(`${API_BASE_URL}/player/profile/completion`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const completionData = await completionResponse.json();
+                updateCompletionStatus(completionData.data);
+
+                // Load profile data
+                const profileResponse = await fetch(`${API_BASE_URL}/player/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (profileResponse.ok) {
+                    const profileData = await profileResponse.json();
+                    displayPlayerProfile(profileData.data.profile);
+                } else if (profileResponse.status === 404) {
+                    // No profile yet
+                    displayNoProfile();
+                }
+            } catch (error) {
+                console.error('Error loading player profile:', error);
+                showResponse({message: 'Failed to load player profile', error: error.message}, false);
+            }
+        }
+
+        function updateCompletionStatus(data) {
+            const percentage = data.completion_percentage || 0;
+            document.getElementById('completionPercentage').textContent = percentage + '%';
+            document.getElementById('completionBar').style.width = percentage + '%';
+
+            let missingText = '';
+            if (data.missing_required_fields && data.missing_required_fields.length > 0) {
+                missingText = '⚠️ Missing required: ' + data.missing_required_fields.map(f => 
+                    f.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                ).join(', ');
+            } else if (percentage === 100) {
+                missingText = '✅ Profile complete!';
+            }
+            document.getElementById('missingFields').textContent = missingText;
+        }
+
+        function displayPlayerProfile(profile) {
+            if (!profile) {
+                displayNoProfile();
+                return;
+            }
+
+            const formatValue = (value) => {
+                if (value === null || value === undefined || value === '') return 'Not set';
+                if (typeof value === 'boolean') return value ? '✓ Yes' : '✗ No';
+                if (Array.isArray(value)) return value.join(', ') || 'Not set';
+                if (typeof value === 'object') return JSON.stringify(value);
+                return value.toString().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            };
+
+            const profileHTML = `
+                <div style="display: grid; gap: 15px;">
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">📋 Basic Information</h5>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Date of Birth:</span>
+                            <span class="user-detail-value">${formatValue(profile.date_of_birth)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Location:</span>
+                            <span class="user-detail-value">${formatValue(profile.location_city)}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">🎾 Playing Profile</h5>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Skill Level:</span>
+                            <span class="user-detail-value">${formatValue(profile.skill_level)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Years Playing:</span>
+                            <span class="user-detail-value">${formatValue(profile.years_playing)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Play Frequency:</span>
+                            <span class="user-detail-value">${formatValue(profile.play_frequency)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Primary Position:</span>
+                            <span class="user-detail-value">${formatValue(profile.primary_position)}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">🏆 Experience & Achievements</h5>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Tournament Level:</span>
+                            <span class="user-detail-value">${formatValue(profile.tournament_participation)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Certifications:</span>
+                            <span class="user-detail-value">${formatValue(profile.certifications)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Tournament Results:</span>
+                            <span class="user-detail-value">${formatValue(profile.tournament_results)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Achievements:</span>
+                            <span class="user-detail-value">${formatValue(profile.achievements)}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">⚙️ Preferences</h5>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Court Type:</span>
+                            <span class="user-detail-value">${formatValue(profile.preferred_court_type)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Match Format:</span>
+                            <span class="user-detail-value">${formatValue(profile.preferred_match_format)}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">📝 Bio</h5>
+                        <p style="color: #666; line-height: 1.6;">${formatValue(profile.bio)}</p>
+                    </div>
+
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">✓ Agreements</h5>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Code of Conduct:</span>
+                            <span class="user-detail-value">${formatValue(profile.agree_code_of_conduct)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Community Guidelines:</span>
+                            <span class="user-detail-value">${formatValue(profile.agree_community_guidelines)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Ranking Rules:</span>
+                            <span class="user-detail-value">${formatValue(profile.agree_ranking_rules)}</span>
+                        </div>
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Fair Play:</span>
+                            <span class="user-detail-value">${formatValue(profile.agree_fair_play)}</span>
+                        </div>
+                    </div>
+
+                    ${profile.team_club_affiliation || profile.emergency_contact_name ? `
+                    <div style="background: #fff; padding: 15px; border: 2px solid #000; border-radius: 4px;">
+                        <h5 style="margin-bottom: 10px; color: #000;">ℹ️ Additional Info</h5>
+                        ${profile.team_club_affiliation ? `
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Team/Club:</span>
+                            <span class="user-detail-value">${formatValue(profile.team_club_affiliation)}</span>
+                        </div>` : ''}
+                        ${profile.emergency_contact_name ? `
+                        <div class="user-detail-item">
+                            <span class="user-detail-label">Emergency Contact:</span>
+                            <span class="user-detail-value">${formatValue(profile.emergency_contact_name)} - ${formatValue(profile.emergency_contact_phone)}</span>
+                        </div>` : ''}
+                    </div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('playerProfileData').innerHTML = profileHTML;
+            document.getElementById('playerProfileView').style.display = 'block';
+            document.getElementById('playerProfileEditForm').style.display = 'none';
+
+            // Populate form for editing
+            populatePlayerProfileForm(profile);
+        }
+
+        function displayNoProfile() {
+            document.getElementById('playerProfileData').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <p style="font-size: 16px; margin-bottom: 10px;">📋 No player profile yet</p>
+                    <p style="font-size: 14px;">Create your player profile to get started!</p>
+                </div>
+            `;
+            document.getElementById('playerProfileView').style.display = 'block';
+            document.getElementById('playerProfileEditForm').style.display = 'none';
+        }
+
+        function showPlayerProfileForm() {
+            document.getElementById('playerProfileView').style.display = 'none';
+            document.getElementById('playerProfileEditForm').style.display = 'block';
+        }
+
+        function cancelPlayerProfileEdit() {
+            document.getElementById('playerProfileView').style.display = 'block';
+            document.getElementById('playerProfileEditForm').style.display = 'none';
+        }
+
+        function populatePlayerProfileForm(profile) {
+            if (!profile) return;
+
+            // Basic fields
+            const fields = [
+                'date_of_birth', 'location_city', 'skill_level', 'years_playing',
+                'play_frequency', 'primary_position', 'tournament_participation',
+                'certifications', 'tournament_results', 'achievements',
+                'preferred_court_type', 'preferred_match_format', 'bio',
+                'team_club_affiliation', 'emergency_contact_name', 'emergency_contact_phone',
+                'medical_conditions'
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element && profile[field] !== null && profile[field] !== undefined) {
+                    element.value = profile[field];
+                }
+            });
+
+            // Checkboxes
+            const checkboxes = [
+                'agree_code_of_conduct', 'agree_community_guidelines',
+                'agree_ranking_rules', 'agree_fair_play'
+            ];
+
+            checkboxes.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    element.checked = profile[field] === true;
+                }
+            });
+        }
+
+        // Handle player profile form submission
+        document.getElementById('updatePlayerProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                showResponse({message: 'No authentication token found'}, false);
+                return;
+            }
+
+            // Gather form data
+            const formData = {
+                date_of_birth: document.getElementById('date_of_birth').value || null,
+                location_city: document.getElementById('location_city').value || null,
+                skill_level: document.getElementById('skill_level').value || null,
+                years_playing: document.getElementById('years_playing').value ? parseInt(document.getElementById('years_playing').value) : null,
+                play_frequency: document.getElementById('play_frequency').value || null,
+                primary_position: document.getElementById('primary_position').value || null,
+                tournament_participation: document.getElementById('tournament_participation').value || null,
+                certifications: document.getElementById('certifications').value || null,
+                tournament_results: document.getElementById('tournament_results').value || null,
+                achievements: document.getElementById('achievements').value || null,
+                preferred_court_type: document.getElementById('preferred_court_type').value || null,
+                preferred_match_format: document.getElementById('preferred_match_format').value || null,
+                bio: document.getElementById('bio').value || null,
+                agree_code_of_conduct: document.getElementById('agree_code_of_conduct').checked,
+                agree_community_guidelines: document.getElementById('agree_community_guidelines').checked,
+                agree_ranking_rules: document.getElementById('agree_ranking_rules').checked,
+                agree_fair_play: document.getElementById('agree_fair_play').checked,
+                team_club_affiliation: document.getElementById('team_club_affiliation').value || null,
+                emergency_contact_name: document.getElementById('emergency_contact_name').value || null,
+                emergency_contact_phone: document.getElementById('emergency_contact_phone').value || null,
+                medical_conditions: document.getElementById('medical_conditions').value || null
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/player/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse({
+                        message: 'Player profile updated successfully! ✅',
+                        completion: data.data.completion_percentage + '%',
+                        is_complete: data.data.is_complete
+                    }, true);
+                    
+                    // Reload profile
+                    await loadPlayerProfile();
+                    cancelPlayerProfileEdit();
+                } else {
+                    showResponse(data, false);
+                }
+            } catch (error) {
+                showResponse({
+                    message: 'Update failed',
+                    error: error.message
+                }, false);
+            }
+        });
     </script>
 </body>
 </html>
