@@ -15,17 +15,25 @@
 
 ## **AUTHENTICATION & USER MANAGEMENT**
 ### Core Features
-- [ ] User registration endpoint
-- [ ] User login/logout endpoints
-- [ ] Password reset functionality
-- [ ] JWT/Session token management
-- [ ] Role-based access control (Admin, User, Organizer)
-- [ ] User profile management endpoint
-- [ ] Email verification
+- [x] User registration endpoint (`POST /api/auth/register`)
+- [x] User login/logout endpoints (`POST /api/auth/login`, `POST /api/auth/logout`)
+- [x] Password change functionality (`PUT /api/auth/password`)
+- [x] JWT/Session token management (Laravel Sanctum)
+- [x] Role-based access control (USER, COACH, ADMIN, SUPER_ADMIN, COURT_OWNER)
+- [x] User profile management endpoint (`GET /api/auth/profile`, `PUT /api/auth/profile`)
+- [x] Delete account functionality (`DELETE /api/auth/profile`)
+- [x] Password reset functionality (`POST /api/auth/forgot-password`, `POST /api/auth/reset-password`)
+- [x] Email verification (`GET /api/auth/email/verify/{id}/{hash}`, `POST /api/auth/email/resend`)
 
 ### Database
-- [ ] Users table/collection
-- [ ] Authentication logs
+- [x] Users table with roles (`first_name`, `last_name`, `email`, `password`, `role`, `phone_number`, `profile_picture`, `status`)
+- [x] Authentication logs (`GET /api/auth/logs`, `GET /api/auth/logs/all` for admins)
+
+### Player Profiles
+- [x] Player profiles table with comprehensive fields
+- [x] Player profile API endpoints (`GET /api/player/profile`, `PUT /api/player/profile`, `POST /api/player/profile/photo`, `GET /api/player/profile/completion`, `DELETE /api/player/profile`)
+- [x] Profile completion tracking system
+- [x] Role application requirements (COACH, COURT_OWNER)
 
 ---
 
@@ -197,14 +205,15 @@
 ## **INFRASTRUCTURE & SECURITY**
 ### Core Features
 - [ ] API rate limiting
-- [ ] Input validation & sanitization
-- [ ] SQL injection prevention
-- [ ] CORS configuration
+- [x] Input validation & sanitization (on auth endpoints)
+- [x] SQL injection prevention (Eloquent ORM)
+- [x] CORS configuration (for Next.js frontend)
 - [ ] API documentation (Swagger/OpenAPI)
-- [ ] Health check endpoint
-- [ ] Caching strategy (Redis)
+- [x] Health check endpoint (`/api/health`)
+- [x] Caching strategy (Redis configured)
+- [x] Password hashing (Bcrypt)
 - [ ] Database backup strategy
-- [ ] Error handling & logging
+- [x] Error handling & logging (basic implementation)
 
 ---
 

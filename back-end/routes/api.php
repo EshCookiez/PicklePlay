@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PlayerProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,13 @@ Route::get('/health', function () {
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    
+    // Email verification (signed route)
+    Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+        ->middleware('signed')
+        ->name('verification.verify');
 });
 
 // Protected routes (require authentication)
@@ -37,7 +45,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/password', [AuthController::class, 'updatePassword']);
         Route::delete('/profile', [AuthController::class, 'deleteAccount']);
+        Route::post('/email/resend', [AuthController::class, 'sendVerificationEmail']);
+        Route::get('/logs', [AuthController::class, 'getAuthLogs']);
+        Route::get('/logs/all', [AuthController::class, 'getAllAuthLogs']); // Admin only
+    });
+    
+    // Player Profile routes
+    Route::prefix('player')->group(function () {
+        Route::get('/profile', [PlayerProfileController::class, 'getProfile']);
+        Route::put('/profile', [PlayerProfileController::class, 'updateProfile']);
+        Route::post('/profile/photo', [PlayerProfileController::class, 'uploadPhoto']);
+        Route::get('/profile/completion', [PlayerProfileController::class, 'getCompletion']);
+        Route::delete('/profile', [PlayerProfileController::class, 'deleteProfile']);
     });
     
     // Legacy user route
