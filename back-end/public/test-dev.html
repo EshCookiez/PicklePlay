@@ -243,6 +243,138 @@
             color: #fff;
         }
 
+        .edit-btn {
+            background: #000;
+            color: #fff;
+            border: 2px solid #000;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+
+        .edit-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin-top: 15px;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .edit-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .edit-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .edit-form input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 4px;
+        }
+
+        .edit-form .button-group {
+            margin-top: 20px;
+        }
+
+        .delete-btn {
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            margin-top: 15px;
+        }
+
+        .delete-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .danger-zone {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+
+        .danger-zone h4 {
+            color: #000;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .danger-zone p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 4px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: #000;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-content .button-group {
+            margin-top: 20px;
+        }
+
+        .modal-content .button-group button {
+            margin-top: 0;
+        }
+
         .auth-forms {
             display: block;
         }
@@ -275,7 +407,7 @@
 
         <!-- Logged In Section -->
         <div id="loggedInSection" class="logged-in-section">
-            <div class="user-details">
+            <div id="userDetailsView" class="user-details">
                 <h3>✓ Logged In</h3>
                 <div class="user-detail-item">
                     <span class="user-detail-label">ID:</span>
@@ -302,7 +434,58 @@
                     <span class="user-detail-value" id="userStatus">-</span>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+
+            <!-- Edit Form -->
+            <div id="editForm" class="edit-form">
+                <h3>Edit Profile</h3>
+                <form id="updateProfileForm">
+                    <div class="form-group">
+                        <label for="edit_first_name">First Name *</label>
+                        <input type="text" id="edit_first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_last_name">Last Name *</label>
+                        <input type="text" id="edit_last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_phone_number">Phone Number</label>
+                        <input type="tel" id="edit_phone_number" name="phone_number">
+                    </div>
+                    <div class="button-group">
+                        <button type="submit">Save Changes</button>
+                        <button type="button" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="button-group">
+                <button class="edit-btn" onclick="showEditForm()">Edit Profile</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <h4>⚠ Danger Zone</h4>
+                <p>Once you delete your account, there is no going back. Please be certain.</p>
+                <button class="delete-btn" onclick="showDeleteModal()">Delete Account</button>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h3>Delete Account?</h3>
+                <p>Are you sure you want to delete your account? This action cannot be undone and will permanently delete:</p>
+                <ul style="margin: 15px 0; padding-left: 20px; color: #666;">
+                    <li>Your profile information</li>
+                    <li>All your data</li>
+                    <li>Your authentication tokens</li>
+                </ul>
+                <div class="button-group">
+                    <button onclick="confirmDelete()" style="background: #000; color: #fff;">Yes, Delete</button>
+                    <button onclick="closeDeleteModal()" style="background: #fff; color: #000;">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <div id="authForms" class="auth-forms">
@@ -432,8 +615,13 @@
             }
         }
 
+        // Store current user data
+        let currentUser = null;
+
         // Display user details
         function displayUserDetails(user) {
+            currentUser = user;
+            
             document.getElementById('userId').textContent = user.id;
             document.getElementById('userName').textContent = user.full_name || `${user.first_name} ${user.last_name}`;
             document.getElementById('userEmail').textContent = user.email;
@@ -445,7 +633,139 @@
             document.getElementById('loggedInSection').classList.add('active');
             document.getElementById('authForms').classList.add('hidden');
             document.getElementById('response').style.display = 'none';
+            
+            // Hide edit form if it was open
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'block';
         }
+
+        // Show edit form
+        function showEditForm() {
+            if (!currentUser) return;
+            
+            // Populate form with current values
+            document.getElementById('edit_first_name').value = currentUser.first_name;
+            document.getElementById('edit_last_name').value = currentUser.last_name;
+            document.getElementById('edit_phone_number').value = currentUser.phone_number || '';
+            
+            // Show edit form, hide details view
+            document.getElementById('editForm').classList.add('active');
+            document.getElementById('userDetailsView').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            document.getElementById('editForm').classList.remove('active');
+            document.getElementById('userDetailsView').style.display = 'block';
+        }
+
+        // Show delete modal
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                closeDeleteModal();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Clear local storage
+                    localStorage.removeItem('auth_token');
+                    
+                    // Close modal
+                    closeDeleteModal();
+                    
+                    // Hide logged in section, show auth forms
+                    document.getElementById('loggedInSection').classList.remove('active');
+                    document.getElementById('authForms').classList.remove('hidden');
+                    
+                    // Show success message
+                    showResponse({
+                        success: true,
+                        message: 'Account deleted successfully'
+                    }, true);
+                } else {
+                    closeDeleteModal();
+                    showResponse(data, false);
+                }
+            } catch (error) {
+                closeDeleteModal();
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            }
+        }
+
+        // Update profile form submission
+        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const button = e.target.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Saving...';
+
+            const token = localStorage.getItem('auth_token');
+            const formData = {
+                first_name: document.getElementById('edit_first_name').value,
+                last_name: document.getElementById('edit_last_name').value,
+                phone_number: document.getElementById('edit_phone_number').value || null,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                showResponse(data, response.ok);
+
+                if (response.ok) {
+                    // Update displayed user details
+                    setTimeout(() => {
+                        displayUserDetails(data.data.user);
+                    }, 2000);
+                }
+            } catch (error) {
+                showResponse({
+                    success: false,
+                    message: 'Network error',
+                    error: error.message
+                }, false);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Save Changes';
+            }
+        });
 
         // Logout function
         async function logout() {
