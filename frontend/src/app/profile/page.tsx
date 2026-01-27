@@ -4,17 +4,21 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@/images/PicklePlayLogo.jpg';
-import { 
-  UserProfile, 
-  UserRole, 
-  DashboardTab, 
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import {
+  UserProfile,
+  UserRole,
+  DashboardTab,
 } from '@/types/profile';
-import { 
-  MOCK_USER, 
-  MOCK_STATS, 
-  MOCK_APPLICATIONS, 
-  NAV_ITEMS, 
-  ROLE_COLORS 
+import {
+  MOCK_USER,
+  MOCK_STATS,
+  MOCK_APPLICATIONS,
+  NAV_ITEMS,
+  ADMIN_NAV_ITEMS,
+  SUPER_ADMIN_NAV_ITEMS,
+  ROLE_COLORS
 } from '@/lib/profile-constants';
 import { Card, Badge, Button } from '@/components/profile/ui/Common';
 import ProfileOverview from '@/components/profile/ProfileOverview';
@@ -27,32 +31,83 @@ import PaymentInfo from '@/components/profile/PaymentInfo';
 import ProfessionalInfo from '@/components/profile/ProfessionalInfo';
 import ProfileCompletion from '@/components/profile/ProfileCompletion';
 import EditProfileModal from '@/components/profile/Modals/EditProfile';
-import { Menu, Star, ExternalLink, Settings as SettingsIcon, Camera, MapPin } from 'lucide-react';
+import { Menu, Star, ExternalLink, Settings as SettingsIcon, Camera, MapPin, LogOut, ShieldAlert } from 'lucide-react';
+
+// Admin Components
+import AdminOverview from '@/components/admin/AdminOverview';
+import UserManagement from '@/components/admin/UserManagement';
+import CourtManagement from '@/components/admin/CourtManagement';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const { user: authUser, isLoading: authLoading, logout } = useAuth();
+  const router = useRouter();
+
+  // State
+  const [activeTab, setActiveTab] = useState<string>('overview');
   const [activeRole, setActiveRole] = useState<UserRole>(UserRole.CUSTOMER);
   const [user, setUser] = useState<UserProfile>(MOCK_USER);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const isSuperAdmin = authUser?.role === 'super_admin';
+  const isAdmin = authUser?.role === 'admin';
+  const isAnyAdmin = isAdmin || isSuperAdmin;
+
+  const navItems = isSuperAdmin
+    ? SUPER_ADMIN_NAV_ITEMS
+    : isAdmin
+      ? ADMIN_NAV_ITEMS
+      : NAV_ITEMS;
+
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '') as DashboardTab;
-    if (NAV_ITEMS.some(item => item.id === hash)) {
+    const hash = window.location.hash.replace('#', '');
+    if (navItems.some(item => item.id === hash)) {
       setActiveTab(hash);
+    } else {
+      setActiveTab(isAnyAdmin ? 'admin-overview' : 'overview');
+    }
+  }, [isAnyAdmin, isSuperAdmin, isAdmin, navItems]);
+
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      router.push('/'); // Redirect to home if not logged in
+      return;
     }
 
-    // Set user profile in localStorage so Header knows user is logged in
-    const userProfileData = {
-      name: user.fullName,
-      rank: 1,
-      points: 2450,
-      avatar: user.fullName.charAt(0).toUpperCase()
-    };
-    localStorage.setItem('userProfile', JSON.stringify(userProfileData));
-  }, [user.fullName]);
+    if (authUser) {
+      // Map Auth User to Profile User
+      setUser(prev => ({
+        ...prev,
+        id: authUser.id.toString(),
+        fullName: `${authUser.first_name || ''} ${authUser.last_name || ''}`.trim() || "Guest User",
+        email: authUser.email,
+        phone: authUser.phone_number,
+        dob: authUser.date_of_birth,
+        location: {
+          city: authUser.location || "Unknown",
+          state: "Philippines",
+          country: "PH"
+        },
+        avatarUrl: `https://ui-avatars.com/api/?name=${authUser.first_name || 'U'}+${authUser.last_name || 'U'}&background=0D8ABC&color=fff`
+      }));
 
-  const handleTabChange = (tab: DashboardTab) => {
+      // Map backend role to frontend UserRole enum
+      const roleMap: Record<string, UserRole> = {
+        'user': UserRole.CUSTOMER,
+        'coach': UserRole.COACH,
+        'court_owner': UserRole.COURT_OWNER,
+        'admin': UserRole.ADMIN,
+        'super_admin': UserRole.SUPER_ADMIN
+      };
+
+      if (authUser.role && roleMap[authUser.role]) {
+        setActiveRole(roleMap[authUser.role]);
+      }
+    }
+  }, [authUser, authLoading, router]);
+
+  const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     window.location.hash = tab;
     setIsSidebarOpen(false);
@@ -63,13 +118,23 @@ export default function ProfilePage() {
     setIsEditModalOpen(false);
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a5f]"></div>
+      </div>
+    );
+  }
+
+  if (!authUser) return null;
+
   const isProfessionalRole = activeRole === UserRole.COACH || activeRole === UserRole.COURT_OWNER;
 
   return (
     <div className="flex min-h-screen overflow-hidden bg-slate-50">
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -94,10 +159,10 @@ export default function ProfilePage() {
             </Link>
 
             <nav className="space-y-1">
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => handleTabChange(item.id as DashboardTab)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === item.id ? 'bg-[#fbbf24] text-[#1e3a5f] shadow-lg shadow-black/10' : 'text-blue-100/70 hover:text-white hover:bg-white/10'}`}
                 >
                   <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-[#1e3a5f]' : 'text-blue-100/50'}`} />
@@ -107,14 +172,21 @@ export default function ProfilePage() {
             </nav>
           </div>
 
-          <div className="mt-auto p-3 bg-black/10 border-t border-white/5">
+          <div className="mt-auto p-3 bg-black/10 border-t border-white/5 space-y-3">
             <div className="flex items-center gap-2">
               <img src={user.avatarUrl} className="w-8 h-8 rounded-full border-2 border-[#fbbf24]" alt="Avatar" />
-              <div className="overflow-hidden">
+              <div className="overflow-hidden flex-1">
                 <p className="text-xs font-bold truncate">{user.fullName}</p>
                 <p className="text-[10px] text-blue-100/60 uppercase font-semibold tracking-tight">Active Member</p>
               </div>
             </div>
+            <button
+              onClick={() => logout()}
+              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold text-red-100/70 hover:text-white hover:bg-red-500/20 transition-all border border-red-500/20"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              LOGOUT SESSION
+            </button>
           </div>
         </div>
       </aside>
@@ -141,8 +213,8 @@ export default function ProfilePage() {
         {/* Hero Profile Section */}
         <div className="relative">
           <div className="h-20 md:h-24 w-full bg-gradient-to-br from-[#1e3a5f] via-[#0a56a7] to-[#0066cc] overflow-hidden relative">
-            <img 
-              src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=2000" 
+            <img
+              src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=2000"
               className="w-full h-full object-cover opacity-30 mix-blend-overlay"
               alt="Banner"
             />
@@ -154,29 +226,39 @@ export default function ProfilePage() {
               <div className="flex flex-col md:flex-row items-center md:items-end gap-3">
                 <div className="relative shrink-0">
                   <div className="p-0.5 rounded-2xl bg-white shadow-lg">
-                    <img 
-                      src={user.avatarUrl} 
-                      alt="Profile" 
+                    <img
+                      src={user.avatarUrl}
+                      alt="Profile"
                       className="w-18 h-18 md:w-22 md:h-22 rounded-2xl border-2 border-white object-cover"
-                      style={{width: '72px', height: '72px'}}
+                      style={{ width: '72px', height: '72px' }}
                     />
                   </div>
-                  <button 
+                  <button
                     onClick={() => setIsEditModalOpen(true)}
                     className="absolute bottom-0.5 right-0.5 p-1.5 bg-[#fbbf24] text-[#1e3a5f] rounded-lg shadow-lg hover:scale-110 active:scale-95 transition-all border-2 border-white"
                   >
                     <Camera className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                
+
                 <div className="text-center md:text-left pb-0.5">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <h1 className="text-xl md:text-2xl font-black text-[#1e3a5f] tracking-tight uppercase">{user.fullName}</h1>
-                    <Badge className={`${ROLE_COLORS[activeRole]} text-[10px] font-black px-2 py-0.5 border rounded uppercase tracking-wide`}>
-                      {activeRole}
-                    </Badge>
+                    <h1 className="text-xl md:text-2xl font-black text-[#1e3a5f] tracking-tight uppercase flex items-center gap-2">
+                      {isAnyAdmin && <ShieldAlert size={20} className={isSuperAdmin ? "text-purple-500" : "text-rose-500"} />}
+                      {isSuperAdmin ? 'System Executive' : isAdmin ? 'System Administrator' : user.fullName}
+                    </h1>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${ROLE_COLORS[activeRole]} text-[10px] font-black px-2 py-0.5 border rounded uppercase tracking-wide`}>
+                        {activeRole}
+                      </Badge>
+                      {isAnyAdmin && (
+                        <Badge className={`${isSuperAdmin ? 'bg-purple-500' : 'bg-rose-500'} text-white border-none text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wide`}>
+                          {isSuperAdmin ? 'Root Access' : 'Staff'}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  
+
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs font-bold text-slate-500 mt-1">
                     <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> {user.rating} <span className="text-slate-400 font-medium">(45 Reviews)</span></span>
                     <span className="w-1 h-1 bg-slate-300 rounded-full hidden md:block"></span>
@@ -198,35 +280,67 @@ export default function ProfilePage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-2 py-1.5 md:px-3 space-y-1.5">
-          
+
           <ProfileCompletion user={user} />
 
           {/* Tab Content Area */}
           <div className="min-h-[150px]">
-            {activeTab === 'overview' && (
-              <>
-                <ProfileOverview user={user} onEdit={() => setIsEditModalOpen(true)} />
-                {isProfessionalRole && (
-                  <div className="mt-3">
-                    <h3 className="text-sm font-black text-slate-800 uppercase italic tracking-tighter mb-2">Professional Details</h3>
-                    <ProfessionalInfo role={activeRole} />
-                  </div>
+            {isAnyAdmin ? (
+              <div className="space-y-6">
+                {activeTab === 'admin-overview' && <AdminOverview />}
+                {activeTab === 'user-mgmt' && <UserManagement />}
+                {activeTab === 'court-mgmt' && <CourtManagement />}
+                {isSuperAdmin && activeTab === 'analytics' && <AdminAnalytics />}
+                {activeTab === 'security' && <Security />}
+
+                {/* Access Protection for standard admins */}
+                {isAdmin && ['analytics', 'roles-perms', 'system-settings'].includes(activeTab) && (
+                  <Card className="p-20 flex flex-col items-center justify-center bg-rose-50/50 border-rose-100 border-dashed border-2">
+                    <ShieldAlert size={48} className="text-rose-300 mb-4" />
+                    <h2 className="text-lg font-black text-rose-800 uppercase tracking-tight mb-2">Access Denied</h2>
+                    <p className="text-[10px] font-black uppercase text-rose-400 tracking-widest text-center max-w-xs">
+                      This module is restricted to Super Admin accounts only.
+                      Please contact system executive for permissions.
+                    </p>
+                  </Card>
                 )}
+
+                {/* Maintenance / Coming Soon fallback */}
+                {!['admin-overview', 'user-mgmt', 'court-mgmt', 'analytics', 'security'].includes(activeTab) && (
+                  <Card className="p-20 flex flex-col items-center justify-center bg-white/50 border-dashed border-2">
+                    <ShieldAlert size={48} className="text-slate-200 mb-4" />
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Module under maintenance</p>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <>
+                {activeTab === 'overview' && (
+                  <>
+                    <ProfileOverview user={user} onEdit={() => setIsEditModalOpen(true)} />
+                    {isProfessionalRole && (
+                      <div className="mt-3">
+                        <h3 className="text-sm font-black text-slate-800 uppercase italic tracking-tighter mb-2">Professional Details</h3>
+                        <ProfessionalInfo role={activeRole} />
+                      </div>
+                    )}
+                  </>
+                )}
+                {activeTab === 'roles' && (
+                  <RolesManagement
+                    activeRole={activeRole}
+                    applications={MOCK_APPLICATIONS}
+                    onSwitchRole={() => setActiveRole(activeRole === UserRole.COACH ? UserRole.PLAYER : UserRole.COACH)}
+                    onApplyRole={(r) => console.log('apply', r)}
+                  />
+                )}
+                {activeTab === 'stats' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
+                {activeTab === 'financials' && <PaymentInfo />}
+                {activeTab === 'settings' && <Settings />}
+                {activeTab === 'security' && <Security />}
+                {activeTab === 'verification' && <Verification user={user} />}
               </>
             )}
-            {activeTab === 'roles' && (
-              <RolesManagement 
-                activeRole={activeRole} 
-                applications={MOCK_APPLICATIONS} 
-                onSwitchRole={() => setActiveRole(activeRole === UserRole.COACH ? UserRole.PLAYER : UserRole.COACH)} 
-                onApplyRole={(r) => console.log('apply', r)}
-              />
-            )}
-            {activeTab === 'stats' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
-            {activeTab === 'financials' && <PaymentInfo />}
-            {activeTab === 'settings' && <Settings />}
-            {activeTab === 'security' && <Security />}
-            {activeTab === 'verification' && <Verification user={user} />}
           </div>
         </div>
 
@@ -255,10 +369,10 @@ export default function ProfilePage() {
         </footer>
       </main>
 
-      <EditProfileModal 
-        user={user} 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
+      <EditProfileModal
+        user={user}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
         onSave={handleEditSave}
       />
     </div>
