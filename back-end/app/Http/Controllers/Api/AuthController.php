@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -28,10 +29,11 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::min(8)],
-            'role' => ['required', 'in:user,coach,admin,super_admin,court_owner'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+            'date_of_birth' => ['required', 'date', 'before:-18 years'], // Must be 18+
             'phone_number' => ['nullable', 'string', 'max:20'],
+            'location' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -43,15 +45,32 @@ class AuthController extends Controller
         }
 
         try {
-            // Create user
+            // Create user with CUSTOMER role by default
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => $request->role,
+                'role' => User::ROLE_USER, // Always defaults to CUSTOMER role
                 'phone_number' => $request->phone_number,
+                'date_of_birth' => $request->date_of_birth,
+                'location' => $request->location,
                 'status' => 'active',
+                'last_login_at' => now(),
+                'login_count' => 1,
+                'last_ip_address' => $request->ip(),
+            ]);
+
+            // Create related records
+            $user->getOrCreateProfile();
+            $user->getOrCreatePreferences();
+            $user->getOrCreateStatistics();
+
+            // Generate email verification token
+            $verificationToken = Str::random(64);
+            $user->update([
+                'email_verification_token' => $verificationToken,
+                'email_verification_token_expires_at' => now()->addHours(24),
             ]);
 
             // Create API token
@@ -77,7 +96,10 @@ class AuthController extends Controller
                         'email' => $user->email,
                         'role' => $user->role,
                         'phone_number' => $user->phone_number,
+                        'date_of_birth' => $user->date_of_birth,
+                        'location' => $user->location,
                         'status' => $user->status,
+                        'email_verified_at' => $user->email_verified_at,
                         'created_at' => $user->created_at,
                     ],
                     'token' => $token,
@@ -150,6 +172,9 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Update last login information
+        $user->updateLastLogin($request->ip());
+
         // Create API token
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -173,7 +198,11 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'phone_number' => $user->phone_number,
+                    'date_of_birth' => $user->date_of_birth,
+                    'location' => $user->location,
                     'status' => $user->status,
+                    'email_verified_at' => $user->email_verified_at,
+                    'last_login_at' => $user->last_login_at,
                 ],
                 'token' => $token,
                 'token_type' => 'Bearer',
@@ -211,6 +240,7 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user();
+        $user->load(['profile', 'preferences', 'statistics']);
 
         return response()->json([
             'success' => true,
@@ -223,18 +253,30 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'phone_number' => $user->phone_number,
+                    'date_of_birth' => $user->date_of_birth,
+                    'location' => $user->location,
                     'profile_picture' => $user->profile_picture,
                     'status' => $user->status,
                     'email_verified_at' => $user->email_verified_at,
+                    'phone_verified_at' => $user->phone_verified_at,
+                    'last_login_at' => $user->last_login_at,
+                    'login_count' => $user->login_count,
+                    'wallet_balance' => $user->wallet_balance,
+                    'total_spent' => $user->total_spent,
+                    'total_earnings' => $user->total_earnings,
+                    'two_factor_enabled' => $user->two_factor_enabled,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
-                ]
+                ],
+                'profile' => $user->profile,
+                'preferences' => $user->preferences,
+                'statistics' => $user->statistics,
             ]
         ], 200);
     }
 
     /**
-     * Update authenticated user profile
+     * Update authenticated user basic information
      */
     public function updateProfile(Request $request)
     {
@@ -242,9 +284,11 @@ class AuthController extends Controller
 
         // Validate request
         $validator = Validator::make($request->all(), [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['sometimes', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'string', 'max:255'],
             'phone_number' => ['nullable', 'string', 'max:20'],
+            'date_of_birth' => ['sometimes', 'date', 'before:-18 years'],
+            'location' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -256,12 +300,14 @@ class AuthController extends Controller
         }
 
         try {
-            // Update user
-            $user->update([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'phone_number' => $request->phone_number,
-            ]);
+            // Update user basic info
+            $user->update($request->only([
+                'first_name',
+                'last_name',
+                'phone_number',
+                'date_of_birth',
+                'location',
+            ]));
 
             // Log profile update
             AuthenticationLog::log(
@@ -270,6 +316,8 @@ class AuthController extends Controller
                 email: $user->email,
                 status: 'success'
             );
+
+            $user->load(['profile', 'preferences', 'statistics']);
 
             return response()->json([
                 'success' => true,
@@ -283,12 +331,18 @@ class AuthController extends Controller
                         'email' => $user->email,
                         'role' => $user->role,
                         'phone_number' => $user->phone_number,
+                        'date_of_birth' => $user->date_of_birth,
+                        'location' => $user->location,
                         'profile_picture' => $user->profile_picture,
                         'status' => $user->status,
                         'email_verified_at' => $user->email_verified_at,
+                        'phone_verified_at' => $user->phone_verified_at,
                         'created_at' => $user->created_at,
                         'updated_at' => $user->updated_at,
-                    ]
+                    ],
+                    'profile' => $user->profile,
+                    'preferences' => $user->preferences,
+                    'statistics' => $user->statistics,
                 ]
             ], 200);
 
@@ -296,6 +350,140 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Profile update failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user extended profile
+     */
+    public function updateExtendedProfile(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->getOrCreateProfile();
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'bio' => ['nullable', 'string', 'max:500'],
+            'gender' => ['nullable', 'in:male,female,non_binary,prefer_not_to_say'],
+            'instagram_url' => ['nullable', 'url', 'max:255'],
+            'linkedin_url' => ['nullable', 'url', 'max:255'],
+            'twitter_url' => ['nullable', 'url', 'max:255'],
+            'website_url' => ['nullable', 'url', 'max:255'],
+            'street_address' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state_province' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'title_occupation' => ['nullable', 'string', 'max:255'],
+            'company_organization' => ['nullable', 'string', 'max:255'],
+            'years_in_sport' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Update profile
+            $profile->update($request->only([
+                'bio',
+                'gender',
+                'instagram_url',
+                'linkedin_url',
+                'twitter_url',
+                'website_url',
+                'street_address',
+                'city',
+                'state_province',
+                'country',
+                'postal_code',
+                'latitude',
+                'longitude',
+                'title_occupation',
+                'company_organization',
+                'years_in_sport',
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Extended profile updated successfully',
+                'data' => [
+                    'profile' => $profile->fresh()
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Extended profile update failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user preferences
+     */
+    public function updatePreferences(Request $request)
+    {
+        $user = $request->user();
+        $preferences = $user->getOrCreatePreferences();
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'preferred_language' => ['sometimes', 'string', 'max:10'],
+            'timezone' => ['sometimes', 'string', 'max:50'],
+            'privacy_level' => ['sometimes', 'in:public,private,friends_only'],
+            'email_booking_confirmations' => ['sometimes', 'boolean'],
+            'email_lesson_reminders' => ['sometimes', 'boolean'],
+            'email_marketing' => ['sometimes', 'boolean'],
+            'email_frequency' => ['sometimes', 'in:immediate,daily,weekly'],
+            'push_notifications_enabled' => ['sometimes', 'boolean'],
+            'sms_notifications_enabled' => ['sometimes', 'boolean'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Update preferences
+            $preferences->update($request->only([
+                'preferred_language',
+                'timezone',
+                'privacy_level',
+                'email_booking_confirmations',
+                'email_lesson_reminders',
+                'email_marketing',
+                'email_frequency',
+                'push_notifications_enabled',
+                'sms_notifications_enabled',
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Preferences updated successfully',
+                'data' => [
+                    'preferences' => $preferences->fresh()
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Preferences update failed',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -311,7 +499,7 @@ class AuthController extends Controller
         // Validate request
         $validator = Validator::make($request->all(), [
             'current_password' => ['required', 'string'],
-            'new_password' => ['required', 'string', Password::min(8), 'confirmed'],
+            'new_password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
         ]);
 
         if ($validator->fails()) {
@@ -333,7 +521,8 @@ class AuthController extends Controller
 
             // Update password
             $user->update([
-                'password' => Hash::make($request->new_password)
+                'password' => Hash::make($request->new_password),
+                'last_password_change_at' => now(),
             ]);
 
             // Log password change
@@ -674,6 +863,111 @@ class AuthController extends Controller
                 'logs' => $logs
             ]
         ], 200);
+    }
+
+    /**
+     * Upload profile photo
+     */
+    public function uploadProfilePhoto(Request $request)
+    {
+        $user = $request->user();
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Delete old profile photo if exists
+            if ($user->profile_picture) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            // Store new photo
+            $path = $request->file('photo')->store('profile-photos', 'public');
+
+            // Update user
+            $user->update([
+                'profile_picture' => $path
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile photo uploaded successfully',
+                'data' => [
+                    'profile_picture' => $path,
+                    'url' => Storage::disk('public')->url($path)
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo upload failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload cover photo
+     */
+    public function uploadCoverPhoto(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->getOrCreateProfile();
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'], // 10MB max
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Delete old cover photo if exists
+            if ($profile->cover_photo) {
+                Storage::disk('public')->delete($profile->cover_photo);
+            }
+
+            // Store new photo
+            $path = $request->file('photo')->store('cover-photos', 'public');
+
+            // Update profile
+            $profile->update([
+                'cover_photo' => $path
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover photo uploaded successfully',
+                'data' => [
+                    'cover_photo' => $path,
+                    'url' => Storage::disk('public')->url($path)
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo upload failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
