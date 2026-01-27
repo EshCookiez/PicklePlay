@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Calendar, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
 import logo from "../../images/PicklePlayLogo.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function AuthPage() {
   const router = useRouter();
+  const { login, signup } = useAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -28,6 +31,9 @@ export default function AuthPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    dateOfBirth: "",
+    phoneNumber: "",
+    location: "",
   });
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
@@ -62,8 +68,6 @@ export default function AuthPage() {
 
     if (!loginData.password) {
       newErrors.password = "Password is required";
-    } else if (loginData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -83,6 +87,9 @@ export default function AuthPage() {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupData.email)) {
       newErrors.email = "Please enter a valid email";
+    }
+    if (!signupData.dateOfBirth) {
+      newErrors.dateOfBirth = "Date of birth is required";
     }
     if (!signupData.password) {
       newErrors.password = "Password is required";
@@ -106,23 +113,20 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      // Simulate backend login
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Store user in localStorage
-      const userData = {
-        id: "user123",
-        name: "Jea Bayona",
+      await login({
         email: loginData.email,
-        avatar: "JB",
-        memberSince: "Jan 2025"
-      };
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      // Redirect to profile
+        password: loginData.password,
+      });
+
+      toast.success("Welcome back!");
       router.push("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      if (error.errors) {
+        setErrors(error.errors);
+      } else {
+        toast.error(error.message || "Login failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -134,23 +138,41 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
-      // Simulate backend signup
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Store user in localStorage
-      const userData = {
-        id: "user123",
-        name: `${signupData.firstName} ${signupData.lastName}`,
+      await signup({
+        first_name: signupData.firstName,
+        last_name: signupData.lastName,
         email: signupData.email,
-        avatar: signupData.firstName[0] + signupData.lastName[0],
-        memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" })
-      };
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      // Redirect to profile
+        password: signupData.password,
+        password_confirmation: signupData.confirmPassword,
+        date_of_birth: signupData.dateOfBirth,
+        phone_number: signupData.phoneNumber,
+        location: signupData.location,
+      });
+
+      toast.success("Account created successfully!");
       router.push("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
+      if (error.errors) {
+        // Map backend errors to field names
+        const fieldErrors: Record<string, string> = {};
+        Object.keys(error.errors).forEach(key => {
+          // Map snake_case to camelCase for state
+          let mappedKey = key;
+          if (key === 'first_name') mappedKey = 'firstName';
+          if (key === 'last_name') mappedKey = 'lastName';
+          if (key === 'date_of_birth') mappedKey = 'dateOfBirth';
+          if (key === 'phone_number') mappedKey = 'phoneNumber';
+
+          fieldErrors[mappedKey] = Array.isArray(error.errors[key])
+            ? error.errors[key][0]
+            : error.errors[key];
+        });
+        setErrors(fieldErrors);
+        toast.error("Please fix the errors in the form.");
+      } else {
+        toast.error(error.message || "Signup failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -165,7 +187,7 @@ export default function AuthPage() {
         <div
           style={{
             perspective: "1000px",
-            height: isFlipped ? "600px" : "550px",
+            height: isFlipped ? "750px" : "550px",
           }}
           className="transition-all duration-500"
         >
@@ -217,11 +239,10 @@ export default function AuthPage() {
                         setLoginData({ ...loginData, email: e.target.value });
                         if (errors.email) setErrors({ ...errors, email: undefined });
                       }}
-                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${
-                        errors.email
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${errors.email
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="you@example.com"
                     />
                   </div>
@@ -243,11 +264,10 @@ export default function AuthPage() {
                         setLoginData({ ...loginData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${
-                        errors.password
+                      className={`w-full pl-10 pr-12 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${errors.password
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button
@@ -351,11 +371,10 @@ export default function AuthPage() {
                           setSignupData({ ...signupData, firstName: e.target.value });
                           if (errors.firstName) setErrors({ ...errors, firstName: undefined });
                         }}
-                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                          errors.firstName
+                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.firstName
                             ? "border-red-500 focus:ring-red-200"
                             : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                        }`}
+                          }`}
                         placeholder="John"
                       />
                     </div>
@@ -375,11 +394,10 @@ export default function AuthPage() {
                           setSignupData({ ...signupData, lastName: e.target.value });
                           if (errors.lastName) setErrors({ ...errors, lastName: undefined });
                         }}
-                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                          errors.lastName
+                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.lastName
                             ? "border-red-500 focus:ring-red-200"
                             : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                        }`}
+                          }`}
                         placeholder="Doe"
                       />
                     </div>
@@ -402,15 +420,74 @@ export default function AuthPage() {
                         setSignupData({ ...signupData, email: e.target.value });
                         if (errors.email) setErrors({ ...errors, email: undefined });
                       }}
-                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.email
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.email
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="you@example.com"
                     />
                   </div>
                   {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>}
+                </div>
+
+                {/* Date of Birth Field */}
+                <div>
+                  <label htmlFor="dateOfBirth" className="block text-sm font-semibold text-gray-900 mb-1">
+                    Date of Birth
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                    <input
+                      type="date"
+                      id="dateOfBirth"
+                      value={signupData.dateOfBirth}
+                      onChange={(e) => {
+                        setSignupData({ ...signupData, dateOfBirth: e.target.value });
+                        if (errors.dateOfBirth) setErrors({ ...errors, dateOfBirth: undefined });
+                      }}
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.dateOfBirth
+                          ? "border-red-500 focus:ring-red-200"
+                          : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
+                        }`}
+                    />
+                  </div>
+                  {errors.dateOfBirth && <p className="text-red-500 text-xs mt-0.5">{errors.dateOfBirth}</p>}
+                </div>
+
+                {/* Optional: Phone & Location Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-900 mb-1">
+                      Phone (Optional)
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="tel"
+                        id="phoneNumber"
+                        value={signupData.phoneNumber}
+                        onChange={(e) => setSignupData({ ...signupData, phoneNumber: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20 transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600"
+                        placeholder="+63..."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="location" className="block text-sm font-semibold text-gray-900 mb-1">
+                      Location (Optional)
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="location"
+                        value={signupData.location}
+                        onChange={(e) => setSignupData({ ...signupData, location: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20 transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600"
+                        placeholder="City, Province"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Password Field */}
@@ -428,11 +505,10 @@ export default function AuthPage() {
                         setSignupData({ ...signupData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.password
+                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.password
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button
@@ -473,11 +549,10 @@ export default function AuthPage() {
                         setSignupData({ ...signupData, confirmPassword: e.target.value });
                         if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.confirmPassword
+                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.confirmPassword
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button

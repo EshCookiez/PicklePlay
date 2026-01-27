@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, X, Calendar, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
 import logo from "../images/PicklePlayLogo.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialView = "login" }: AuthModalProps) {
   const router = useRouter();
+  const { login, signup } = useAuth();
   const [isFlipped, setIsFlipped] = useState(initialView === "signup");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -38,6 +41,9 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
     email: "",
     password: "",
     confirmPassword: "",
+    dateOfBirth: "",
+    phoneNumber: "",
+    location: "",
   });
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
@@ -72,8 +78,6 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
     if (!loginData.password) {
       newErrors.password = "Password is required";
-    } else if (loginData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -93,6 +97,9 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupData.email)) {
       newErrors.email = "Please enter a valid email";
+    }
+    if (!signupData.dateOfBirth) {
+      newErrors.dateOfBirth = "Date of birth is required";
     }
     if (!signupData.password) {
       newErrors.password = "Password is required";
@@ -116,26 +123,21 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
     setLoading(true);
     try {
-      console.log("Login attempt:", loginData);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Store user in localStorage
-      const userData = {
-        id: "user123",
-        name: "User",
+      await login({
         email: loginData.email,
-        avatar: loginData.email[0].toUpperCase(),
-        memberSince: "Jan 2025"
-      };
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      // Close modal
+        password: loginData.password,
+      });
+
+      toast.success("Welcome back!");
       onClose();
-      
-      // Redirect to profile
       router.push("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      if (error.errors) {
+        setErrors(error.errors);
+      } else {
+        toast.error(error.message || "Login failed. Please check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -147,26 +149,40 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
     setLoading(true);
     try {
-      console.log("Signup attempt:", signupData);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Store user in localStorage
-      const userData = {
-        id: "user123",
-        name: `${signupData.firstName} ${signupData.lastName}`,
+      await signup({
+        first_name: signupData.firstName,
+        last_name: signupData.lastName,
         email: signupData.email,
-        avatar: signupData.firstName[0] + signupData.lastName[0],
-        memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" })
-      };
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      // Close modal
+        password: signupData.password,
+        password_confirmation: signupData.confirmPassword,
+        date_of_birth: signupData.dateOfBirth,
+        phone_number: signupData.phoneNumber,
+        location: signupData.location,
+      });
+
+      toast.success("Account created successfully!");
       onClose();
-      
-      // Redirect to profile
       router.push("/profile");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
+      if (error.errors) {
+        const fieldErrors: Record<string, string> = {};
+        Object.keys(error.errors).forEach(key => {
+          let mappedKey = key;
+          if (key === 'first_name') mappedKey = 'firstName';
+          if (key === 'last_name') mappedKey = 'lastName';
+          if (key === 'date_of_birth') mappedKey = 'dateOfBirth';
+          if (key === 'phone_number') mappedKey = 'phoneNumber';
+
+          fieldErrors[mappedKey] = Array.isArray(error.errors[key])
+            ? error.errors[key][0]
+            : error.errors[key];
+        });
+        setErrors(fieldErrors);
+        toast.error("Please fix the errors in the form.");
+      } else {
+        toast.error(error.message || "Signup failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -177,14 +193,13 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Close modal only if clicking directly on the backdrop, not on the card
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
       onClick={handleBackdropClick}
     >
@@ -193,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
         <div
           style={{
             perspective: "1000px",
-            height: isFlipped ? "600px" : "550px",
+            height: isFlipped ? "750px" : "550px",
             width: "100%",
           }}
           className="transition-all duration-500"
@@ -241,24 +256,23 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
               <form onSubmit={handleLoginSubmit} className="space-y-5">
                 {/* Email Field */}
                 <div>
-                  <label htmlFor="login-email" className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="modal-login-email" className="block text-sm font-semibold text-gray-900 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                     <input
                       type="email"
-                      id="login-email"
+                      id="modal-login-email"
                       value={loginData.email}
                       onChange={(e) => {
                         setLoginData({ ...loginData, email: e.target.value });
                         if (errors.email) setErrors({ ...errors, email: undefined });
                       }}
-                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${
-                        errors.email
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${errors.email
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="you@example.com"
                     />
                   </div>
@@ -267,24 +281,23 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
                 {/* Password Field */}
                 <div>
-                  <label htmlFor="login-password" className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="modal-login-password" className="block text-sm font-semibold text-gray-900 mb-2">
                     Password
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
                     <input
                       type={showPassword ? "text" : "password"}
-                      id="login-password"
+                      id="modal-login-password"
                       value={loginData.password}
                       onChange={(e) => {
                         setLoginData({ ...loginData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${
-                        errors.password
+                      className={`w-full pl-10 pr-12 py-3 rounded-lg border transition focus:outline-none focus:ring-2 placeholder:text-gray-600 ${errors.password
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button
@@ -383,48 +396,46 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-900 mb-1">
+                    <label htmlFor="modal-firstName" className="block text-sm font-semibold text-gray-900 mb-1">
                       First Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
-                        id="firstName"
+                        id="modal-firstName"
                         value={signupData.firstName}
                         onChange={(e) => {
                           setSignupData({ ...signupData, firstName: e.target.value });
                           if (errors.firstName) setErrors({ ...errors, firstName: undefined });
                         }}
-                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                          errors.firstName
+                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.firstName
                             ? "border-red-500 focus:ring-red-200"
                             : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                        }`}
+                          }`}
                         placeholder="John"
                       />
                     </div>
                     {errors.firstName && <p className="text-red-500 text-xs mt-0.5">{errors.firstName}</p>}
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-semibold text-gray-900 mb-1">
+                    <label htmlFor="modal-lastName" className="block text-sm font-semibold text-gray-900 mb-1">
                       Last Name
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                       <input
                         type="text"
-                        id="lastName"
+                        id="modal-lastName"
                         value={signupData.lastName}
                         onChange={(e) => {
                           setSignupData({ ...signupData, lastName: e.target.value });
                           if (errors.lastName) setErrors({ ...errors, lastName: undefined });
                         }}
-                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                          errors.lastName
+                        className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.lastName
                             ? "border-red-500 focus:ring-red-200"
                             : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                        }`}
+                          }`}
                         placeholder="Doe"
                       />
                     </div>
@@ -434,50 +445,108 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
                 {/* Email Field */}
                 <div>
-                  <label htmlFor="signup-email" className="block text-sm font-semibold text-gray-900 mb-1">
+                  <label htmlFor="modal-signup-email" className="block text-sm font-semibold text-gray-900 mb-1">
                     Email Address
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                     <input
                       type="email"
-                      id="signup-email"
+                      id="modal-signup-email"
                       value={signupData.email}
                       onChange={(e) => {
                         setSignupData({ ...signupData, email: e.target.value });
                         if (errors.email) setErrors({ ...errors, email: undefined });
                       }}
-                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.email
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.email
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="you@example.com"
                     />
                   </div>
                   {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>}
                 </div>
 
+                {/* Date of Birth Field */}
+                <div>
+                  <label htmlFor="modal-dateOfBirth" className="block text-sm font-semibold text-gray-900 mb-1">
+                    Date of Birth
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                    <input
+                      type="date"
+                      id="modal-dateOfBirth"
+                      value={signupData.dateOfBirth}
+                      onChange={(e) => {
+                        setSignupData({ ...signupData, dateOfBirth: e.target.value });
+                        if (errors.dateOfBirth) setErrors({ ...errors, dateOfBirth: undefined });
+                      }}
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.dateOfBirth
+                          ? "border-red-500 focus:ring-red-200"
+                          : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
+                        }`}
+                    />
+                  </div>
+                  {errors.dateOfBirth && <p className="text-red-500 text-xs mt-0.5">{errors.dateOfBirth}</p>}
+                </div>
+
+                {/* Optional: Phone & Location Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="modal-phoneNumber" className="block text-sm font-semibold text-gray-900 mb-1">
+                      Phone (Optional)
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="tel"
+                        id="modal-phoneNumber"
+                        value={signupData.phoneNumber}
+                        onChange={(e) => setSignupData({ ...signupData, phoneNumber: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20 transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600"
+                        placeholder="+63..."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="modal-location" className="block text-sm font-semibold text-gray-900 mb-1">
+                      Location (Optional)
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="modal-location"
+                        value={signupData.location}
+                        onChange={(e) => setSignupData({ ...signupData, location: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20 transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600"
+                        placeholder="City, Province"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Password Field */}
                 <div>
-                  <label htmlFor="signup-password" className="block text-sm font-semibold text-gray-900 mb-1">
+                  <label htmlFor="modal-signup-password" className="block text-sm font-semibold text-gray-900 mb-1">
                     Password
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                     <input
                       type={showSignupPassword ? "text" : "password"}
-                      id="signup-password"
+                      id="modal-signup-password"
                       value={signupData.password}
                       onChange={(e) => {
                         setSignupData({ ...signupData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.password
+                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.password
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button
@@ -505,24 +574,23 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
                 {/* Confirm Password Field */}
                 <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-semibold text-gray-900 mb-1">
+                  <label htmlFor="modal-confirm-password" className="block text-sm font-semibold text-gray-900 mb-1">
                     Confirm Password
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                     <input
                       type={showSignupConfirmPassword ? "text" : "password"}
-                      id="confirm-password"
+                      id="modal-confirm-password"
                       value={signupData.confirmPassword}
                       onChange={(e) => {
                         setSignupData({ ...signupData, confirmPassword: e.target.value });
                         if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
                       }}
-                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${
-                        errors.confirmPassword
+                      className={`w-full pl-10 pr-12 py-2 rounded-lg border transition focus:outline-none focus:ring-2 text-sm placeholder:text-gray-600 ${errors.confirmPassword
                           ? "border-red-500 focus:ring-red-200"
                           : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
-                      }`}
+                        }`}
                       placeholder="••••••••"
                     />
                     <button

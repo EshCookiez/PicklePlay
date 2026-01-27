@@ -19,17 +19,10 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const { openAuthModal } = useAuth();
+  const { user, logout, openAuthModal } = useAuth();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Load user profile from localStorage - Example: { name: "User", rank: 124, points: 2450, avatar: "U" }
-    const storedProfile = localStorage.getItem("userProfile");
-    if (storedProfile) {
-      setUserProfile(JSON.parse(storedProfile));
-    }
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -91,15 +84,14 @@ export default function Header() {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? "bg-[#1e3a5f]/40 backdrop-blur-2xl shadow-xl" 
-        : "bg-transparent backdrop-blur-none"
-    }`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+      ? "bg-[#1e3a5f]/40 backdrop-blur-2xl shadow-xl"
+      : "bg-transparent backdrop-blur-none"
+      }`}>
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <div 
+          <div
             onClick={() => {
               if (pathname === '/') {
                 window.location.reload();
@@ -121,8 +113,8 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center ml-8">
             {Object.entries(dropdownContent).map(([menu, content]) => (
-              <div 
-                key={menu} 
+              <div
+                key={menu}
                 className="relative group"
               >
                 <button
@@ -132,7 +124,7 @@ export default function Header() {
                   {menu}
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === menu ? "rotate-180" : ""}`} />
                 </button>
-                
+
                 {/* Dropdown Menu */}
                 {openDropdown === menu && (
                   <div className="absolute left-1/2 -translate-x-1/2 mt-1 w-[400px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-fadeIn">
@@ -180,16 +172,16 @@ export default function Header() {
             </button>
 
             {/* User Profile / Auth */}
-            {userProfile ? (
+            {user ? (
               <>
                 {/* User Stats */}
                 <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
                   <div className="text-right">
                     <p className="text-xs text-white/60 font-medium">
-                      RANK <span className="font-bold text-[#fbbf24]">#{userProfile.rank}</span>
+                      RANK <span className="font-bold text-[#fbbf24]">#--</span>
                     </p>
                     <p className="text-xs text-white/60 font-medium">
-                      POINTS <span className="font-bold text-[#fbbf24]">{userProfile.points.toLocaleString()}</span>
+                      POINTS <span className="font-bold text-[#fbbf24]">0</span>
                     </p>
                   </div>
                 </div>
@@ -207,7 +199,7 @@ export default function Header() {
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                   >
                     <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-lg border-2 border-white/20">
-                      {userProfile.avatar}
+                      {user.first_name?.[0] || 'U'}
                     </div>
                   </button>
 
@@ -217,11 +209,11 @@ export default function Header() {
                       <div className="p-4 bg-gradient-to-br from-[#1e3a5f] to-[#0a56a7] text-white">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">
-                            {userProfile.avatar}
+                            {user.first_name?.[0] || 'U'}
                           </div>
                           <div>
-                            <p className="font-bold text-sm">{userProfile.name}</p>
-                            <p className="text-xs text-white/70">Rank #{userProfile.rank}</p>
+                            <p className="font-bold text-sm truncate max-w-[150px]">{user.first_name} {user.last_name}</p>
+                            <p className="text-xs text-white/70">{user.role}</p>
                           </div>
                         </div>
                       </div>
@@ -243,9 +235,8 @@ export default function Header() {
                           Settings
                         </Link>
                         <button
-                          onClick={() => {
-                            localStorage.removeItem('userProfile');
-                            setUserProfile(null);
+                          onClick={async () => {
+                            await logout();
                             setOpenDropdown(null);
                           }}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all text-sm font-medium"
@@ -335,15 +326,15 @@ export default function Header() {
 
             <hr className="border-white/10 my-4" />
 
-            {userProfile ? (
+            {user ? (
               <div className="px-4 py-3 space-y-3">
                 <div className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center font-bold text-white border-2 border-white/20">
-                    {userProfile.avatar}
+                    {user.first_name?.[0] || 'U'}
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">RANK <span className="text-[#fbbf24]">#{userProfile.rank}</span></p>
-                    <p className="text-white/70 text-xs">Points: <span className="text-[#fbbf24] font-semibold">{userProfile.points.toLocaleString()}</span></p>
+                    <p className="text-white font-semibold text-sm">{user.first_name} {user.last_name}</p>
+                    <p className="text-white/70 text-xs">{user.role}</p>
                   </div>
                 </div>
                 <Link
@@ -353,6 +344,15 @@ export default function Header() {
                 >
                   View Profile
                 </Link>
+                <button
+                  onClick={async () => {
+                    await logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-red-400 font-semibold text-center hover:bg-white/10 rounded-lg transition-all text-sm border border-red-400/20"
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               <div className="px-4 space-y-2">

@@ -1,22 +1,27 @@
 
 import React from 'react';
-import { 
-  UserRole, 
-  AccountStatus, 
-  ApplicationStatus, 
-  UserProfile, 
-  UserStatistics, 
-  RoleApplication, 
-  LoginActivity 
+import {
+  UserRole,
+  AccountStatus,
+  ApplicationStatus,
+  UserProfile,
+  UserStatistics,
+  RoleApplication,
+  LoginActivity
 } from '@/types/profile';
-import { 
-  Briefcase, 
-  Activity, 
-  LayoutDashboard, 
+import {
+  Briefcase,
+  Activity,
+  LayoutDashboard,
   Lock,
   Shield,
   Settings,
-  CreditCard
+  CreditCard,
+  Users,
+  Map,
+  BarChart,
+  ShieldCheck,
+  Globe
 } from 'lucide-react';
 
 export const MOCK_LOGIN_HISTORY: LoginActivity[] = [
@@ -205,6 +210,23 @@ export const NAV_ITEMS = [
   { id: 'settings', label: 'Preferences', icon: Settings },
   { id: 'security', label: 'Account Security', icon: Lock },
   { id: 'verification', label: 'Verification', icon: Shield },
+];
+
+export const SUPER_ADMIN_NAV_ITEMS = [
+  { id: 'admin-overview', label: 'Admin Panel', icon: LayoutDashboard },
+  { id: 'user-mgmt', label: 'User Management', icon: Users },
+  { id: 'court-mgmt', label: 'Court Moderation', icon: Map },
+  { id: 'analytics', label: 'System Analytics', icon: BarChart },
+  { id: 'roles-perms', label: 'Roles & Perms', icon: ShieldCheck },
+  { id: 'system-settings', label: 'System Settings', icon: Globe },
+  { id: 'security', label: 'Account Security', icon: Lock },
+];
+
+export const ADMIN_NAV_ITEMS = [
+  { id: 'admin-overview', label: 'Admin Panel', icon: LayoutDashboard },
+  { id: 'user-mgmt', label: 'User Management', icon: Users },
+  { id: 'court-mgmt', label: 'Court Moderation', icon: Map },
+  { id: 'security', label: 'Account Security', icon: Lock },
 ];
 
 export const ROLE_COLORS = {
