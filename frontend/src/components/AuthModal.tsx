@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, User, X } from "lucide-react";
 import Image from "next/image";
 import logo from "../images/PicklePlayLogo.jpg";
@@ -12,6 +13,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialView = "login" }: AuthModalProps) {
+  const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(initialView === "signup");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -116,8 +118,22 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
     try {
       console.log("Login attempt:", loginData);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      // Close modal on successful login
+      
+      // Store user in localStorage
+      const userData = {
+        id: "user123",
+        name: "User",
+        email: loginData.email,
+        avatar: loginData.email[0].toUpperCase(),
+        memberSince: "Jan 2025"
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Close modal
       onClose();
+      
+      // Redirect to profile
+      router.push("/profile");
     } catch (error) {
       console.error("Login error:", error);
     } finally {
@@ -133,8 +149,22 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
     try {
       console.log("Signup attempt:", signupData);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      // Close modal on successful signup
+      
+      // Store user in localStorage
+      const userData = {
+        id: "user123",
+        name: `${signupData.firstName} ${signupData.lastName}`,
+        email: signupData.email,
+        avatar: signupData.firstName[0] + signupData.lastName[0],
+        memberSince: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" })
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Close modal
       onClose();
+      
+      // Redirect to profile
+      router.push("/profile");
     } catch (error) {
       console.error("Signup error:", error);
     } finally {
@@ -146,8 +176,18 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Close modal only if clicking directly on the backdrop, not on the card
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      onClick={handleBackdropClick}
+    >
       <div className="relative w-full max-w-md flex items-center justify-center">
         {/* Flip Card Container */}
         <div
