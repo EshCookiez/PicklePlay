@@ -38,13 +38,14 @@ function RecenterMap({ position }: { position: [number, number] }) {
   return null;
 }
 
-export default function MapView({ center, userLocation, courts }: MapViewProps) {
+export default function MapView({ center, userLocation, courts, onViewDetails }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-export default function MapView({ center, userLocation, courts, onViewDetails }: MapViewProps) {
+  }, []);
+
   // Create custom paddle icon for pickleball courts
   const customPaddleIcon = useMemo(() => {
     return L.icon({
@@ -216,31 +217,5 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
         )}
       </MapContainer>
     </div>
-    <MapContainer center={center} zoom={12} scrollWheelZoom={false} className="h-[420px] w-full">
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <RecenterMap position={center} />
-      {courtMarkers}
-      {userLocation && (
-        <Marker position={userLocation} icon={userLocationIcon}>
-          <Popup>
-            <div className="space-y-2 p-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
-                </div>
-                <p className="font-bold text-blue-600">Your Location</p>
-              </div>
-              <p className="text-sm text-gray-600">Showing nearby pickleball courts</p>
-              <div className="text-xs text-gray-500">
-                {courts.length} courts found nearby
-              </div>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-    </MapContainer>
   );
 }
