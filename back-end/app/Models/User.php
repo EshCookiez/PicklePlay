@@ -36,6 +36,22 @@ class User extends Authenticatable
         'phone_number',
         'profile_picture',
         'status',
+        'date_of_birth',
+        'location',
+        'phone_verified_at',
+        'email_verification_token',
+        'email_verification_token_expires_at',
+        'last_login_at',
+        'last_password_change_at',
+        'login_count',
+        'last_ip_address',
+        'stripe_customer_id',
+        'wallet_balance',
+        'total_spent',
+        'total_earnings',
+        'two_factor_enabled',
+        'two_factor_method',
+        'two_factor_backup_codes',
     ];
 
     /**
@@ -46,6 +62,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verification_token',
+        'two_factor_backup_codes',
     ];
 
     /**
@@ -57,7 +75,17 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
+            'email_verification_token_expires_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'last_password_change_at' => 'datetime',
+            'date_of_birth' => 'date',
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
+            'wallet_balance' => 'decimal:2',
+            'total_spent' => 'decimal:2',
+            'total_earnings' => 'decimal:2',
+            'login_count' => 'integer',
         ];
     }
 
@@ -144,5 +172,85 @@ class User extends Authenticatable
             ]);
         }
         return $this->playerProfile;
+    }
+
+    /**
+     * Get the user profile associated with the user
+     */
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    /**
+     * Get the user preferences associated with the user
+     */
+    public function preferences()
+    {
+        return $this->hasOne(UserPreference::class);
+    }
+
+    /**
+     * Get the user statistics associated with the user
+     */
+    public function statistics()
+    {
+        return $this->hasOne(UserStatistic::class);
+    }
+
+    /**
+     * Get or create user profile
+     */
+    public function getOrCreateProfile()
+    {
+        if (!$this->profile) {
+            return $this->profile()->create([]);
+        }
+        return $this->profile;
+    }
+
+    /**
+     * Get or create user preferences
+     */
+    public function getOrCreatePreferences()
+    {
+        if (!$this->preferences) {
+            return $this->preferences()->create([]);
+        }
+        return $this->preferences;
+    }
+
+    /**
+     * Get or create user statistics
+     */
+    public function getOrCreateStatistics()
+    {
+        if (!$this->statistics) {
+            return $this->statistics()->create([]);
+        }
+        return $this->statistics;
+    }
+
+    /**
+     * Check if user is 18 years or older
+     */
+    public function isAdult(): bool
+    {
+        if (!$this->date_of_birth) {
+            return false;
+        }
+        return $this->date_of_birth->age >= 18;
+    }
+
+    /**
+     * Update last login information
+     */
+    public function updateLastLogin(?string $ipAddress = null): void
+    {
+        $this->update([
+            'last_login_at' => now(),
+            'login_count' => $this->login_count + 1,
+            'last_ip_address' => $ipAddress ?? request()->ip(),
+        ]);
     }
 }
