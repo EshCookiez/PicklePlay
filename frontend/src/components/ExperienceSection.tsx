@@ -1,104 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function ExperienceSection() {
-  const [balls, setBalls] = useState<Array<{ id: number; x: number; y: number; delay: number; duration: number; size: number }>>([]);
-
-  useEffect(() => {
-    // Generate evenly distributed paddle positions in a grid pattern with varied sizes
-    const generatedItems = [];
-    const cols = 8; // 8 columns
-    const rows = 5; // 5 rows
-    const totalItems = cols * rows;
-    
-    for (let i = 0; i < totalItems; i++) {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const size = Math.random() > 0.5 ? 25 : 15; // 50% big (25px), 50% small (15px)
-      
-      generatedItems.push({
-        id: i,
-        x: (col / (cols - 1)) * 90 + 5, // Even distribution with 5% margins
-        y: (row / (rows - 1)) * 90 + 5, // Even distribution with 5% margins
-        delay: Math.random() * 8,
-        duration: 3 + Math.random() * 5,
-        size,
-      });
-    }
-    setBalls(generatedItems);
-  }, []);
-
   return (
     <>
-      <style jsx>{`
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0px) scale(1);
-            opacity: 0.2;
-          }
-          50% {
-            transform: translateY(-25px) scale(1.2);
-            opacity: 0.5;
-          }
-        }
-        
-        .ball-bg {
-          position: absolute;
-          opacity: 0.2;
-          pointer-events: none;
-          z-index: 1;
-        }
-        
-        .ball-bg img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-      `}</style>
-      
-      <section className="w-full py-16 bg-white relative overflow-hidden">
-        {/* Bouncing paddles background */}
-        {balls.map((item) => (
-          <div
-            key={item.id}
-            className="ball-bg"
-            style={{
-              left: `${item.x}%`,
-              top: `${item.y}%`,
-              width: `${item.size}px`,
-              height: `${item.size}px`,
-              animation: `bounce ${item.duration}s ease-in-out ${item.delay}s infinite`,
-            }}
-          >
-            <Image
-              src="/images/Paddle.png"
-              alt="Background paddle"
-              width={item.size}
-              height={item.size}
-              style={{ width: 'auto', height: 'auto' }}
-            />
-          </div>
-        ))}
-        
+      <section className="w-full py-16 bg-white relative overflow-visible"> {/* Changed from overflow-hidden to overflow-visible */}
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-10">
           <div className="flex-1 text-left">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0a56a7]">
+            <h2 className="text-3xl md:text-5xl mb-4 text-[#0a56a7] font-serif italic tracking-wide">
               Experience PicklePlay in Action
             </h2>
-            <p className="text-gray-700 mb-6">
-              PICKLEPLAY — Your New Pickleball Playground. Get ready to serve, volley, and smash
-              your way to victory at the heart of Cebu's newest and most thrilling pickleball
-              destination.
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              PICKLEPLAY — Your New Pickleball Playground. Get ready to serve, volley, 
+              and smash your way to victory at the heart of Cebu's newest and most thrilling
+              pickleball destination.
             </p>
           </div>
 
           <div className="flex-1 w-full max-w-xl">
             <div className="relative bg-gray-200 rounded-xl overflow-hidden shadow-lg aspect-video">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner5-SwAiVYRMsfUCqZMBq1uTm9yK0DsC3F.png"
-                alt="PicklePlay Experience"
+                src="https://images.unsplash.com/photo-1534158914592-062992fbe900?w=800&q=80"
+                alt="Pickleball Community"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
                 loading="eager"
@@ -110,25 +34,27 @@ export default function ExperienceSection() {
       </section>
 
       {/* Community Section */}
-      <section className="w-full py-0 bg-gray-50 -mt-8 relative">
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#a3ff01]/50 via-[#84cc16]/30 to-transparent z-20"></div>
+      <section className="w-full pt-0 pb-0 bg-[#a3ff01] -mt-8 relative z-40 overflow-visible"> {/* Added overflow-visible here too */}
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/80 via-white/40 to-[#a3ff01]/0 backdrop-blur-md z-10 pointer-events-none"></div>
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-10">
           <div className="flex-1 w-full max-w-none">
-            <div className="relative rounded-xl overflow-hidden">
+            <div className="relative rounded-xl overflow-visible z-50"> {/* Changed from overflow-hidden to overflow-visible */}
               <img
                 src="/images/Mowdel.png"
                 alt="PicklePlay Community"
-                className="w-full h-full object-cover"
+                className="w-full h-[580px] object-cover m-0 -mt-32 relative z-50"
               />
             </div>
           </div>
 
           <div className="flex-1 text-left mt-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0a56a7]">
-              Build Friendships Through Pickleball
+            <h2 className="text-3xl md:text-5xl mb-4 text-[#0a56a7] font-serif italic tracking-wide">
+              Be Part of our Growing Community
             </h2>
-            <p className="text-gray-700 mb-6">
-              Meet amazing people who share your passion. Join our growing pickleball family across the Philippines and build lasting friendships while enjoying the sport you love.
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              Join thousands of pickleball enthusiasts who have made PicklePlay their home. 
+              Connect with players of all skill levels, share your passion, and be part of 
+              the fastest-growing sports community in the Philippines.
             </p>
           </div>
         </div>
