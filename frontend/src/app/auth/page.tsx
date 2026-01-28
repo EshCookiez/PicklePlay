@@ -143,10 +143,7 @@ export default function AuthPage() {
         last_name: signupData.lastName,
         email: signupData.email,
         password: signupData.password,
-        password_confirmation: signupData.confirmPassword,
-        date_of_birth: signupData.dateOfBirth,
         phone_number: signupData.phoneNumber,
-        location: signupData.location,
       });
 
       toast.success("Account created successfully!");
