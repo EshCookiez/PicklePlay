@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {MaterialIcons} from '@expo/vector-icons';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {BlurView} from 'expo-blur';
 import Colors from '../constants/Colors';
 // Define the new color constants for easy reuse
@@ -61,44 +60,51 @@ const HomeScreen = ({navigation}) => {
 
   const courts = [
     {
+      id: 1,
       name: 'Banawa Community Court',
-      location: 'Cebu City',
+      location: 'Banawa, Cebu City',
       rating: 4.5,
       imageUrl:
-        'https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=60',
     },
     {
+      id: 2,
       name: 'Downtown Sports Complex',
-      location: 'Cebu City',
+      location: 'Downtown, Cebu City',
       rating: 4.8,
       imageUrl:
-        'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1529926706528-db9e5010cd3e?auto=format&fit=crop&w=800&q=60',
     },
     {
+      id: 3,
       name: 'Riverside Recreation Center',
-      location: 'Cebu City',
+      location: 'Riverside, Cebu City',
       rating: 4.3,
       imageUrl:
-        'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=800&q=60',
+    },
+    {
+      id: 4,
+      name: 'Ayala Sports Hub',
+      location: 'Ayala Center, Cebu City',
+      rating: 4.9,
+      imageUrl:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=60',
+    },
+    {
+      id: 5,
+      name: 'IT Park Pickle Courts',
+      location: 'IT Park, Cebu City',
+      rating: 4.6,
+      imageUrl:
+        'https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=800&q=60',
     },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Updated StatusBar color */}
       <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
-
-      {/* Header */}
-      <LinearGradient
-        colors={[thematicBlue, thematicBlue]}
-        style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.logoContainer}>
-            <Image source={require('../assets/PicklePlayLogo.jpg')} style={styles.logoImage} />
-            <Text style={styles.logo}>PICKLEPLAY</Text>
-          </View>
-        </View>
-      </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero Section with Blurred Background */}
@@ -189,7 +195,7 @@ const HomeScreen = ({navigation}) => {
         </View>
       </ScrollView>
 
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -198,35 +204,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  header: {
-    paddingTop: 10,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-    resizeMode: 'contain',
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 2,
-  },
   content: {
     flex: 1,
+    paddingBottom: 10,
   },
   heroSection: {
     backgroundColor: Colors.surface,

@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {MaterialIcons} from '@expo/vector-icons';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 
 // Define the new color constants for easy reuse
@@ -46,48 +45,65 @@ const FindCourtsScreen = ({ navigation, onBackNavigation }) => {
 
   const courts = [
     {
+      id: 1,
       name: 'Banawa Community Court',
-      location: 'Cebu City',
+      location: 'Banawa, Cebu City',
       rating: 4.5,
+      distance: '1.2 km',
       imageUrl:
-        'https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=60',
     },
     {
+      id: 2,
       name: 'Downtown Sports Complex',
-      location: 'Cebu City',
+      location: 'Downtown, Cebu City',
       rating: 4.8,
+      distance: '2.5 km',
       imageUrl:
-        'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1529926706528-db9e5010cd3e?auto=format&fit=crop&w=800&q=60',
     },
     {
+      id: 3,
       name: 'Riverside Recreation Center',
-      location: 'Cebu City',
+      location: 'Riverside, Cebu City',
       rating: 4.3,
+      distance: '3.1 km',
       imageUrl:
-        'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=800&q=60',
+    },
+    {
+      id: 4,
+      name: 'Ayala Sports Hub',
+      location: 'Ayala Center, Cebu City',
+      rating: 4.9,
+      distance: '4.0 km',
+      imageUrl:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=60',
+    },
+    {
+      id: 5,
+      name: 'IT Park Pickle Courts',
+      location: 'IT Park, Cebu City',
+      rating: 4.6,
+      distance: '5.2 km',
+      imageUrl:
+        'https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=800&q=60',
+    },
+    {
+      id: 6,
+      name: 'Mactan Island Courts',
+      location: 'Lapu-Lapu City',
+      rating: 4.4,
+      distance: '8.5 km',
+      imageUrl:
+        'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=60',
     },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Updated StatusBar color */}
       <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
-
-      {/* Header with Back Button */}
-      <LinearGradient
-        colors={[thematicBlue, thematicBlue]}
-        style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={handleBackPress}>
-            <MaterialIcons name="arrow-back" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logo}>PICKLEPLAY</Text>
-          </View>
-        </View>
-      </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.courtsSection}>
@@ -122,48 +138,19 @@ const FindCourtsScreen = ({ navigation, onBackNavigation }) => {
         </View>
       </ScrollView>
 
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F2F2F7',
   },
-  header: {
-    paddingTop: 10,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    padding: 5,
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginLeft: 10,
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-    resizeMode: 'contain',
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 2,
-  },
+  
   content: {
     flex: 1,
+    paddingBottom: 10,
   },
   courtsSection: {
     margin: 15,

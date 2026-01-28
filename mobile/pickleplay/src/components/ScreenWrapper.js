@@ -14,10 +14,10 @@ const ScreenWrapper = ({ children }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F2F2F7',
   },
   content: {
     flex: 1,
-    marginBottom: 70, // Space for footer
   },
 });
 

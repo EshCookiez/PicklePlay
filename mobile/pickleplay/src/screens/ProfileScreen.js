@@ -7,14 +7,11 @@ import {
   ScrollView,
   StatusBar,
   Image,
-  BackHandler,
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {MaterialIcons} from '@expo/vector-icons';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 
-// Define the new color constants for easy reuse
 const thematicBlue = '#0A56A7';
 const activeColor = '#a3ff01';
 
@@ -22,16 +19,39 @@ const ProfileScreen = ({ navigation, onBackNavigation }) => {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(4);
   const screens = ['Home', 'Find', 'Map', 'Shop', 'Profile'];
 
+  const playerStats = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
+    ranking: 'Gold',
+    rankingTier: 2,
+    experience: 650,
+    experienceRequired: 1000,
+    wins: 28,
+    losses: 14,
+    rating: 4.8,
+    gamesPlayed: 42,
+    friends: 12,
+    winRate: 66.7,
+    avgScore: 21,
+  };
+
+  const getRankColor = (ranking) => {
+    const ranks = {
+      'Bronze': '#CD7F32',
+      'Silver': '#C0C0C0',
+      'Gold': '#FFD700',
+      'Platinum': '#E5E4E2',
+      'Diamond': '#B9F2FF',
+      'Master': '#FF1493',
+    };
+    return ranks[ranking] || '#FFD700';
+  };
+
   const navigateWithDirection = (targetIndex) => {
     if (targetIndex === currentScreenIndex) return;
-    
-    // Determine transition direction
     const isMovingForward = targetIndex > currentScreenIndex;
-    
-    // Set the target screen index first
     setCurrentScreenIndex(targetIndex);
-    
-    // Navigate with appropriate direction parameter and screen index
     const direction = isMovingForward ? 'right' : 'left';
     navigation.navigate(screens[targetIndex], { direction, screenIndex: targetIndex });
   };
@@ -49,188 +69,157 @@ const ProfileScreen = ({ navigation, onBackNavigation }) => {
       icon: 'person',
       title: 'Personal Information',
       description: 'Update your profile details',
-      onPress: () => console.log('Personal Information pressed'),
+      screen: 'PersonalInformation',
     },
     {
       icon: 'settings',
       title: 'Settings',
       description: 'Manage app preferences',
-      onPress: () => console.log('Settings pressed'),
+      screen: 'Settings',
     },
     {
       icon: 'notifications',
       title: 'Notifications',
       description: 'Configure notification settings',
-      onPress: () => console.log('Notifications pressed'),
+      screen: 'NotificationsPrefs',
     },
     {
       icon: 'security',
       title: 'Privacy & Security',
       description: 'Manage your privacy settings',
-      onPress: () => console.log('Privacy & Security pressed'),
+      screen: 'PrivacySecurity',
     },
     {
       icon: 'help',
       title: 'Help & Support',
       description: 'Get help with the app',
-      onPress: () => console.log('Help & Support pressed'),
+      screen: 'HelpSupport',
     },
     {
       icon: 'info',
       title: 'About',
       description: 'App version and information',
-      onPress: () => console.log('About pressed'),
+      screen: 'About',
     },
   ];
 
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Updated StatusBar color */}
-      <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
+  const handleLogout = () => {
+    navigation.navigate('Login', { direction: 'left', screenIndex: 0 });
+  };
 
-      {/* Header */}
-      <LinearGradient
-        colors={[thematicBlue, thematicBlue]}
-        style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={handleBackPress}>
-            <MaterialIcons name="arrow-back" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <View style={styles.logoContainer}>
-            <Image source={require('../assets/PicklePlayLogo.jpg')} style={styles.logoImage} />
-            <Text style={styles.logo}>PICKLEPLAY</Text>
-          </View>
-        </View>
-      </LinearGradient>
+  const StatCard = ({ icon, label, value, backgroundColor }) => (
+    <View style={[styles.statCard, { backgroundColor }]}>
+      <MaterialIcons name={icon} size={28} color={Colors.white} />
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header Section */}
         <View style={styles.profileHeaderSection}>
           <View style={styles.profileImageContainer}>
             <Image 
-              source={{uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80'}} 
+              source={{uri: playerStats.profileImage}} 
               style={styles.profileImage} 
             />
+            <View style={[styles.rankBadge, { backgroundColor: getRankColor(playerStats.ranking) }]}>
+              <Text style={styles.rankBadgeText}>{playerStats.ranking}</Text>
+            </View>
             <TouchableOpacity style={styles.editProfileButton}>
               <MaterialIcons name="camera-alt" size={20} color={Colors.white} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.profileName}>John Doe</Text>
-          <Text style={styles.profileEmail}>john.doe@example.com</Text>
-          <View style={styles.profileStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>42</Text>
-              <Text style={styles.statLabel}>Games</Text>
+          <Text style={styles.profileName}>{playerStats.name}</Text>
+          <Text style={styles.rankingNameText}>{playerStats.ranking} Ranked Player</Text>
+          <Text style={styles.profileEmail}>{playerStats.email}</Text>
+          
+          {/* Experience Bar */}
+          <View style={styles.experienceContainer}>
+            <View style={styles.experienceBar}>
+              <View 
+                style={[
+                  styles.experienceProgress,
+                  { 
+                    width: `${(playerStats.experience / playerStats.experienceRequired) * 100}%`,
+                    backgroundColor: getRankColor(playerStats.ranking)
+                  }
+                ]} 
+              />
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>4.8</Text>
-              <Text style={styles.statLabel}>Rating</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Friends</Text>
-            </View>
+            <Text style={styles.experienceText}>
+              {playerStats.experience} / {playerStats.experienceRequired} XP
+            </Text>
           </View>
         </View>
 
-        {/* Profile Options Section */}
+        {/* Statistics Cards */}
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>Statistics</Text>
+          <View style={styles.statsGrid}>
+            <StatCard icon="emoji-events" label="Wins" value={playerStats.wins} backgroundColor="#4CAF50" />
+            <StatCard icon="trending-up" label="Win Rate" value={`${playerStats.winRate}%`} backgroundColor="#2196F3" />
+            <StatCard icon="sports-tennis" label="Games" value={playerStats.gamesPlayed} backgroundColor="#FF9800" />
+            <StatCard icon="star" label="Rating" value={playerStats.rating} backgroundColor="#9C27B0" />
+          </View>
+        </View>
+
+        {/* Profile Options */}
         <View style={styles.optionsSection}>
-          <Text style={styles.sectionTitle}>Account Settings</Text>
+          <Text style={styles.sectionTitle}>Account</Text>
           {profileOptions.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.optionCard}
-              onPress={option.onPress}>
+            <TouchableOpacity 
+              key={index} 
+              style={styles.optionItem}
+              onPress={() => navigation.navigate(option.screen)}
+            >
               <View style={styles.optionIcon}>
-                <MaterialIcons
-                  name={option.icon}
-                  size={24}
-                  color={thematicBlue}
-                />
+                <MaterialIcons name={option.icon} size={24} color={thematicBlue} />
               </View>
-              <View style={styles.optionContent}>
+              <View style={styles.optionText}>
                 <Text style={styles.optionTitle}>{option.title}</Text>
                 <Text style={styles.optionDescription}>{option.description}</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color={Colors.border} />
+              <MaterialIcons name="chevron-right" size={24} color="#ccc" />
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Logout Button */}
-        <View style={styles.logoutSection}>
-          <TouchableOpacity style={styles.logoutButton}>
-            <MaterialIcons name="logout" size={20} color={Colors.white} />
-            <Text style={styles.logoutText}>Log Out</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={24} color="#FF3B30" />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
 
-    </SafeAreaView>
+        <View style={{height: 30}} />
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    paddingTop: 10,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginLeft: 15,
-  },
-  logoImage: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
-    resizeMode: 'contain',
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 2,
+    backgroundColor: '#F2F2F7',
   },
   content: {
     flex: 1,
   },
   profileHeaderSection: {
-    backgroundColor: Colors.surface,
-    margin: 15,
-    padding: 25,
-    borderRadius: 12,
+    backgroundColor: thematicBlue,
+    paddingTop: 20,
+    paddingBottom: 30,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   profileImageContainer: {
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   profileImage: {
     width: 100,
@@ -239,115 +228,145 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.white,
   },
-  editProfileButton: {
+  rankBadge: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  rankBadgeText: {
+    color: '#333',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  editProfileButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
     backgroundColor: thematicBlue,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 15,
+    padding: 5,
     borderWidth: 2,
     borderColor: Colors.white,
   },
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: thematicBlue,
+    color: Colors.white,
+    marginBottom: 5,
+  },
+  rankingNameText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
     marginBottom: 5,
   },
   profileEmail: {
     fontSize: 14,
-    color: Colors.border,
-    marginBottom: 20,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 15,
   },
-  profileStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-  statItem: {
+  experienceContainer: {
+    width: '80%',
     alignItems: 'center',
   },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: thematicBlue,
-    marginBottom: 5,
+  experienceBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 4,
+    overflow: 'hidden',
   },
-  statLabel: {
+  experienceProgress: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  experienceText: {
     fontSize: 12,
-    color: Colors.border,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 5,
   },
-  optionsSection: {
-    margin: 15,
+  statsSection: {
+    padding: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: thematicBlue,
     marginBottom: 15,
   },
-  optionCard: {
+  statsGrid: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    width: '48%',
     padding: 15,
-    marginBottom: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    marginBottom: 10,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.white,
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 4,
+  },
+  optionsSection: {
+    paddingHorizontal: 20,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
   },
   optionIcon: {
-    width: 50,
-    height: 50,
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${thematicBlue}15`,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
-  optionContent: {
+  optionText: {
     flex: 1,
   },
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: thematicBlue,
-    marginBottom: 3,
+    color: '#333',
+    marginBottom: 2,
   },
   optionDescription: {
-    fontSize: 13,
-    color: Colors.border,
-    lineHeight: 18,
-  },
-  logoutSection: {
-    margin: 15,
-    marginBottom: 30,
+    fontSize: 12,
+    color: '#888',
   },
   logoutButton: {
     flexDirection: 'row',
-    backgroundColor: '#ff4757',
-    padding: 15,
-    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#FFE5E5',
+    marginHorizontal: 20,
+    marginTop: 20,
+    padding: 15,
+    borderRadius: 12,
   },
   logoutText: {
-    color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    color: '#FF3B30',
+    marginLeft: 10,
   },
 });
 

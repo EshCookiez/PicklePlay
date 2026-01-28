@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,79 +8,154 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
-import {LinearGradient} from 'expo-linear-gradient';
-import {MaterialIcons} from '@expo/vector-icons';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 
 // Define the new color constants for easy reuse
 const thematicBlue = '#0A56A7';
 const activeColor = '#a3ff01';
 
-const CourtDetailScreen = ({ navigation }) => {
+const CourtDetailScreen = ({ navigation, route }) => {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const screens = ['Home', 'Find', 'Map', 'Shop'];
 
   const navigateWithDirection = (targetIndex) => {
     if (targetIndex === currentScreenIndex) return;
-    
+
     // Determine transition direction
     const isMovingForward = targetIndex > currentScreenIndex;
-    
+
     // Set the target screen index first
     setCurrentScreenIndex(targetIndex);
-    
+
     // Navigate with appropriate direction parameter and screen index
     const direction = isMovingForward ? 'right' : 'left';
     navigation.navigate(screens[targetIndex], { direction, screenIndex: targetIndex });
   };
 
   const handleBackPress = () => {
-    navigation.navigate('Home');
+    navigation.navigate('FindCourts', { direction: 'left', screenIndex: 1 });
   };
 
-  // Sample court data since we're not using route params
-  const court = {
-    name: 'Banawa Community Court',
-    location: 'Cebu City',
-    rating: 4.5,
+  // Static data for specific courts to simulate rich backend data
+  const staticCourtData = {
+    'Metrosports Centre': {
+      description: 'A premier indoor sports facility featuring multiple professional-grade pickleball courts. Known for its well-maintained surface and competitive atmosphere.',
+      amenities: ['Indoor Courts', 'Pro Shop', 'Locker Rooms', 'Cafe', 'Parking'],
+      hours: '6:00 AM - 11:00 PM',
+      phone: '+63 32 231 9988',
+      images: [
+        'https://images.unsplash.com/photo-1599586120429-4828d5423ee4?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1626248532464-9428564b1275?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+    'Alta Vista Golf & Country Club': {
+      description: 'Experience pickleball with a view. Located within the prestigious Alta Vista club, these courts offer a luxurious playing environment with stunning city overlooks.',
+      amenities: ['Scenic Views', 'Clubhouse Access', 'Dining', 'Shower Facilities', 'Private Parking'],
+      hours: '7:00 AM - 9:00 PM',
+      phone: '+63 32 272 7971',
+      images: [
+        'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1622163642998-1ea36746b555?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+    'Citigreen Tennis Resort': {
+      description: 'A dedicated racket sports haven. While famous for tennis, Citigreen offers top-tier pickleball courts surrounded by lush greenery for a refreshing game.',
+      amenities: ['Red Clay Courts', 'Garden Setting', 'Refreshment Bar', 'Equipment Rental', 'Coaching'],
+      hours: '6:00 AM - 10:00 PM',
+      phone: '+63 32 261 1111',
+      images: [
+        'https://images.unsplash.com/photo-1622163642998-1ea36746b555?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1551855217-0209c13dc88c?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+    'Banawa Community Court': {
+      description: 'A friendly community hub for local pickleball enthusiasts. Features well-maintained outdoor courts perfect for casual games and meetups.',
+      amenities: ['Outdoor Courts', 'Community Area', 'Restrooms', 'Lighting'],
+      hours: '6:00 AM - 10:00 PM',
+      phone: '+63 32 255 1234',
+      images: [
+        'https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+    'Downtown Sports Complex': {
+      description: 'The city\'s central spot for sports action. Offers high-quality indoor pickleball courts with excellent lighting and ventilation.',
+      amenities: ['Indoor Courts', 'Bleachers', 'Changing Rooms', 'Vending Machines'],
+      hours: '8:00 AM - 10:00 PM',
+      phone: '+63 32 233 4455',
+      images: [
+        'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1599586120429-4828d5423ee4?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+    'Riverside Recreation Center': {
+      description: 'Located by the river, this center provides a refreshing breeze for outdoor play. A popular spot for morning and late afternoon games.',
+      amenities: ['Riverside View', 'Outdoor Courts', 'Picnic Area', 'Parking'],
+      hours: '5:00 AM - 9:00 PM',
+      phone: '+63 32 254 7788',
+      images: [
+        'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=1200&q=60',
+        'https://images.unsplash.com/photo-1622163642998-1ea36746b555?auto=format&fit=crop&w=1200&q=60',
+      ]
+    },
+  };
+
+  // Get court data from route params, or use a default fallback
+  const params = route?.params || {};
+  const passedCourt = params.court;
+
+  // Default fallback data if no court is passed
+  const defaultCourt = {
+    name: 'Court Details',
+    location: 'Location not available',
+    rating: 0,
     imageUrl: 'https://images.unsplash.com/photo-1560743641-3914f2c45636?auto=format&fit=crop&w=1200&q=60',
     description: 'A beautiful community court with excellent facilities.',
     amenities: ['Parking', 'Restrooms', 'Lighting', 'Water Fountain'],
     hours: '6:00 AM - 10:00 PM',
-    phone: '+63 123 456 7890',
+    phone: '',
   };
+
+  // Merge passed data with static data if available
+  let court = passedCourt || defaultCourt;
+
+  if (court.name && staticCourtData[court.name]) {
+    court = { ...court, ...staticCourtData[court.name] };
+  }
+
+  // Ensure necessary fields exist if not in static data or params
+  // Ensure necessary fields exist if not in static data or params
+  if (!court.amenities) {
+    court.amenities = defaultCourt.amenities;
+  }
+  if (!court.description) {
+    court.description = defaultCourt.description;
+  }
+  if (!court.images) {
+    court.images = court.imageUrl ? [court.imageUrl] : [defaultCourt.imageUrl];
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Updated StatusBar color */}
       <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
 
-      {/* Header */}
-      <LinearGradient
-        colors={[thematicBlue, thematicBlue]}
-        style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={handleBackPress}>
-            <MaterialIcons name="arrow-back" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <View style={styles.logoContainer}>
-            <Image source={require('../assets/PicklePlayLogo.jpg')} style={styles.logoImage} />
-            <Text style={styles.logo}>PICKLEPLAY</Text>
-          </View>
-        </View>
-      </LinearGradient>
+
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Court Image */}
         <Image
-          source={{uri: court.imageUrl}}
+          source={{ uri: court.imageUrl }}
           style={styles.courtHeroImage}
           resizeMode="cover"
         />
-        
+
         {/* Court Details */}
         <View style={styles.courtDetails}>
           <Text style={styles.courtName}>{court.name}</Text>
@@ -96,16 +171,16 @@ const CourtDetailScreen = ({ navigation }) => {
             <MaterialIcons name="star" size={20} color={thematicBlue} />
             <Text style={styles.ratingText}>{court.rating}</Text>
           </View>
-          
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About This Court</Text>
             <Text style={styles.sectionText}>
-              This is a great pickleball court located in {court.location}. 
-              Perfect for players of all skill levels with excellent facilities 
+              This is a great pickleball court located in {court.location}.
+              Perfect for players of all skill levels with excellent facilities
               and a welcoming community.
             </Text>
           </View>
-          
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Amenities</Text>
             <View style={styles.amenitiesList}>
@@ -127,55 +202,43 @@ const CourtDetailScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
-          
-          <TouchableOpacity style={styles.bookButton}>
+
+          {/* Gallery Section */}
+          {court.images && court.images.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Gallery</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll}>
+                {court.images.map((img, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: img }}
+                    style={styles.galleryImage}
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.bookButton}
+            onPress={() => navigation.navigate('Booking', { court })}
+          >
             <Text style={styles.bookButtonText}>Book This Court</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.floatingBackButton}
+        onPress={handleBackPress}>
+        <MaterialIcons name="arrow-back" size={24} color={Colors.white} />
+      </TouchableOpacity>
+
       {/* Bottom Navigation with Swipe Gestures */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => {
-            setCurrentScreenIndex(0);
-            navigation.navigate('Home');
-          }}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 0 && styles.activeNavIcon]}>
-            <MaterialIcons name="home" size={24} color={currentScreenIndex === 0 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.navItem}
-          onPress={() => {
-            setCurrentScreenIndex(1);
-            navigation.navigate('FindCourts');
-          }}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 1 && styles.activeNavIcon]}>
-            <MaterialIcons name="search" size={24} color={currentScreenIndex === 1 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={styles.navText}>Find</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.activeNavItem]}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 2 && styles.activeNavIcon]}>
-            <MaterialIcons name="map" size={24} color={currentScreenIndex === 2 ? activeColor : thematicBlue} />
-          </View>
-          <Text style={styles.navText}>Map</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <View style={[styles.navIconContainer, currentScreenIndex === 3 && styles.activeNavIcon]}>
-            <MaterialIcons
-              name="shopping-cart"
-              size={24}
-              color={currentScreenIndex === 3 ? activeColor : thematicBlue}
-            />
-          </View>
-          <Text style={styles.navText}>Shop</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+    </SafeAreaView >
   );
 };
 
@@ -217,7 +280,19 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginBottom: 70,
+  },
+  floatingBackButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 10,
+    elevation: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   courtHeroImage: {
     width: '100%',
@@ -331,6 +406,16 @@ const styles = StyleSheet.create({
   activeNavText: {
     color: activeColor,
     fontWeight: 'bold',
+  },
+  galleryScroll: {
+    marginTop: 10,
+  },
+  galleryImage: {
+    width: 200,
+    height: 120,
+    borderRadius: 10,
+    marginRight: 10,
+    backgroundColor: Colors.surfaceAlt,
   },
 });
 

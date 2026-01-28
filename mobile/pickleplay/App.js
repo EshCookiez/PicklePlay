@@ -1,7 +1,8 @@
-import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
 import {NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StatusBar, View, StyleSheet, Easing} from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 // Import screens
 import LoadingScreen from './src/screens/LoadingScreen';
@@ -11,10 +12,24 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import FindCourtsScreen from './src/screens/FindCourtsScreen';
 import CourtDetailScreen from './src/screens/CourtDetailScreen';
+import BookingScreen from './src/screens/BookingScreen';
+import BookingReceiptScreen from './src/screens/BookingReceiptScreen';
 import MapScreen from './src/screens/MapScreen';
 import ShopScreen from './src/screens/ShopScreen';
+import CartScreen from './src/screens/CartScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
+import ShopReceiptScreen from './src/screens/ShopReceiptScreen';
+import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import PersonalInformationScreen from './src/screens/PersonalInformationScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
+import PrivacySecurityScreen from './src/screens/PrivacySecurityScreen';
+import HelpSupportScreen from './src/screens/HelpSupportScreen';
+import AboutScreen from './src/screens/AboutScreen';
+import CommunityScreen from './src/screens/CommunityScreen';
 import GlobalFooter from './src/components/GlobalFooter';
+import GlobalHeader from './src/components/GlobalHeader';
 import ScreenWrapper from './src/components/ScreenWrapper';
 import Colors from './src/constants/Colors';
 
@@ -24,7 +39,7 @@ const getScreenOptions = ({route}) => {
   const screenOptions = {
     headerShown: false,
     gestureEnabled: true,
-    animationDuration: 600, // Increased for smoother feel
+    animationDuration: 600,
     animationTypeForReplace: 'push',
     transitionSpec: {
       open: {
@@ -32,7 +47,7 @@ const getScreenOptions = ({route}) => {
         config: {
           duration: 600,
           useNativeDriver: true,
-          easing: Easing.out(Easing.cubic), // Smooth easing function
+          easing: Easing.out(Easing.cubic),
         },
       },
       close: {
@@ -46,13 +61,12 @@ const getScreenOptions = ({route}) => {
     },
   };
   
-  // Custom animation based on navigation direction
   if (route.params?.direction === 'left') {
     screenOptions.animation = 'slide_from_left';
   } else if (route.params?.direction === 'right') {
     screenOptions.animation = 'slide_from_right';
   } else {
-    screenOptions.animation = 'slide_from_right'; // Default
+    screenOptions.animation = 'slide_from_right';
   }
   
   return screenOptions;
@@ -68,7 +82,6 @@ const App = () => {
       console.log('App handleFooterNavigation called:', screenName, index);
     }
     
-    // Determine transition direction based on current and target screen index
     const isMovingForward = index > currentScreenIndex;
     const direction = isMovingForward ? 'right' : 'left';
     
@@ -79,7 +92,6 @@ const App = () => {
     setCurrentScreenIndex(index);
     setCurrentRoute(screenName);
     
-    // Use the navigation container ref with proper direction
     if (navigationRef.current) {
       if (__DEV__) {
         console.log('Navigation container ref available, navigating to:', screenName, 'with direction:', direction);
@@ -91,20 +103,14 @@ const App = () => {
           console.log('Navigation error:', error);
         }
       }
-    } else {
-      if (__DEV__) {
-        console.log('Navigation container ref not available');
-      }
     }
   }, [currentScreenIndex]);
 
-  // Handle back button navigation from headers
   const handleBackNavigation = useCallback(() => {
     if (__DEV__) {
       console.log('Back button pressed, navigating to Home');
     }
     
-    // Use left transition for back button
     setCurrentScreenIndex(0);
     setCurrentRoute('Home');
     
@@ -116,22 +122,15 @@ const App = () => {
           console.log('Back navigation error:', error);
         }
       }
-    } else {
-      if (__DEV__) {
-        console.log('Navigation ref not available for back navigation');
-      }
     }
   }, []);
 
-  // Screens that should show the footer
-  const footerScreens = useMemo(() => ['Home', 'FindCourts', 'Map', 'Shop', 'Profile'], []);
+  const footerScreens = useMemo(() => ['Home', 'FindCourts', 'Map', 'Shop', 'Profile', 'CourtDetail', 'Community'], []);
   const shouldShowFooter = useMemo(() => footerScreens.includes(currentRoute), [currentRoute, footerScreens]);
 
-  // Create screen wrapper to handle route updates - memoized to prevent recreation
   const createScreenWithRouteTracking = useCallback((screenName, ScreenComponent, onBackNavigation) => {
-    return ({ navigation }) => {
+    return ({ navigation, route }) => {
       useEffect(() => {
-        // Update route immediately when screen mounts
         setCurrentRoute(screenName);
         if (__DEV__) {
           console.log('Route updated to:', screenName);
@@ -140,53 +139,136 @@ const App = () => {
       
       return (
         <ScreenWrapper>
-          <ScreenComponent navigation={navigation} onBackNavigation={onBackNavigation} />
+          <ScreenComponent navigation={navigation} route={route} onBackNavigation={onBackNavigation} />
         </ScreenWrapper>
       );
     };
   }, []);
 
+  const screenIndexMap = useMemo(() => ({
+    'Home': 0,
+    'FindCourts': 1,
+    'Map': 2,
+    'Shop': 3,
+    'Profile': 4,
+    'Community': 5,
+  }), []);
+
+  const onNavigationStateChange = useCallback((state) => {
+    if (!state) return;
+    
+    const currentRouteName = state.routes[state.index]?.name;
+    const routeParams = state.routes[state.index]?.params;
+    
+    if (__DEV__) {
+      console.log('Navigation state changed:', currentRouteName, routeParams);
+    }
+    
+    if (routeParams?.screenIndex !== undefined) {
+      setCurrentScreenIndex(routeParams.screenIndex);
+    } else if (screenIndexMap[currentRouteName] !== undefined) {
+      setCurrentScreenIndex(screenIndexMap[currentRouteName]);
+    }
+    
+    setCurrentRoute(currentRouteName);
+  }, [screenIndexMap]);
+
+  const noHeaderScreens = useMemo(() => [
+    'Loading', 'Landing', 'Login', 'Register',
+    'PersonalInformation', 'Settings', 'NotificationsPrefs', 'PrivacySecurity', 'HelpSupport', 'About',
+    'Booking', 'BookingReceipt', 'CourtDetail',
+    'Cart', 'Checkout', 'ShopReceipt', 'ProductDetail'
+  ], []);
+  const shouldShowHeader = useMemo(() => !noHeaderScreens.includes(currentRoute), [currentRoute, noHeaderScreens]);
+
   return (
-    <NavigationContainer ref={navigationRef}>
-      <View style={styles.container}>
-        <Stack.Navigator 
-          ref={navigationRef}
-          screenOptions={getScreenOptions}
-          initialRouteName="Loading">
-          {/* Authentication Flow */}
-          <Stack.Screen name="Loading" component={LoadingScreen} />
-          <Stack.Screen name="Landing" component={LandingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          
-          {/* Main App Flow */}
-          <Stack.Screen name="Home">
-            {createScreenWithRouteTracking('Home', HomeScreen)}
-          </Stack.Screen>
-          <Stack.Screen name="FindCourts">
-            {createScreenWithRouteTracking('FindCourts', FindCourtsScreen, handleBackNavigation)}
-          </Stack.Screen>
-          <Stack.Screen name="CourtDetail">
-            {createScreenWithRouteTracking('CourtDetail', CourtDetailScreen, handleBackNavigation)}
-          </Stack.Screen>
-          <Stack.Screen name="Map">
-            {createScreenWithRouteTracking('Map', MapScreen, handleBackNavigation)}
-          </Stack.Screen>
-          <Stack.Screen name="Shop">
-            {createScreenWithRouteTracking('Shop', ShopScreen, handleBackNavigation)}
-          </Stack.Screen>
-          <Stack.Screen name="Profile">
-            {createScreenWithRouteTracking('Profile', ProfileScreen, handleBackNavigation)}
-          </Stack.Screen>
-        </Stack.Navigator>
-        {shouldShowFooter && (
-          <GlobalFooter 
-            currentScreenIndex={currentScreenIndex}
-            onNavigate={handleFooterNavigation}
-          />
-        )}
-      </View>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer ref={navigationRef} onStateChange={onNavigationStateChange}>
+        <View style={styles.container}>
+          {shouldShowHeader && (
+            <GlobalHeader />
+          )}
+          <View style={styles.stackContainer}>
+            <Stack.Navigator 
+              screenOptions={getScreenOptions}
+              initialRouteName="Loading">
+              {/* Authentication Flow */}
+              <Stack.Screen name="Loading" component={LoadingScreen} />
+              <Stack.Screen name="Landing" component={LandingScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              
+              {/* Main App Flow */}
+              <Stack.Screen name="Home">
+                {createScreenWithRouteTracking('Home', HomeScreen)}
+              </Stack.Screen>
+              <Stack.Screen name="FindCourts">
+                {createScreenWithRouteTracking('FindCourts', FindCourtsScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="CourtDetail">
+                {createScreenWithRouteTracking('CourtDetail', CourtDetailScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Booking">
+                {createScreenWithRouteTracking('Booking', BookingScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="BookingReceipt">
+                {createScreenWithRouteTracking('BookingReceipt', BookingReceiptScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Map">
+                {createScreenWithRouteTracking('Map', MapScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Shop">
+                {createScreenWithRouteTracking('Shop', ShopScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="ProductDetail">
+                {createScreenWithRouteTracking('ProductDetail', ProductDetailScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Cart">
+                {createScreenWithRouteTracking('Cart', CartScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Checkout">
+                {createScreenWithRouteTracking('Checkout', CheckoutScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="ShopReceipt">
+                {createScreenWithRouteTracking('ShopReceipt', ShopReceiptScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Profile">
+                {createScreenWithRouteTracking('Profile', ProfileScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Community">
+                {createScreenWithRouteTracking('Community', CommunityScreen, handleBackNavigation)}
+              </Stack.Screen>
+
+              {/* Profile Settings Screens */}
+              <Stack.Screen name="PersonalInformation">
+                {createScreenWithRouteTracking('PersonalInformation', PersonalInformationScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="Settings">
+                {createScreenWithRouteTracking('Settings', SettingsScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="NotificationsPrefs">
+                {createScreenWithRouteTracking('NotificationsPrefs', NotificationsScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="PrivacySecurity">
+                {createScreenWithRouteTracking('PrivacySecurity', PrivacySecurityScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="HelpSupport">
+                {createScreenWithRouteTracking('HelpSupport', HelpSupportScreen, handleBackNavigation)}
+              </Stack.Screen>
+              <Stack.Screen name="About">
+                {createScreenWithRouteTracking('About', AboutScreen, handleBackNavigation)}
+              </Stack.Screen>
+            </Stack.Navigator>
+          </View>
+          {shouldShowFooter && (
+            <GlobalFooter 
+              currentScreenIndex={currentScreenIndex}
+              onNavigate={handleFooterNavigation}
+            />
+          )}
+        </View>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 };
 
@@ -195,5 +277,11 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
+    backgroundColor: '#0A56A7',
+  },
+  stackContainer: {
+    flex: 1,
+    backgroundColor: '#F2F2F7',
   },
 });

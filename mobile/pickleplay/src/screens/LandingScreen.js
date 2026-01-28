@@ -19,7 +19,7 @@ const LandingScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={thematicBlue} />
-      
+
       <LinearGradient
         colors={[thematicBlue, thematicBlue]}
         style={styles.gradient}>
@@ -27,18 +27,18 @@ const LandingScreen = ({ navigation }) => {
           {/* Top Section - Logo and Title */}
           <View style={styles.topSection}>
             <View style={styles.logoContainer}>
-              <Image 
-                source={require('../assets/PicklePlayLogo.jpg')} 
-                style={styles.logoImage} 
+              <Image
+                source={require('../assets/PicklePlayLogo.jpg')}
+                style={styles.logoImage}
               />
               <Text style={styles.logo}>PICKLEPLAY</Text>
             </View>
-            
+
             <View style={styles.titleContainer}>
               <Text style={styles.mainTitle}>Find your perfect</Text>
               <Text style={styles.mainTitle}>pickleball court</Text>
             </View>
-            
+
             <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>
                 Connect with players, discover courts, and join the ultimate pickleball community
@@ -48,19 +48,21 @@ const LandingScreen = ({ navigation }) => {
 
           {/* Bottom Section - Buttons */}
           <View style={styles.bottomSection}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.getStartedButton}
-              
+
               onPress={() => navigation.navigate('Register')}>
               <Text style={styles.getStartedText}>GET STARTED</Text>
               <MaterialIcons name="arrow-forward" size={20} color={thematicBlue} />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.loginButton}
               onPress={() => navigation.navigate('Login')}>
               <Text style={styles.loginText}>LOG IN</Text>
             </TouchableOpacity>
+
+
           </View>
         </View>
       </LinearGradient>
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+
 });
 
 export default LandingScreen;

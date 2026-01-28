@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '../constants/Colors';
 
 // Define the new color constants for easy reuse
@@ -13,6 +14,7 @@ const thematicBlue = '#0A56A7';
 const activeColor = '#a3ff01';
 
 const GlobalFooter = ({ currentScreenIndex = 0, onNavigate }) => {
+  const insets = useSafeAreaInsets();
   const screens = ['Home', 'FindCourts', 'Map', 'Shop', 'Profile'];
 
   const handleNavigation = (screenName, index) => {
@@ -32,7 +34,10 @@ const GlobalFooter = ({ currentScreenIndex = 0, onNavigate }) => {
   };
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[
+      styles.bottomNav, 
+      { paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }
+    ]}>
       <TouchableOpacity 
         style={styles.navItem}
         onPress={() => {
@@ -96,45 +101,59 @@ const GlobalFooter = ({ currentScreenIndex = 0, onNavigate }) => {
         </View>
         <Text style={styles.navText}>Profile</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.navItem}
+        onPress={() => {
+          if (__DEV__) console.log('Community icon pressed');
+          handleNavigation('Community', 5);
+        }}>
+        <View style={[styles.navIconContainer, currentScreenIndex === 5 && styles.activeNavIcon]}>
+          <MaterialIcons
+            name="groups"
+            size={24}
+            color={currentScreenIndex === 5 ? activeColor : thematicBlue}
+          />
+        </View>
+        <Text style={styles.navText}>Community</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
-    paddingBottom: 10,
-    paddingTop: 8,
-    height: 70,
-    zIndex: 1000,
+    paddingTop: 10,
+    // Shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // Elevation for Android
+    elevation: 10,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 4,
   },
   activeNavItem: {
     backgroundColor: thematicBlue,
   },
   navIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   activeNavIcon: {
-    backgroundColor: 'rgba(163, 255, 1, 0.1)',
+    backgroundColor: 'rgba(163, 255, 1, 0.15)',
   },
   navText: {
-    fontSize: 11,
+    fontSize: 10,
     color: thematicBlue,
     marginTop: 2,
     fontWeight: '500',
