@@ -15,11 +15,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Default Super Admin Account (Full Access)
         User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'email' => 'superadmin@pickleplay.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'super_admin',
+            'status' => 'active',
+        ]);
+
+        // Default Admin Account (Restricted Access)
+        User::factory()->create([
+            'first_name' => 'Staff',
+            'last_name' => 'Admin',
+            'email' => 'admin@pickleplay.ph',
+            'password' => bcrypt('password123'),
+            'role' => 'admin',
+            'status' => 'active',
+        ]);
+
+        // Regular Test User
+        User::factory()->create([
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
+            'password' => bcrypt('password123'),
+            'role' => 'user',
+            'status' => 'active',
         ]);
     }
 }

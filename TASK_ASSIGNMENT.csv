@@ -1,0 +1,125 @@
+Task ID,Task Name,Phase,Category,Priority,Role,Status,Dependencies,Est. Hours,Sprint
+AUTH-01,User registration API endpoint,Phase 1,Authentication,P0 Critical,Backend,Not Started,None,4,Sprint 1
+AUTH-02,User login/logout API endpoints,Phase 1,Authentication,P0 Critical,Backend,Not Started,AUTH-01,4,Sprint 1
+AUTH-03,JWT/Session token management,Phase 1,Authentication,P0 Critical,Backend,Not Started,AUTH-02,3,Sprint 1
+AUTH-04,Password reset functionality,Phase 1,Authentication,P1 High,Backend,Not Started,AUTH-02,3,Sprint 2
+AUTH-05,Email verification system,Phase 1,Authentication,P2 Medium,Backend,Not Started,AUTH-01,4,Sprint 3
+AUTH-06,Role-based access control,Phase 1,Authentication,P1 High,Backend,Not Started,AUTH-02,4,Sprint 2
+AUTH-07,Login/Register UI pages,Phase 1,Authentication,P0 Critical,Frontend,Not Started,AUTH-01,6,Sprint 1
+AUTH-08,Auth state management (Context),Phase 1,Authentication,P0 Critical,Frontend,Not Started,AUTH-07,3,Sprint 1
+AUTH-09,Protected routes implementation,Phase 1,Authentication,P0 Critical,Frontend,Not Started,AUTH-08,2,Sprint 1
+AUTH-10,Mobile login/register screens,Phase 1,Authentication,P0 Critical,Mobile Frontend,Not Started,AUTH-01,6,Sprint 1
+AUTH-11,Mobile auth token storage,Phase 1,Authentication,P0 Critical,Mobile Backend,Not Started,AUTH-03,3,Sprint 1
+PROF-01,User profile API (CRUD),Phase 1,User Profiles,P0 Critical,Backend,Not Started,AUTH-01,4,Sprint 1
+PROF-02,Profile image upload API,Phase 1,User Profiles,P1 High,Backend,Not Started,PROF-01,3,Sprint 2
+PROF-03,Users table migration,Phase 1,User Profiles,P0 Critical,Backend,Not Started,None,2,Sprint 1
+PROF-04,Profile page UI,Phase 1,User Profiles,P0 Critical,Frontend,Not Started,PROF-01,6,Sprint 1
+PROF-05,Profile edit form,Phase 1,User Profiles,P0 Critical,Frontend,Not Started,PROF-04,4,Sprint 2
+PROF-06,Profile image upload UI,Phase 1,User Profiles,P1 High,Frontend,Not Started,PROF-02,3,Sprint 2
+PROF-07,Mobile profile screen,Phase 1,User Profiles,P1 High,Mobile Frontend,Not Started,PROF-01,5,Sprint 2
+PROF-08,Mobile profile edit,Phase 1,User Profiles,P1 High,Mobile Frontend,Not Started,PROF-07,4,Sprint 2
+COURT-01,Courts table migration,Phase 1,Court Discovery,P0 Critical,Backend,Not Started,None,2,Sprint 1
+COURT-02,Get all courts API,Phase 1,Court Discovery,P0 Critical,Backend,Not Started,COURT-01,2,Sprint 1
+COURT-03,Get court by ID API,Phase 1,Court Discovery,P0 Critical,Backend,Not Started,COURT-01,2,Sprint 1
+COURT-04,Create court API (Admin),Phase 1,Court Discovery,P1 High,Backend,Not Started,COURT-01 AUTH-06,3,Sprint 2
+COURT-05,Update court API (Admin),Phase 1,Court Discovery,P1 High,Backend,Not Started,COURT-04,2,Sprint 2
+COURT-06,Delete court API (Admin),Phase 1,Court Discovery,P2 Medium,Backend,Not Started,COURT-04,1,Sprint 3
+COURT-07,Court search with filters API,Phase 1,Court Discovery,P0 Critical,Backend,Not Started,COURT-02,4,Sprint 2
+COURT-08,Geolocation/nearby courts API,Phase 1,Court Discovery,P1 High,Backend,Not Started,COURT-02,4,Sprint 2
+COURT-09,Court amenities table,Phase 1,Court Discovery,P1 High,Backend,Not Started,COURT-01,2,Sprint 2
+COURT-10,Court listing page UI,Phase 1,Court Discovery,P0 Critical,Frontend,In Progress,COURT-02,6,Sprint 2
+COURT-11,Court details page UI,Phase 1,Court Discovery,P0 Critical,Frontend,Not Started,COURT-03,6,Sprint 2
+COURT-12,Court search/filter UI,Phase 1,Court Discovery,P0 Critical,Frontend,Not Started,COURT-07,5,Sprint 2
+COURT-13,Map integration (Leaflet),Phase 1,Court Discovery,P0 Critical,Frontend,Not Started,COURT-02,6,Sprint 2
+COURT-14,Mobile court list screen,Phase 1,Court Discovery,P1 High,Mobile Frontend,Not Started,COURT-02,5,Sprint 2
+COURT-15,Mobile court details screen,Phase 1,Court Discovery,P1 High,Mobile Frontend,Not Started,COURT-03,5,Sprint 2
+COURT-16,Mobile map integration,Phase 1,Court Discovery,P1 High,Mobile Frontend,Not Started,COURT-08,6,Sprint 3
+REV-01,Reviews table migration,Phase 1,Court Reviews,P1 High,Backend,Not Started,COURT-01 PROF-03,2,Sprint 2
+REV-02,Create review API,Phase 1,Court Reviews,P1 High,Backend,Not Started,REV-01,3,Sprint 2
+REV-03,Get reviews by court API,Phase 1,Court Reviews,P1 High,Backend,Not Started,REV-01,2,Sprint 2
+REV-04,Review form UI,Phase 1,Court Reviews,P1 High,Frontend,Not Started,REV-02,4,Sprint 2
+REV-05,Reviews display component,Phase 1,Court Reviews,P1 High,Frontend,Done,REV-03,3,Sprint 2
+FEED-01,Posts table migration,Phase 2,Community Feed,P1 High,Backend,Not Started,PROF-03,2,Sprint 3
+FEED-02,Create post API,Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-01,3,Sprint 3
+FEED-03,Get feed posts API (paginated),Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-01,3,Sprint 3
+FEED-04,Like/Unlike post API,Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-01,2,Sprint 3
+FEED-05,Comments table migration,Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-01,2,Sprint 3
+FEED-06,Add comment API,Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-05,2,Sprint 3
+FEED-07,Get comments API,Phase 2,Community Feed,P1 High,Backend,Not Started,FEED-05,2,Sprint 3
+FEED-08,Community feed page UI,Phase 2,Community Feed,P1 High,Frontend,Not Started,FEED-03,8,Sprint 3
+FEED-09,Create post modal/form,Phase 2,Community Feed,P1 High,Frontend,Not Started,FEED-02,4,Sprint 3
+FEED-10,Post card component,Phase 2,Community Feed,P1 High,Frontend,Not Started,FEED-08,4,Sprint 3
+FEED-11,Comments section component,Phase 2,Community Feed,P1 High,Frontend,Not Started,FEED-07,4,Sprint 3
+FEED-12,Like button with animation,Phase 2,Community Feed,P2 Medium,Frontend,Not Started,FEED-04,2,Sprint 4
+FEED-13,Mobile feed screen,Phase 2,Community Feed,P2 Medium,Mobile Frontend,Not Started,FEED-03,6,Sprint 4
+FEED-14,Mobile create post,Phase 2,Community Feed,P2 Medium,Mobile Frontend,Not Started,FEED-02,4,Sprint 4
+GRP-01,Groups table migration,Phase 2,Groups/Teams,P1 High,Backend,Not Started,PROF-03,2,Sprint 3
+GRP-02,Group members table,Phase 2,Groups/Teams,P1 High,Backend,Not Started,GRP-01,2,Sprint 3
+GRP-03,Create group API,Phase 2,Groups/Teams,P1 High,Backend,Not Started,GRP-01,3,Sprint 3
+GRP-04,Join/Leave group API,Phase 2,Groups/Teams,P1 High,Backend,Not Started,GRP-02,3,Sprint 3
+GRP-05,Get group members API,Phase 2,Groups/Teams,P1 High,Backend,Not Started,GRP-02,2,Sprint 3
+GRP-06,Invite member API,Phase 2,Groups/Teams,P2 Medium,Backend,Not Started,GRP-02,3,Sprint 4
+GRP-07,Group stats API,Phase 2,Groups/Teams,P2 Medium,Backend,Not Started,GRP-02,3,Sprint 4
+GRP-08,Groups listing page,Phase 2,Groups/Teams,P1 High,Frontend,Not Started,GRP-03,5,Sprint 3
+GRP-09,Group details page,Phase 2,Groups/Teams,P1 High,Frontend,Not Started,GRP-05,6,Sprint 3
+GRP-10,Create group form,Phase 2,Groups/Teams,P1 High,Frontend,Not Started,GRP-03,4,Sprint 3
+GRP-11,Member management UI,Phase 2,Groups/Teams,P2 Medium,Frontend,Not Started,GRP-06,4,Sprint 4
+COACH-01,Coaches table migration,Phase 2,Coaching System,P2 Medium,Backend,Not Started,PROF-03,2,Sprint 4
+COACH-02,Coach profile API,Phase 2,Coaching System,P2 Medium,Backend,Not Started,COACH-01,3,Sprint 4
+COACH-03,Coach availability API,Phase 2,Coaching System,P2 Medium,Backend,Not Started,COACH-01,4,Sprint 4
+COACH-04,Book lesson API,Phase 2,Coaching System,P2 Medium,Backend,Not Started,COACH-03,4,Sprint 4
+COACH-05,Coach directory page,Phase 2,Coaching System,P2 Medium,Frontend,Not Started,COACH-02,5,Sprint 4
+COACH-06,Coach profile page,Phase 2,Coaching System,P2 Medium,Frontend,Not Started,COACH-02,5,Sprint 4
+COACH-07,Booking calendar UI,Phase 2,Coaching System,P2 Medium,Frontend,Not Started,COACH-03,6,Sprint 4
+COACH-08,Lesson booking form,Phase 2,Coaching System,P2 Medium,Frontend,Not Started,COACH-04,4,Sprint 4
+MSG-01,Conversations table,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,PROF-03,2,Sprint 4
+MSG-02,Messages table,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,MSG-01,2,Sprint 4
+MSG-03,Send message API,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,MSG-02,3,Sprint 4
+MSG-04,Get conversations API,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,MSG-01,2,Sprint 4
+MSG-05,Get messages API,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,MSG-02,2,Sprint 4
+MSG-06,Real-time WebSocket setup,Phase 2,Messaging/Chat,P2 Medium,Backend,Not Started,MSG-03,6,Sprint 5
+MSG-07,Inbox page UI,Phase 2,Messaging/Chat,P2 Medium,Frontend,Not Started,MSG-04,6,Sprint 4
+MSG-08,Chat conversation UI,Phase 2,Messaging/Chat,P2 Medium,Frontend,Not Started,MSG-05,6,Sprint 4
+MSG-09,Real-time message updates,Phase 2,Messaging/Chat,P2 Medium,Full Stack,Not Started,MSG-06,4,Sprint 5
+RANK-01,Points system design,Phase 3,Ranking System,P1 High,Backend,Not Started,PROF-03,3,Sprint 4
+RANK-02,Points table migration,Phase 3,Ranking System,P1 High,Backend,Not Started,RANK-01,2,Sprint 4
+RANK-03,Award points API,Phase 3,Ranking System,P1 High,Backend,Not Started,RANK-02,3,Sprint 4
+RANK-04,Leaderboard API,Phase 3,Ranking System,P1 High,Backend,Not Started,RANK-02,4,Sprint 4
+RANK-05,Personal ranking API,Phase 3,Ranking System,P1 High,Backend,Not Started,RANK-02,2,Sprint 4
+RANK-06,Ranking algorithm,Phase 3,Ranking System,P1 High,Backend,Not Started,RANK-02,6,Sprint 4
+RANK-07,Leaderboard page UI,Phase 3,Ranking System,P1 High,Frontend,Not Started,RANK-04,6,Sprint 4
+RANK-08,Personal rank card component,Phase 3,Ranking System,P1 High,Frontend,Not Started,RANK-05,3,Sprint 4
+RANK-09,Points history UI,Phase 3,Ranking System,P2 Medium,Frontend,Not Started,RANK-03,4,Sprint 5
+TOUR-01,Tournaments table,Phase 3,Tournaments,P2 Medium,Backend,Not Started,PROF-03,3,Sprint 5
+TOUR-02,Tournament participants table,Phase 3,Tournaments,P2 Medium,Backend,Not Started,TOUR-01,2,Sprint 5
+TOUR-03,Create tournament API,Phase 3,Tournaments,P2 Medium,Backend,Not Started,TOUR-01,4,Sprint 5
+TOUR-04,Register for tournament API,Phase 3,Tournaments,P2 Medium,Backend,Not Started,TOUR-02,3,Sprint 5
+TOUR-05,Tournament brackets API,Phase 3,Tournaments,P2 Medium,Backend,Not Started,TOUR-02,6,Sprint 5
+TOUR-06,Record match results API,Phase 3,Tournaments,P2 Medium,Backend,Not Started,TOUR-05,4,Sprint 5
+TOUR-07,Tournaments listing page,Phase 3,Tournaments,P2 Medium,Frontend,Not Started,TOUR-03,5,Sprint 5
+TOUR-08,Tournament details page,Phase 3,Tournaments,P2 Medium,Frontend,Not Started,TOUR-03,6,Sprint 5
+TOUR-09,Bracket visualization,Phase 3,Tournaments,P2 Medium,Frontend,Not Started,TOUR-05,8,Sprint 5
+TOUR-10,Registration form,Phase 3,Tournaments,P2 Medium,Frontend,Not Started,TOUR-04,3,Sprint 5
+RWD-01,Rewards catalog table,Phase 3,Rewards System,P3 Low,Backend,Not Started,None,2,Sprint 6
+RWD-02,User points balance API,Phase 3,Rewards System,P3 Low,Backend,Not Started,RANK-02,2,Sprint 6
+RWD-03,Redeem reward API,Phase 3,Rewards System,P3 Low,Backend,Not Started,RWD-01,4,Sprint 6
+RWD-04,Rewards catalog page,Phase 3,Rewards System,P3 Low,Frontend,Not Started,RWD-01,5,Sprint 6
+RWD-05,Points balance widget,Phase 3,Rewards System,P3 Low,Frontend,Not Started,RWD-02,2,Sprint 6
+RWD-06,Redemption flow UI,Phase 3,Rewards System,P3 Low,Frontend,Not Started,RWD-03,4,Sprint 6
+PREM-01,Subscription tiers table,Phase 4,Premium Features,P3 Low,Backend,Not Started,PROF-03,2,Sprint 7
+PREM-02,Payment gateway integration,Phase 4,Premium Features,P3 Low,Backend,Not Started,None,8,Sprint 7
+PREM-03,Subscription management API,Phase 4,Premium Features,P3 Low,Backend,Not Started,PREM-01,4,Sprint 7
+PREM-04,Premium features middleware,Phase 4,Premium Features,P3 Low,Backend,Not Started,PREM-01,3,Sprint 7
+PREM-05,Subscription page UI,Phase 4,Premium Features,P3 Low,Frontend,Not Started,PREM-03,6,Sprint 7
+PREM-06,Payment checkout flow,Phase 4,Premium Features,P3 Low,Frontend,Not Started,PREM-02,6,Sprint 7
+SET-01,User settings API,Phase 4,Settings,P3 Low,Backend,Not Started,PROF-01,3,Sprint 6
+SET-02,Notification preferences API,Phase 4,Settings,P3 Low,Backend,Not Started,SET-01,2,Sprint 6
+SET-03,Privacy settings API,Phase 4,Settings,P3 Low,Backend,Not Started,SET-01,2,Sprint 6
+SET-04,Settings page UI,Phase 4,Settings,P3 Low,Frontend,Not Started,SET-01,5,Sprint 6
+SET-05,Notification settings UI,Phase 4,Settings,P3 Low,Frontend,Not Started,SET-02,3,Sprint 6
+SET-06,Privacy settings UI,Phase 4,Settings,P3 Low,Frontend,Not Started,SET-03,3,Sprint 6
+LEARN-01,Tutorials content table,Phase 4,Learn/Tutorials,P3 Low,Backend,Not Started,None,2,Sprint 7
+LEARN-02,Get tutorials API,Phase 4,Learn/Tutorials,P3 Low,Backend,Not Started,LEARN-01,2,Sprint 7
+LEARN-03,Tutorials listing page,Phase 4,Learn/Tutorials,P3 Low,Frontend,Not Started,LEARN-02,4,Sprint 7
+LEARN-04,Tutorial video player,Phase 4,Learn/Tutorials,P3 Low,Frontend,Not Started,LEARN-03,4,Sprint 7
+LEARN-05,Rules & tips page,Phase 4,Learn/Tutorials,P3 Low,Frontend,Not Started,None,4,Sprint 7

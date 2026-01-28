@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import GlobalFooter from './GlobalFooter';
 
 const ScreenWrapper = ({ children }) => {
   return (
@@ -8,7 +7,6 @@ const ScreenWrapper = ({ children }) => {
       <View style={styles.content}>
         {children}
       </View>
-      <GlobalFooter />
     </View>
   );
 };
