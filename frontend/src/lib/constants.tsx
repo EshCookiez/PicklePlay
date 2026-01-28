@@ -8,7 +8,7 @@ import {
   UserStatistics, 
   RoleApplication, 
   LoginActivity 
-} from './types';
+} from '@/types/profile';
 import { 
   Briefcase, 
   Activity, 

@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PlayerProfileController;
+use App\Http\Controllers\Api\CourtController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +33,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-    
+
     // Email verification (signed route)
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->middleware('signed')
@@ -55,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/logs', [AuthController::class, 'getAuthLogs']);
         Route::get('/logs/all', [AuthController::class, 'getAllAuthLogs']); // Admin only
     });
-    
+
     // Player Profile routes
     Route::prefix('player')->group(function () {
         Route::get('/profile', [PlayerProfileController::class, 'getProfile']);
@@ -64,7 +66,34 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile/completion', [PlayerProfileController::class, 'getCompletion']);
         Route::delete('/profile', [PlayerProfileController::class, 'deleteProfile']);
     });
-    
+
+    // Court Management routes
+    Route::prefix('courts')->group(function () {
+        Route::get('/', [CourtController::class, 'index']);
+        Route::post('/', [CourtController::class, 'store']);
+        Route::get('/statistics', [CourtController::class, 'statistics']);
+        Route::get('/{id}', [CourtController::class, 'show']);
+        Route::put('/{id}', [CourtController::class, 'update']);
+        Route::delete('/{id}', [CourtController::class, 'destroy']);
+
+        // Admin actions
+        Route::post('/{id}/approve', [CourtController::class, 'approve']);
+        Route::post('/{id}/reject', [CourtController::class, 'reject']);
+        Route::post('/{id}/suspend', [CourtController::class, 'suspend']);
+    });
+
+    // Admin User Management routes
+    Route::prefix('admin/users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/statistics', [UserController::class, 'statistics']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+        Route::patch('/{id}/role', [UserController::class, 'updateRole']);
+        Route::patch('/{id}/status', [UserController::class, 'toggleStatus']);
+    });
+
     // Legacy user route
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -76,6 +105,6 @@ Route::prefix('v1')->group(function () {
     // Courts routes (example)
     // Route::get('/courts', [CourtController::class, 'index']);
     // Route::get('/courts/{id}', [CourtController::class, 'show']);
-    
+
     // Add your API routes here
 });

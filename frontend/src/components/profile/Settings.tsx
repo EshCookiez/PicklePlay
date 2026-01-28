@@ -8,14 +8,14 @@ const Settings: React.FC = () => {
   const [prefs, setPrefs] = useState(MOCK_USER.preferences);
 
   const handleToggle = (section: keyof typeof prefs, key: string) => {
-    // @ts-ignore - simplistic nested update for demo
-    setPrefs(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [key]: !prev[section][key]
-      }
-    }));
+    setPrefs(prev => {
+      const newPrefs = { ...prev } as any;
+      newPrefs[section] = {
+        ...newPrefs[section],
+        [key]: !newPrefs[section][key]
+      };
+      return newPrefs;
+    });
   };
 
   return (

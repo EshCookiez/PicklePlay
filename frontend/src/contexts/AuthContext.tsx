@@ -1,45 +1,80 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { authApi } from "@/lib/api";
-
-interface User {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  phone_number?: string;
-  location?: string;
-  date_of_birth?: string;
-}
+import { User, Session } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
+import { User as DbUser } from '@/types/database'
 
 interface AuthContextType {
-  user: User | null;
+  user: DbUser | null;
+  session: Session | null;
   isLoading: boolean;
   isAuthModalOpen: boolean;
   authView: "login" | "signup";
   openAuthModal: (view?: "login" | "signup") => void;
   closeAuthModal: () => void;
-  login: (credentials: any) => Promise<any>;
-  signup: (userData: any) => Promise<any>;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
+  signup: (userData: { 
+    email: string; 
+    password: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<DbUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "signup">("login");
+  const supabase = createClient();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    // Get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        // Fetch user data from public.users table
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUser(userData);
+      }
+      
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      
+      if (session?.user) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const openAuthModal = (view: "login" | "signup" = "login") => {
@@ -51,56 +86,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthModalOpen(false);
   };
 
-  const login = async (credentials: any) => {
-    try {
-      const response = await authApi.login(credentials);
-      if (response.success) {
-        const userData = response.data.user;
-        const token = response.data.token;
-
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("token", token);
-        setUser(userData);
-      }
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  const login = async (credentials: { email: string; password: string }) => {
+    const { error } = await supabase.auth.signInWithPassword(credentials);
+    if (error) throw error;
+    closeAuthModal();
   };
 
-  const signup = async (userData: any) => {
-    try {
-      const response = await authApi.register(userData);
-      if (response.success) {
-        const user = response.data.user;
-        const token = response.data.token;
+  const signup = async (userData: { 
+    email: string; 
+    password: string;
+    first_name: string;
+    last_name: string;
+    phone_number?: string;
+  }) => {
+    // Sign up with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+        },
+      },
+    });
 
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", token);
-        setUser(user);
-      }
-      return response;
-    } catch (error) {
-      throw error;
+    if (error) throw error;
+
+    // Create user record in public.users table
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone_number: userData.phone_number || null,
+          role: 'user',
+          status: 'active',
+          password: '', // Supabase handles password separately
+          email_verified_at: null,
+        });
+
+      if (profileError) throw profileError;
     }
+    
+    closeAuthModal();
   };
 
   const logout = async () => {
-    try {
-      await authApi.logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      setUser(null);
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Logout error:", error);
+    setUser(null);
+    setSession(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        session,
         isLoading,
         isAuthModalOpen,
         authView,
