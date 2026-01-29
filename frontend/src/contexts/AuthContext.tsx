@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: { email: string; password: string }) => {
     const { error } = await supabase.auth.signInWithPassword(credentials);
     if (error) throw error;
-    closeAuthModal();
+    // Don't close modal here - let the component handle it
   };
 
   const signup = async (userData: { 
@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: userData.email,
       password: userData.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           first_name: userData.first_name,
           last_name: userData.last_name,
@@ -118,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error: profileError } = await supabase
         .from('users')
         .insert({
+          id: data.user.id, // Use the Supabase Auth user ID
           email: userData.email,
           first_name: userData.first_name,
           last_name: userData.last_name,
@@ -128,17 +130,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email_verified_at: null,
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile creation error:", profileError);
+        // Don't throw here - auth account was created successfully
+      }
     }
     
-    closeAuthModal();
+    // Don't close modal here - let the component handle it
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error("Logout error:", error);
-    setUser(null);
-    setSession(null);
+    try {
+      // Clear state first
+      setUser(null);
+      setSession(null);
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Force a complete page reload to clear all state
+      window.location.href = '/';
+      window.location.reload();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if there's an error, force reload to clear state
+      window.location.href = '/';
+      window.location.reload();
+    }
   };
 
   return (
