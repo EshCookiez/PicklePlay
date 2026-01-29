@@ -296,6 +296,9 @@ export default function ProfilePage() {
             {activeTab === 'roles' && <RolesManagement activeRole={activeRole} applications={MOCK_APPLICATIONS} onSwitchRole={() => {}} onApplyRole={(role) => setActiveRole(role)} />}
             
             {/* Other Profile Tabs */}
+            {activeTab === 'stats' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
+            {activeTab === 'financials' && <PaymentInfo />}
+            {activeTab === 'verification' && <Verification user={user} />}
             {activeTab === 'statistics' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
             {activeTab === 'applications' && <Verification user={user} />}
             {activeTab === 'settings' && <Settings />}

@@ -129,8 +129,12 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       });
 
       toast.success("Welcome back!");
+      // Close modal first
       onClose();
-      router.push("/profile");
+      // Navigate after a brief delay to ensure modal is closed
+      setTimeout(() => {
+        router.push("/profile");
+      }, 100);
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.errors) {
@@ -158,8 +162,12 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       });
 
       toast.success("Account created successfully!");
+      // Close modal first
       onClose();
-      router.push("/profile");
+      // Navigate after a brief delay to ensure modal is closed
+      setTimeout(() => {
+        router.push("/profile");
+      }, 100);
     } catch (error: any) {
       console.error("Signup error:", error);
       if (error.errors) {

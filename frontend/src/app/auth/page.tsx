@@ -119,7 +119,10 @@ export default function AuthPage() {
       });
 
       toast.success("Welcome back!");
-      router.push("/profile");
+      // Navigate after a brief delay to ensure auth state is updated
+      setTimeout(() => {
+        router.push("/profile");
+      }, 100);
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.errors) {
@@ -147,7 +150,10 @@ export default function AuthPage() {
       });
 
       toast.success("Account created successfully!");
-      router.push("/profile");
+      // Navigate after a brief delay to ensure auth state is updated
+      setTimeout(() => {
+        router.push("/profile");
+      }, 100);
     } catch (error: any) {
       console.error("Signup error:", error);
       if (error.errors) {

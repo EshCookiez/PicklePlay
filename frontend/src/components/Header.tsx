@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase } from "lucide-react";
+import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase, Activity, Wallet, Receipt } from "lucide-react";
 import logo from "../images/PicklePlayLogo.jpg"
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -77,6 +77,18 @@ export default function Header() {
           items: [
             { icon: <Briefcase className="w-5 h-5" />, label: "Coaching", desc: "Book lessons & improve", href: "/coaching" },
             { icon: <BookOpen className="w-5 h-5" />, label: "Articles & Tips", desc: "Learn from the pros", href: "/articles" },
+          ]
+        }
+      ]
+    },
+    Account: {
+      categories: [
+        {
+          title: "YOUR ACCOUNT",
+          items: [
+            { icon: <Activity className="w-5 h-5" />, label: "Activity & Stats", desc: "Track your performance", href: "/activity" },
+            { icon: <Wallet className="w-5 h-5" />, label: "Wallet", desc: "Manage your funds", href: "/wallet" },
+            { icon: <Receipt className="w-5 h-5" />, label: "Billing", desc: "View invoices & plans", href: "/billing" },
           ]
         }
       ]
