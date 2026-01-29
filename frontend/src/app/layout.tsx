@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import AppProviders from "@/components/AppProviders";
+import MainLayout from "@/components/MainLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-[#0a56a7] via-blue-50 to-[#0066ff]`}
       >
         <AppProviders>
-          {children}
+          <MainLayout>
+            {children}
+          </MainLayout>
         </AppProviders>
       </body>
     </html>

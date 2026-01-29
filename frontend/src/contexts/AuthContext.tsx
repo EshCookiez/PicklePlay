@@ -19,6 +19,8 @@ interface AuthContextType {
     password: string;
     first_name: string;
     last_name: string;
+    date_of_birth: string;
+    location: string;
     phone_number?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
@@ -87,9 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (credentials: { email: string; password: string }) => {
-    const { error } = await supabase.auth.signInWithPassword(credentials);
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
     if (error) throw error;
-    // Don't close modal here - let the component handle it
+    
+    // Wait for user data to be fetched
+    if (data.session?.user) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.session.user.id)
+        .single();
+      
+      setUser(userData);
+      setSession(data.session);
+    }
   };
 
   const signup = async (userData: { 
@@ -97,6 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
     first_name: string;
     last_name: string;
+    date_of_birth: string;
+    location: string;
     phone_number?: string;
   }) => {
     // Sign up with Supabase Auth
@@ -108,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           first_name: userData.first_name,
           last_name: userData.last_name,
+          date_of_birth: userData.date_of_birth,
         },
       },
     });
@@ -123,20 +139,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: userData.email,
           first_name: userData.first_name,
           last_name: userData.last_name,
+          date_of_birth: userData.date_of_birth,
+          location: userData.location,
           phone_number: userData.phone_number || null,
           role: 'user',
           status: 'active',
-          password: '', // Supabase handles password separately
           email_verified_at: null,
         });
 
       if (profileError) {
         console.error("Profile creation error:", profileError);
-        // Don't throw here - auth account was created successfully
+        throw profileError;
+      }
+      
+      // Fetch and set the newly created user data
+      const { data: newUserData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (newUserData) {
+        setUser(newUserData);
+      }
+      
+      if (data.session) {
+        setSession(data.session);
       }
     }
-    
-    // Don't close modal here - let the component handle it
   };
 
   const logout = async () => {
