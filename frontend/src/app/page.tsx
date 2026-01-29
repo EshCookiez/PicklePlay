@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import HeroCarousel from "@/components/HeroCarousel";
 import ExperienceSection from "@/components/ExperienceSection";
 import CourtsSection from "@/components/CourtsSection";
@@ -12,9 +11,8 @@ import ScrollToTop from "@/components/ScrollToTop";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a56a7] via-blue-50 to-white">
+    <>
       <ScrollToTop />
-      <Header />
       <HeroCarousel />
       <ExperienceSection />
       <CourtsSection />
@@ -24,6 +22,6 @@ export default function Home() {
       <About />
       <Contact />
       <Footer />
-    </div>
+    </>
   );
 }

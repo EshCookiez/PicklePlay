@@ -91,6 +91,9 @@ export default function AuthPage() {
     if (!signupData.dateOfBirth) {
       newErrors.dateOfBirth = "Date of birth is required";
     }
+    if (!signupData.location.trim()) {
+      newErrors.location = "Location is required";
+    }
     if (!signupData.password) {
       newErrors.password = "Password is required";
     } else if (signupData.password.length < 8) {
@@ -119,10 +122,9 @@ export default function AuthPage() {
       });
 
       toast.success("Welcome back!");
-      // Navigate after a brief delay to ensure auth state is updated
-      setTimeout(() => {
-        router.push("/profile");
-      }, 100);
+      // Refresh the router to pick up the new auth state, then navigate
+      router.refresh();
+      router.push("/profile");
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.errors) {
@@ -130,7 +132,6 @@ export default function AuthPage() {
       } else {
         toast.error(error.message || "Login failed. Please check your credentials.");
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -146,14 +147,15 @@ export default function AuthPage() {
         last_name: signupData.lastName,
         email: signupData.email,
         password: signupData.password,
+        date_of_birth: signupData.dateOfBirth,
         phone_number: signupData.phoneNumber,
+        location: signupData.location,
       });
 
       toast.success("Account created successfully!");
-      // Navigate after a brief delay to ensure auth state is updated
-      setTimeout(() => {
-        router.push("/profile");
-      }, 100);
+      // Refresh the router to pick up the new auth state, then navigate
+      router.refresh();
+      router.push("/profile");
     } catch (error: any) {
       console.error("Signup error:", error);
       if (error.errors) {
@@ -176,7 +178,6 @@ export default function AuthPage() {
       } else {
         toast.error(error.message || "Signup failed. Please try again.");
       }
-    } finally {
       setLoading(false);
     }
   };
