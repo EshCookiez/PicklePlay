@@ -25,7 +25,7 @@ export default function Header() {
 
   // Pages that should not have the sidebar
   const noSidebarPages = ['/auth', '/'];
-  const shouldShowSidebar = !noSidebarPages.includes(pathname) && user !== null;
+  const shouldShowSidebar = !noSidebarPages.includes(pathname || "") && user !== null;
 
   useEffect(() => {
     const handleScroll = () => {

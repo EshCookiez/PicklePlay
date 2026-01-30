@@ -166,11 +166,11 @@ export default function UserManagement() {
             case 'avatar':
                 return (
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E40AF] to-blue-600 flex items-center justify-center text-white font-black text-xs border-2 border-white shadow-md">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0f2e22] to-green-600 flex items-center justify-center text-white font-black text-xs border-2 border-white shadow-md">
                             {user.name.charAt(0)}
                         </div>
                         <div>
-                            <p className="text-sm font-black text-[#1E40AF]">{user.name}</p>
+                            <p className="text-sm font-black text-[#0f2e22]">{user.name}</p>
                             <p className="text-xs font-medium text-slate-500">{user.email}</p>
                         </div>
                     </div>
@@ -178,7 +178,7 @@ export default function UserManagement() {
             
             case 'email':
                 return (
-                    <a href={`mailto:${value}`} className="text-sm font-medium text-[#1E40AF] hover:underline">
+                    <a href={`mailto:${value}`} className="text-sm font-medium text-[#0f2e22] hover:underline">
                         {value}
                     </a>
                 );
@@ -187,9 +187,9 @@ export default function UserManagement() {
                 return (
                     <Badge className={
                         value === 'Super Admin' ? 'bg-purple-50 text-purple-600 border-purple-100 font-black' :
-                        value === 'Coach' ? 'bg-[#FDE047]/20 text-amber-700 border-amber-200 font-black' :
-                        value === 'Court Owner' ? 'bg-emerald-50 text-[#064e3b] border-emerald-100 font-black' :
-                        'bg-blue-50 text-[#1E40AF] border-blue-200 font-black'
+                        value === 'Coach' ? 'bg-lime-100/20 text-amber-700 border-lime-200 font-black' :
+                        value === 'Court Owner' ? 'bg-green-50 text-[#0f2e22] border-green-100 font-black' :
+                        'bg-green-50 text-[#0f2e22] border-green-200 font-black'
                     }>
                         {value}
                     </Badge>
@@ -237,10 +237,10 @@ export default function UserManagement() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-[#1E40AF] tracking-tight">User Management</h1>
+                    <h1 className="text-3xl font-black text-[#0f2e22] tracking-tight">User Management</h1>
                     <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mt-2">Manage global user accounts and permissions</p>
                 </div>
-                <Button variant="primary" className="md:w-auto bg-[#1E40AF] hover:bg-blue-900 text-white">
+                <Button variant="primary" className="md:w-auto bg-[#0f2e22] hover:bg-black text-white">
                     <UserPlus size={16} />
                     <span>Add New Admin</span>
                 </Button>

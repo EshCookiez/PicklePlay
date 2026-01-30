@@ -64,11 +64,9 @@ export default function ProfilePage() {
   const isAdmin = authUser?.role === 'admin';
   const isAnyAdmin = isAdmin || isSuperAdmin;
 
-  const navItems = isSuperAdmin
-    ? SUPER_ADMIN_NAV_ITEMS
-    : isAdmin
-      ? ADMIN_NAV_ITEMS
-      : NAV_ITEMS;
+  const navItems = isAnyAdmin
+    ? ADMIN_NAV_ITEMS
+    : NAV_ITEMS;
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
@@ -143,6 +141,34 @@ export default function ProfilePage() {
 
       {/* 2. Main Content */}
       <div className="flex-1 flex flex-col bg-white w-full overflow-x-hidden relative z-10">
+        {/* Navigation Tabs */}
+        <nav className="sticky top-16 lg:top-20 z-20 bg-white border-b border-gray-200 overflow-x-auto">
+          <div className="flex px-3 sm:px-4 lg:px-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
+            {navItems.map((item) => {
+              // Get the correct icon component
+              const IconComponent = item.icon;
+              const isActive = activeTab === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabChange(item.id)}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${
+                    isActive
+                      ? 'border-[#0f2e22] text-[#0f2e22]'
+                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-gray-300'
+                  }`}
+                >
+                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                    isActive ? 'text-[#a3e635]' : 'text-slate-400'
+                  }`} />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
         <main className="flex-1 px-3 sm:px-4 lg:px-6 py-3 overflow-x-hidden mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
             {/* Render content based on active tab */}
             {activeTab === 'overview' && (
