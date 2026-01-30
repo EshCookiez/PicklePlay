@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase, Activity, Wallet, Receipt } from "lucide-react";
+import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase, Activity, Wallet, Receipt, User } from "lucide-react";
 import logo from "../images/PicklePlayLogo.jpg"
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -279,9 +279,17 @@ export default function Header() {
                     onClick={() => toggleDropdown('profile')}
                     className="flex items-center gap-2 hover:scale-105 transition-transform"
                   >
-                    <div className="w-9 h-9 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-bold text-[#1E40AF] text-sm shadow-lg border-2 border-white/30 hover:border-white/50">
-                      {user.first_name?.[0] || 'U'}
-                    </div>
+                    {user.avatar_url ? (
+                      <img 
+                        src={user.avatar_url} 
+                        alt={`${user.first_name} ${user.last_name}`}
+                        className="w-9 h-9 rounded-full object-cover shadow-lg border-2 border-white/30 hover:border-white/50"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center shadow-lg border-2 border-white/30 hover:border-white/50">
+                        <User className="w-5 h-5 text-slate-400 stroke-[1.5]" />
+                      </div>
+                    )}
                   </button>
 
                   {/* Profile Dropdown */}
@@ -289,9 +297,17 @@ export default function Header() {
                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-[#FDE047]/20 overflow-hidden z-50 backdrop-blur-sm">
                       <div className="p-4 bg-gradient-to-r from-[#1E40AF] to-blue-700 text-white">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-[#FDE047] rounded-full flex items-center justify-center font-bold text-lg text-[#1E40AF] border-2 border-white/30">
-                            {user.first_name?.[0] || 'U'}
-                          </div>
+                          {user.avatar_url ? (
+                            <img 
+                              src={user.avatar_url} 
+                              alt={`${user.first_name} ${user.last_name}`}
+                              className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-white/30">
+                              <User className="w-6 h-6 text-slate-400 stroke-[1.5]" />
+                            </div>
+                          )}
                           <div>
                             <p className="font-bold text-sm truncate max-w-[150px]">{user.first_name} {user.last_name}</p>
                             <p className="text-xs text-white/80">{user.role}</p>
@@ -434,9 +450,17 @@ export default function Header() {
             {user ? (
               <div className="px-4 py-3 space-y-3">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-black text-[#1E40AF] border-2 border-yellow-200">
-                    {user.first_name?.[0] || 'U'}
-                  </div>
+                  {user.avatar_url ? (
+                    <img 
+                      src={user.avatar_url} 
+                      alt={`${user.first_name} ${user.last_name}`}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-gray-300"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-slate-300">
+                      <User className="w-5 h-5 text-slate-400 stroke-[1.5]" />
+                    </div>
+                  )}
                   <div>
                     <p className="text-slate-900 font-bold text-sm">{user.first_name} {user.last_name}</p>
                     <p className="text-slate-500 text-xs font-medium">{user.role}</p>

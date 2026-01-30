@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '@/types/profile';
 import { Card, Button, Input } from '../ui/Common';
-import { X, Camera } from 'lucide-react';
+import { X, Camera, User } from 'lucide-react';
 
 interface Props {
   user: UserProfile;
@@ -13,14 +13,36 @@ interface Props {
 
 const EditProfileModal: React.FC<Props> = ({ user, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    fullName: user.fullName,
-    email: user.email,
-    phone: user.phone || '',
-    city: user.location.city,
-    state: user.location.state,
-    bio: user.bio,
-    websiteUrl: user.websiteUrl || ''
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    city: '',
+    state: '',
+    bio: '',
+    websiteUrl: ''
   });
+
+  // Update form data whenever user prop changes or modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      // Split fullName into firstName and lastName
+      const nameParts = user.fullName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      setFormData({
+        firstName: firstName,
+        lastName: lastName,
+        email: user.email,
+        phone: user.phone || '',
+        city: user.location.city,
+        state: user.location.state,
+        bio: user.bio,
+        websiteUrl: user.websiteUrl || ''
+      });
+    }
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -38,11 +60,17 @@ const EditProfileModal: React.FC<Props> = ({ user, isOpen, onClose, onSave }) =>
           {/* Avatar Edit */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative group">
-              <img 
-                src={user.avatarUrl} 
-                alt="Avatar" 
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-[#a3e635]/30 shadow-lg object-cover"
-              />
+              {user.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt="Avatar" 
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-[#a3e635]/30 shadow-lg object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full border-4 border-slate-300 shadow-lg flex items-center justify-center">
+                  <User className="w-10 h-10 sm:w-12 sm:h-12 text-slate-400 stroke-[1.5]" />
+                </div>
+              )}
               <button className="absolute bottom-0 right-0 p-2 bg-[#0f2e22] text-[#a3e635] rounded-full shadow-lg hover:bg-[#1a4332] transition-all active:scale-95">
                 <Camera className="w-4 h-4" />
               </button>
@@ -52,9 +80,14 @@ const EditProfileModal: React.FC<Props> = ({ user, isOpen, onClose, onSave }) =>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <Input 
-              label="Full Name" 
-              value={formData.fullName} 
-              onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+              label="First Name" 
+              value={formData.firstName} 
+              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+            />
+            <Input 
+              label="Last Name" 
+              value={formData.lastName} 
+              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
             />
             <Input 
               label="Email Address" 
@@ -96,7 +129,12 @@ const EditProfileModal: React.FC<Props> = ({ user, isOpen, onClose, onSave }) =>
 
         <div className="px-4 sm:px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={() => onSave(formData)}>Save Changes</Button>
+          <Button onClick={() => {
+            // Combine firstName and lastName back into fullName
+            const { firstName, lastName, ...rest } = formData;
+            const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+            onSave({ ...rest, fullName });
+          }}>Save Changes</Button>
         </div>
       </div>
     </div>

@@ -48,9 +48,17 @@ const ProfileOverview: React.FC<Props> = ({ user, onEdit }) => {
       {/* Profile Picture Section */}
       <div className="flex justify-center py-4 sm:py-8">
         <div className="relative">
-          <div className="w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-black text-4xl sm:text-6xl text-[#1E40AF] shadow-2xl border-4 border-yellow-200">
-            {user.fullName?.[0] || 'U'}
-          </div>
+          {user.avatarUrl ? (
+            <img 
+              src={user.avatarUrl} 
+              alt={user.fullName}
+              className="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover shadow-2xl border-4 border-yellow-200"
+            />
+          ) : (
+            <div className="w-32 h-32 sm:w-48 sm:h-48 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center shadow-2xl border-4 border-slate-300">
+              <User className="w-16 h-16 sm:w-24 sm:h-24 text-slate-400 stroke-[1.5]" />
+            </div>
+          )}
           <button 
             onClick={onEdit}
             className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 bg-[#a3e635] hover:bg-[#84cc16] p-2 sm:p-3 rounded-full transition-colors shadow-lg"

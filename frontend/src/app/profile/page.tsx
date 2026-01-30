@@ -92,7 +92,7 @@ export default function ProfilePage() {
         fullName: `${authUser.first_name || ''} ${authUser.last_name || ''}`.trim() || "Guest User",
         email: authUser.email,
         phone: authUser.phone_number || undefined,
-        avatarUrl: `https://ui-avatars.com/api/?name=${authUser.first_name || 'U'}+${authUser.last_name || 'U'}&background=0D8ABC&color=fff`
+        avatarUrl: authUser.avatar_url || '' // Use uploaded avatar or empty string for default icon
       }));
 
       const roleMap: Record<string, UserRole> = {

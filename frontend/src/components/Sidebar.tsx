@@ -286,13 +286,10 @@ export default function Sidebar() {
                 ) : (
                   <Link
                     href={link.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 justify-center hover:bg-gray-100 text-slate-700`}
-                    title={!isHovered ? link.label : ""}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-100 text-slate-700`}
                   >
                     <span className="text-lime-500">{link.icon}</span>
-                    {isHovered && (
-                      <span className="font-medium text-sm">{link.label}</span>
-                    )}
+                    <span className="font-medium text-sm">{link.label}</span>
                   </Link>
                 )}
               </div>
@@ -314,9 +311,17 @@ export default function Sidebar() {
               href="/profile"
               className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 hover:border-gray-200 transition-all cursor-pointer"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-bold text-[#1E40AF] text-xl flex-shrink-0 shadow-md">
-                {user?.first_name?.[0] || 'U'}
-              </div>
+              {user?.avatar_url ? (
+                <img 
+                  src={user.avatar_url} 
+                  alt={`${user.first_name} ${user.last_name}`}
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0 shadow-md"
+                />
+              ) : (
+                <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                  <User className="w-7 h-7 text-slate-400 stroke-[1.5]" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate text-slate-900">{user?.first_name} {user?.last_name}</p>
                 <p className="text-xs text-slate-600">{user?.role}</p>
@@ -502,9 +507,17 @@ export default function Sidebar() {
               onClick={() => setIsMobileOpen(false)}
               className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 hover:border-gray-200 transition-all"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-bold text-[#1E40AF] text-lg flex-shrink-0 shadow-md">
-                {user?.first_name?.[0] || 'U'}
-              </div>
+              {user?.avatar_url ? (
+                <img 
+                  src={user.avatar_url} 
+                  alt={`${user.first_name} ${user.last_name}`}
+                  className="w-12 h-12 rounded-full object-cover flex-shrink-0 shadow-md"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                  <User className="w-6 h-6 text-slate-400 stroke-[1.5]" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate text-slate-900">{user?.first_name} {user?.last_name}</p>
                 <p className="text-xs text-slate-500">{user?.role}</p>
