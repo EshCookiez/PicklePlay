@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,6 +21,11 @@ export default function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { user, logout, openAuthModal } = useAuth();
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Pages that should not have the sidebar
+  const noSidebarPages = ['/auth', '/'];
+  const shouldShowSidebar = !noSidebarPages.includes(pathname) && user !== null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +35,23 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    if (openDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openDropdown]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -41,6 +63,12 @@ export default function Header() {
 
   // Determine if we're on homepage
   const isHomepage = pathname === '/';
+  
+  // Hide navbar on non-homepage pages
+  if (!isHomepage) {
+    return null;
+  }
+
   // Use white background with black text on non-homepage pages
   const useWhiteNavbar = !isHomepage;
 
@@ -101,12 +129,12 @@ export default function Header() {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <header ref={headerRef} className={`fixed top-0 z-30 transition-all duration-500 left-0 right-0 ${
       useWhiteNavbar
-        ? "bg-white shadow-md border-b border-gray-200"
+        ? "bg-white shadow-md"
         : isScrolled
-        ? "backdrop-blur-lg bg-gradient-to-r from-[#0D3B8C]/85 via-[#1E40AF]/85 to-[#0D3B8C]/85 shadow-xl border-b border-white/20"
-        : "bg-transparent backdrop-blur-none border-b border-transparent shadow-none"
+        ? "backdrop-blur-lg bg-gradient-to-r from-[#0D3B8C]/85 via-[#1E40AF]/85 to-[#0D3B8C]/85 shadow-xl"
+        : "bg-transparent backdrop-blur-none shadow-none"
       }`}>
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
         <div className="flex items-center justify-between h-20">
@@ -160,32 +188,56 @@ export default function Header() {
 
                 {/* Dropdown Menu */}
                 {openDropdown === menu && (
-                  <div className="absolute left-1/2 -translate-x-1/2 mt-1 w-[400px] bg-white rounded-xl shadow-2xl border border-blue-100 overflow-hidden animate-fadeIn">
-                    <div className="p-6 bg-gradient-to-r from-blue-50 to-white">
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-1 w-[400px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn">
+                    <div className="p-6 bg-gradient-to-br from-[#f8fafc] via-white to-[#f0fdf4]">
                       {content.categories.map((category, idx) => (
-                        <div key={idx} className={idx > 0 ? "mt-6 pt-6 border-t border-blue-100" : ""}>
-                          <h3 className="text-xs font-black text-[#1E40AF] uppercase tracking-wider mb-4">
+                        <div key={idx} className={idx > 0 ? "mt-6 pt-6 border-t border-slate-100" : ""}>
+                          <h3 className="text-xs font-black text-[#0f2e22] uppercase tracking-wider mb-4">
                             {category.title}
                           </h3>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             {category.items.map((item, itemIdx) => (
-                              <Link
-                                key={itemIdx}
-                                href={item.href}
-                                className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#FDE047]/20 transition-all group/item border border-transparent hover:border-[#FDE047]"
-                              >
-                                <div className="text-[#1E40AF] flex-shrink-0 mt-0.5">
-                                  {item.icon}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-black text-[#1E40AF] text-sm group-hover/item:text-[#1E40AF]">
-                                    {item.label}
-                                  </p>
-                                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                                    {item.desc}
-                                  </p>
-                                </div>
-                              </Link>
+                              user ? (
+                                <Link
+                                  key={itemIdx}
+                                  href={item.href}
+                                  onClick={() => setOpenDropdown(null)}
+                                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#a3e635]/15 transition-all group/item border border-transparent hover:border-[#a3e635] hover:shadow-md hover:shadow-[#a3e635]/10"
+                                >
+                                  <div className="text-[#a3e635] flex-shrink-0 mt-0.5">
+                                    {item.icon}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-black text-[#0f2e22] text-sm">
+                                      {item.label}
+                                    </p>
+                                    <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                                      {item.desc}
+                                    </p>
+                                  </div>
+                                </Link>
+                              ) : (
+                                <button
+                                  key={itemIdx}
+                                  onClick={() => {
+                                    setOpenDropdown(null);
+                                    openAuthModal("login");
+                                  }}
+                                  className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-[#a3e635]/15 transition-all group/item border border-transparent hover:border-[#a3e635] hover:shadow-md hover:shadow-[#a3e635]/10 text-left"
+                                >
+                                  <div className="text-[#a3e635] flex-shrink-0 mt-0.5">
+                                    {item.icon}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-black text-[#0f2e22] text-sm">
+                                      {item.label}
+                                    </p>
+                                    <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                                      {item.desc}
+                                    </p>
+                                  </div>
+                                </button>
+                              )
                             ))}
                           </div>
                         </div>
@@ -211,26 +263,6 @@ export default function Header() {
             {/* User Profile / Auth */}
             {user ? (
               <>
-                {/* User Stats */}
-                <div className={`hidden lg:flex items-center gap-3 px-3 py-2 rounded-lg backdrop-blur-sm border transition-all ${
-                  useWhiteNavbar
-                    ? 'bg-blue-50 border-blue-200 hover:border-blue-300'
-                    : 'bg-white/10 border-white/20 hover:border-[#FDE047]/30'
-                }`}>
-                  <div className="text-right">
-                    <p className={`text-xs font-bold ${
-                      useWhiteNavbar ? 'text-gray-600' : 'text-white/70'
-                    }`}>
-                      RANK <span className="font-black text-[#FDE047]">#--</span>
-                    </p>
-                    <p className={`text-xs font-bold ${
-                      useWhiteNavbar ? 'text-gray-600' : 'text-white/70'
-                    }`}>
-                      POINTS <span className="font-black text-[#FDE047]">0</span>
-                    </p>
-                  </div>
-                </div>
-
                 {/* Notification Bell */}
                 <button className={`relative p-2.5 rounded-lg transition-all duration-200 ${
                   useWhiteNavbar
@@ -333,37 +365,61 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <nav className="lg:hidden bg-[#1E40AF]/98 backdrop-blur-xl border-t border-white/20 shadow-2xl">
+        <nav className="lg:hidden bg-white/98 backdrop-blur-xl border-t border-gray-200 shadow-2xl max-h-[70vh] overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-2">
             {Object.entries(dropdownContent).map(([menu, content]) => (
               <div key={menu}>
                 <button
                   onClick={() => toggleDropdown(menu)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-white font-black hover:bg-white/20 rounded-lg transition-all"
+                  className="w-full flex items-center justify-between px-4 py-3 text-slate-700 font-bold hover:bg-gray-100 rounded-xl transition-all"
                 >
-                  {menu}
-                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === menu ? "rotate-180" : ""}`} />
+                  <span className="flex items-center gap-3">
+                    <span className="text-[#a3e635]">
+                      {menu === 'Play' && <Trophy className="w-5 h-5" />}
+                      {menu === 'Connect' && <Users className="w-5 h-5" />}
+                      {menu === 'Improve' && <BookOpen className="w-5 h-5" />}
+                      {menu === 'Account' && <Activity className="w-5 h-5" />}
+                    </span>
+                    {menu}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform text-[#a3e635] ${openDropdown === menu ? "" : "-rotate-90"}`} />
                 </button>
                 {openDropdown === menu && (
-                  <div className="mt-2 ml-4 space-y-3 pb-2">
+                  <div className="mt-2 ml-4 space-y-1 pb-2">
                     {content.categories.map((category, idx) => (
                       <div key={idx}>
-                        <p className="text-xs font-black text-white/60 uppercase tracking-wider px-3 mb-2">
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-2">
                           {category.title}
                         </p>
                         <div className="space-y-1">
                           {category.items.map((item, itemIdx) => (
-                            <Link
-                              key={itemIdx}
-                              href={item.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 text-white hover:bg-white/20 rounded-lg transition-all text-sm font-bold"
-                            >
-                              <div className="text-[#FDE047]">
-                                {item.icon}
-                              </div>
-                              <span className="font-black">{item.label}</span>
-                            </Link>
+                            user ? (
+                              <Link
+                                key={itemIdx}
+                                href={item.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-[#a3e635]/15 hover:text-[#0f2e22] rounded-lg transition-all text-sm font-semibold"
+                              >
+                                <div className="text-[#a3e635]">
+                                  {item.icon}
+                                </div>
+                                <span>{item.label}</span>
+                              </Link>
+                            ) : (
+                              <button
+                                key={itemIdx}
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  openAuthModal("login");
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-[#a3e635]/15 hover:text-[#0f2e22] rounded-lg transition-all text-sm font-semibold text-left"
+                              >
+                                <div className="text-[#a3e635]">
+                                  {item.icon}
+                                </div>
+                                <span>{item.label}</span>
+                              </button>
+                            )
                           ))}
                         </div>
                       </div>
@@ -373,23 +429,23 @@ export default function Header() {
               </div>
             ))}
 
-            <hr className="border-white/20 my-4" />
+            <hr className="border-gray-200 my-4" />
 
             {user ? (
               <div className="px-4 py-3 space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-white/20 rounded-lg border border-white/30">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-black text-[#1E40AF] border-2 border-white/20">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#FDE047] to-yellow-300 rounded-full flex items-center justify-center font-black text-[#1E40AF] border-2 border-yellow-200">
                     {user.first_name?.[0] || 'U'}
                   </div>
                   <div>
-                    <p className="text-white font-black text-sm">{user.first_name} {user.last_name}</p>
-                    <p className="text-white/70 text-xs font-bold">{user.role}</p>
+                    <p className="text-slate-900 font-bold text-sm">{user.first_name} {user.last_name}</p>
+                    <p className="text-slate-500 text-xs font-medium">{user.role}</p>
                   </div>
                 </div>
                 <Link
                   href="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full px-4 py-2.5 text-white font-black text-center hover:bg-white/20 rounded-lg transition-all text-sm"
+                  className="block w-full px-4 py-2.5 bg-[#0f2e22] text-white font-bold text-center hover:bg-[#1a4332] rounded-xl transition-all text-sm"
                 >
                   View Profile
                 </Link>
@@ -398,7 +454,7 @@ export default function Header() {
                     await logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 text-[#FDE047] font-black text-center hover:bg-white/20 rounded-lg transition-all text-sm border border-[#FDE047]/40"
+                  className="w-full px-4 py-2.5 text-red-600 font-bold text-center hover:bg-red-50 rounded-xl transition-all text-sm border border-red-200"
                 >
                   Logout
                 </button>
@@ -410,7 +466,7 @@ export default function Header() {
                     openAuthModal("login");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 text-white font-black text-sm hover:bg-white/20 rounded-lg transition-all"
+                  className="w-full px-4 py-2.5 text-[#0f2e22] font-bold text-sm hover:bg-gray-100 rounded-xl transition-all border border-gray-200"
                 >
                   Log in
                 </button>
@@ -419,7 +475,7 @@ export default function Header() {
                     openAuthModal("signup");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 bg-[#FDE047] text-[#1E40AF] font-black text-sm rounded-lg hover:bg-yellow-300 transition-all shadow-md"
+                  className="w-full px-4 py-2.5 bg-[#a3e635] text-[#0f2e22] font-bold text-sm rounded-xl hover:bg-[#84cc16] transition-all shadow-md"
                 >
                   Sign Up
                 </button>

@@ -217,7 +217,7 @@ export default function FindCourts() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 animate-in fade-in duration-1000">
       <Header />
 
       {/* Colored Margin Section */}
