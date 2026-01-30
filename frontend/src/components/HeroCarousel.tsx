@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import SplitText from "../animate/SplitText";
 const slides = [
   {
@@ -25,12 +26,39 @@ const slides = [
 ];
 export default function HeroCarousel() {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [current, setCurrent] = useState(2);
   
   // Search functionality state
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchResult, setSearchResult] = useState('');
+  
+  // Typing animation state
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  
+  // Determine welcome text based on auth state
+  const welcomeText = user ? `Welcome, ${user.first_name || 'User'}` : 'Welcome to PicklePlay Philippines';
+  
+  // Typing animation effect
+  useEffect(() => {
+    let index = 0;
+    setDisplayedText('');
+    setIsTyping(true);
+
+    const interval = setInterval(() => {
+      if (index < welcomeText.length) {
+        setDisplayedText(welcomeText.substring(0, index + 1));
+        index++;
+      } else {
+        setIsTyping(false);
+        clearInterval(interval);
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [welcomeText]);
   
   // Philippine places data
   const philippinePlaces = [
@@ -156,6 +184,24 @@ export default function HeroCarousel() {
                   className="w-full h-auto object-contain max-h-[300px] md:max-h-[450px]"
                   style={{ width: 'auto', height: 'auto', maxHeight: '450px' }}
                 />
+              </div>
+
+              {/* Welcome Message with Typing Animation */}
+              <div className="w-full mb-8 text-center animate-in fade-in duration-700">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black drop-shadow-lg mb-6">
+                  {user && displayedText.startsWith('Welcome,') ? (
+                    <>
+                      <span className="text-white">Welcome, </span>
+                      <span className="text-[#a3e635]">{displayedText.substring(9)}</span>
+                      {isTyping && <span className="animate-pulse text-[#a3e635]">|</span>}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-white">{displayedText}</span>
+                      {isTyping && <span className="animate-pulse text-[#a3e635]">|</span>}
+                    </>
+                  )}
+                </h1>
               </div>
               
               <div className="flex flex-col items-center justify-center mb-8">

@@ -81,7 +81,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!authLoading && !authUser) {
-      router.push('/'); 
+      router.replace('/'); 
       return;
     }
 
@@ -123,13 +123,27 @@ export default function ProfilePage() {
   if (!authUser) return null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f1f5f9] font-sans text-slate-900">
-      
-      
+    <div className="flex flex-col min-h-screen font-sans text-slate-900 overflow-x-hidden animate-in fade-in duration-1000 relative">
+      {/* Decorative Background Ball Images */}
+      <div className="absolute top-10 left-10 w-20 h-20 opacity-8 pointer-events-none z-0">
+        <Image src="/images/Ball.png" alt="Ball" width={80} height={80} className="object-contain" />
+      </div>
+      <div className="absolute top-1/3 right-12 w-28 h-28 opacity-10 pointer-events-none z-0 transform rotate-45">
+        <Image src="/images/Ball.png" alt="Ball" width={112} height={112} className="object-contain" />
+      </div>
+      <div className="absolute bottom-1/2 left-1/3 w-24 h-24 opacity-9 pointer-events-none z-0">
+        <Image src="/images/Ball.png" alt="Ball" width={96} height={96} className="object-contain" />
+      </div>
+      <div className="absolute bottom-20 right-20 w-20 h-20 opacity-7 pointer-events-none z-0 transform -rotate-12">
+        <Image src="/images/Ball.png" alt="Ball" width={80} height={80} className="object-contain" />
+      </div>
+      <div className="absolute top-2/3 right-1/4 w-32 h-32 opacity-11 pointer-events-none z-0">
+        <Image src="/images/Ball.png" alt="Ball" width={128} height={128} className="object-contain" />
+      </div>
 
       {/* 2. Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen pt-14">
-        <main className="flex-1 p-6 overflow-x-hidden">
+      <div className="flex-1 flex flex-col bg-white w-full overflow-x-hidden relative z-10">
+        <main className="flex-1 px-3 sm:px-4 lg:px-6 py-3 overflow-x-hidden mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
             {/* Render content based on active tab */}
             {activeTab === 'overview' && (
               isAnyAdmin ? <AdminOverview /> : <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />

@@ -133,7 +133,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       onClose();
       // Navigate after a brief delay to ensure modal is closed
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/");
       }, 100);
     } catch (error: any) {
       console.error("Login error:", error);
@@ -166,7 +166,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       onClose();
       // Navigate after a brief delay to ensure modal is closed
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/");
       }, 100);
     } catch (error: any) {
       console.error("Signup error:", error);

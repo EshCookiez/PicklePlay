@@ -40,7 +40,26 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/profile', '/dashboard', '/messages', '/settings'];
+  const protectedRoutes = [
+    '/profile',
+    '/dashboard', 
+    '/activity',
+    '/wallet',
+    '/billing',
+    '/messages',
+    '/settings',
+    '/players',
+    '/tournaments',
+    '/teams',
+    '/community',
+    '/rankings',
+    '/rewards',
+    '/coaching',
+    '/articles',
+    '/traffic',
+    '/statistic',
+  ];
+  
   const isProtectedRoute = protectedRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
   );
@@ -49,7 +68,19 @@ export async function updateSession(request: NextRequest) {
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
+    // Add a query param to trigger login modal
+    url.searchParams.set('login', 'required')
     return NextResponse.redirect(url)
+  }
+
+  // Add cache control headers to prevent back button from showing stale authenticated pages
+  if (isProtectedRoute) {
+    supabaseResponse.headers.set(
+      'Cache-Control',
+      'no-store, no-cache, must-revalidate, proxy-revalidate'
+    )
+    supabaseResponse.headers.set('Pragma', 'no-cache')
+    supabaseResponse.headers.set('Expires', '0')
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
