@@ -18,6 +18,7 @@ export interface User {
   role: UserRole
   phone_number: string | null
   profile_picture: string | null
+  avatar_url: string | null
   status: UserStatus
   created_at: string
   updated_at: string

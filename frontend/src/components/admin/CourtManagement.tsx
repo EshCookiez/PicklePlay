@@ -182,7 +182,7 @@ export default function CourtManagement() {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'approved':
-                return 'bg-emerald-50 text-[#064e3b] border-emerald-200';
+                return 'bg-green-50 text-[#0f2e22] border-green-200';
             case 'pending':
                 return 'bg-amber-50 text-amber-700 border-amber-200';
             case 'rejected':
@@ -190,7 +190,7 @@ export default function CourtManagement() {
             case 'suspended':
                 return 'bg-gray-50 text-gray-700 border-gray-200';
             default:
-                return 'bg-blue-50 text-[#1E40AF] border-blue-200';
+                return 'bg-green-50 text-[#0f2e22] border-green-200';
         }
     };
 
@@ -204,20 +204,20 @@ export default function CourtManagement() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-[#1E40AF] tracking-tight">Court Moderation</h1>
+                    <h1 className="text-3xl font-black text-[#0f2e22] tracking-tight">Court Moderation</h1>
                     <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mt-2">
                         Manage court listings and verification status
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     {/* View Toggle */}
-                    <div className="flex bg-white border border-blue-200 rounded-xl p-1">
+                    <div className="flex bg-white border border-green-200 rounded-xl p-1">
                         <button
                             onClick={() => setViewMode('list')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                                 viewMode === 'list'
-                                    ? 'bg-[#1E40AF] text-white'
-                                    : 'text-slate-600 hover:text-[#1E40AF]'
+                                    ? 'bg-[#0f2e22] text-white'
+                                    : 'text-slate-600 hover:text-[#0f2e22]'
                             }`}
                         >
                             <List size={16} />
@@ -227,8 +227,8 @@ export default function CourtManagement() {
                             onClick={() => setViewMode('map')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                                 viewMode === 'map'
-                                    ? 'bg-[#1E40AF] text-white'
-                                    : 'text-slate-600 hover:text-[#1E40AF]'
+                                    ? 'bg-[#0f2e22] text-white'
+                                    : 'text-slate-600 hover:text-[#0f2e22]'
                             }`}
                         >
                             <Map size={16} />
@@ -238,7 +238,7 @@ export default function CourtManagement() {
 
                     <Button 
                         variant="secondary" 
-                        className="bg-[#FDE047] text-[#1E40AF] hover:bg-yellow-300 font-black"
+                        className="bg-[#a3e635] text-[#0f2e22] hover:bg-lime-400 font-black"
                         onClick={() => alert('Add new court feature coming soon!')}
                     >
                         <Plus size={16} />
@@ -262,8 +262,8 @@ export default function CourtManagement() {
                                     <stat.icon size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-[#1E40AF] uppercase tracking-widest">{stat.label}</p>
-                                    <p className="text-2xl font-black text-[#1E40AF]">{stat.value}</p>
+                                    <p className="text-[10px] font-black text-[#0f2e22] uppercase tracking-widest">{stat.label}</p>
+                                    <p className="text-2xl font-black text-[#0f2e22]">{stat.value}</p>
                                 </div>
                             </div>
                         </Card>
@@ -275,13 +275,13 @@ export default function CourtManagement() {
             <Card className="shadow-lg border border-blue-100 bg-white">
                 <div className="p-6 border-b border-blue-100 flex flex-col md:flex-row md:items-center gap-4 bg-gradient-to-r from-blue-50 to-transparent">
                     <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#1E40AF]" size={16} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0f2e22]" size={16} />
                         <input
                             type="text"
                             placeholder="Search courts by name, city, or address..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 focus:border-[#1E40AF] text-sm font-medium transition-all"
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-[#0f2e22]/50 focus:border-[#0f2e22] text-sm font-medium transition-all"
                         />
                     </div>
                     
@@ -332,7 +332,7 @@ export default function CourtManagement() {
                     <div className="divide-y divide-blue-100">
                     {loading ? (
                         <div className="p-12 text-center">
-                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#1E40AF] border-t-transparent"></div>
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#0f2e22] border-t-transparent"></div>
                             <p className="mt-4 text-sm font-semibold text-slate-600">Loading courts...</p>
                         </div>
                     ) : courts.length === 0 ? (
@@ -356,7 +356,7 @@ export default function CourtManagement() {
                                         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                                             <div>
                                                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                                                    <h3 className="text-lg font-black text-[#1E40AF]">{court.name}</h3>
+                                                    <h3 className="text-lg font-black text-[#0f2e22]">{court.name}</h3>
                                                     <Badge className={`${getStatusColor(court.status)} font-black capitalize`}>
                                                         {court.status}
                                                     </Badge>
@@ -372,7 +372,7 @@ export default function CourtManagement() {
 
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                                             <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <MapPin size={14} className="text-[#1E40AF]" />
+                                                <MapPin size={14} className="text-[#0f2e22]" />
                                                 <span>{court.city}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
