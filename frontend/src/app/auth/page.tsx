@@ -122,9 +122,8 @@ export default function AuthPage() {
       });
 
       toast.success("Welcome back!");
-      // Refresh the router to pick up the new auth state, then navigate
-      router.refresh();
-      router.push("/profile");
+      // Navigate to homepage
+      router.push("/");
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.errors) {
@@ -153,9 +152,8 @@ export default function AuthPage() {
       });
 
       toast.success("Account created successfully!");
-      // Refresh the router to pick up the new auth state, then navigate
-      router.refresh();
-      router.push("/profile");
+      // Navigate to homepage
+      router.push("/");
     } catch (error: any) {
       console.error("Signup error:", error);
       if (error.errors) {
