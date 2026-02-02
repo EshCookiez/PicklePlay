@@ -60,14 +60,15 @@ export const playerService = {
     }
 
     if (filters?.search) {
-      query = query.ilike('name', `%${filters.search}%`)
+      // Search in both name and location fields
+      query = query.or(`name.ilike.%${filters.search}%,location.ilike.%${filters.search}%`)
     }
 
     const { data, error } = await query.order('rank', { ascending: true })
 
     if (error) {
       console.error('Error fetching players from Supabase:', error)
-      // Fallback to mock data if table doesn't exist yet for demo purposes
+      // Return null to indicate error - the component will handle it
       return null
     }
 
