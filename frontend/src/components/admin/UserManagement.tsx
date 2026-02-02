@@ -25,7 +25,7 @@ import adminService, { User, UserFilters, UserStatistics } from '@/services/admi
 interface FieldConfig {
     key: string;
     label: string;
-    type: 'text' | 'email' | 'badge' | 'status' | 'date' | 'avatar' | 'actions';
+    type: 'text' | 'email' | 'badge' | 'status' | 'date' | 'avatar' | 'actions' | 'location' | 'skill' | 'frequency';
     visible: boolean;
     sortable?: boolean;
     width?: string;
@@ -34,15 +34,20 @@ interface FieldConfig {
 
 const DEFAULT_FIELD_CONFIG: FieldConfig[] = [
     { key: 'user', label: 'User', type: 'avatar', visible: true, sortable: true, width: 'auto' },
+    { key: 'email', label: 'Email', type: 'email', visible: false, sortable: true, width: 'auto' },
     { key: 'phone', label: 'Phone', type: 'text', visible: false, sortable: false, width: 'auto' },
+    { key: 'location', label: 'Location', type: 'location', visible: true, sortable: false, width: 'auto' },
+    { key: 'skill_level', label: 'Skill Level', type: 'skill', visible: true, sortable: false, width: 'auto' },
+    { key: 'play_frequency', label: 'Play Frequency', type: 'frequency', visible: false, sortable: false, width: 'auto' },
     { key: 'role', label: 'Role', type: 'badge', visible: true, sortable: true, width: 'auto' },
     { key: 'status', label: 'Status', type: 'status', visible: true, sortable: true, width: 'auto' },
+    { key: 'date_of_birth', label: 'DOB', type: 'date', visible: false, sortable: false, width: 'auto' },
     { key: 'joined', label: 'Joined', type: 'date', visible: true, sortable: true, width: 'auto' },
     { key: 'lastActive', label: 'Last Active', type: 'text', visible: false, sortable: true, width: 'auto' },
     { key: 'actions', label: 'Actions', type: 'actions', visible: true, sortable: false, width: 'auto' },
 ];
 
-export default function UserManagement() {
+function UserManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [fieldConfig, setFieldConfig] = useState<FieldConfig[]>(DEFAULT_FIELD_CONFIG);
@@ -58,6 +63,7 @@ export default function UserManagement() {
     const [perPage, setPerPage] = useState(15);
     const [roleFilter, setRoleFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
+    const initialLoadDone = React.useRef(false);
 
     const visibleFields = useMemo(() => fieldConfig.filter(f => f.visible), [fieldConfig]);
 
@@ -65,7 +71,8 @@ export default function UserManagement() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
-        }, 500); // Wait 500ms after user stops typing
+            setCurrentPage(1); // Reset to first page on search
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [searchTerm]);
@@ -81,14 +88,26 @@ export default function UserManagement() {
                 per_page: perPage,
             };
             
-            if (debouncedSearchTerm) filters.search = debouncedSearchTerm;
-            if (roleFilter) filters.role = roleFilter;
-            if (statusFilter) filters.status = statusFilter.toLowerCase();
+            if (debouncedSearchTerm) {
+                filters.search = debouncedSearchTerm;
+            }
+            if (roleFilter) {
+                filters.role = roleFilter;
+            }
+            if (statusFilter) {
+                filters.status = statusFilter;
+            }
             
             const response = await adminService.getUsers(filters);
             
             if (response.success) {
-                setUsers(response.data.users);
+                // Transform users to include joined and lastActive dates
+                const transformedUsers = response.data.users.map(u => ({
+                    ...u,
+                    joined: u.created_at,
+                    lastActive: u.last_login_at || u.updated_at || u.created_at,
+                }));
+                setUsers(transformedUsers);
                 setTotalPages(response.data.pagination.last_page);
                 setTotalUsers(response.data.pagination.total);
             }
@@ -113,10 +132,25 @@ export default function UserManagement() {
     // Load data on mount and when filters change
     useEffect(() => {
         fetchUsers();
+        initialLoadDone.current = true;
     }, [currentPage, perPage, debouncedSearchTerm, roleFilter, statusFilter]);
 
     useEffect(() => {
-        fetchStatistics();
+        // Only fetch statistics once on initial mount
+        if (!initialLoadDone.current) {
+            fetchStatistics();
+        }
+    }, []);
+
+    // Prevent refetch on window focus unless filters changed
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            // Do nothing on visibility change to prevent unnecessary refetch
+            // Data will only be fetched when user explicitly changes filters
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, []);
 
     // Handle user actions
@@ -167,10 +201,10 @@ export default function UserManagement() {
                 return (
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0f2e22] to-green-600 flex items-center justify-center text-white font-black text-xs border-2 border-white shadow-md">
-                            {user.name.charAt(0)}
+                            {user.name?.charAt(0) || '?'}
                         </div>
                         <div>
-                            <p className="text-sm font-black text-[#0f2e22]">{user.name}</p>
+                            <p className="text-sm font-black text-[#0f2e22]">{user.name || 'Unknown'}</p>
                             <p className="text-xs font-medium text-slate-500">{user.email}</p>
                         </div>
                     </div>
@@ -183,15 +217,38 @@ export default function UserManagement() {
                     </a>
                 );
             
+            case 'location':
+                return (
+                    <span className="text-xs font-bold text-slate-600">
+                        {value || '-'}
+                    </span>
+                );
+
+            case 'skill':
+                return (
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-200 font-black">
+                        {value || 'Not Set'}
+                    </Badge>
+                );
+
+            case 'frequency':
+                return (
+                    <span className="text-xs font-bold text-slate-600 capitalize">
+                        {value || 'Not Set'}
+                    </span>
+                );
+            
             case 'badge':
                 return (
                     <Badge className={
-                        value === 'Super Admin' ? 'bg-purple-50 text-purple-600 border-purple-100 font-black' :
-                        value === 'Coach' ? 'bg-lime-100/20 text-amber-700 border-lime-200 font-black' :
-                        value === 'Court Owner' ? 'bg-green-50 text-[#0f2e22] border-green-100 font-black' :
-                        'bg-green-50 text-[#0f2e22] border-green-200 font-black'
+                        value === 'admin' ? 'bg-purple-50 text-purple-600 border-purple-100 font-black' :
+                        value === 'coach' ? 'bg-amber-100 text-amber-700 border-amber-200 font-black' :
+                        value === 'court_owner' ? 'bg-green-50 text-[#0f2e22] border-green-100 font-black' :
+                        'bg-blue-50 text-[#0f2e22] border-blue-200 font-black'
                     }>
-                        {value}
+                        {typeof value === 'string' 
+                            ? value.replace(/_/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                            : value}
                     </Badge>
                 );
             
@@ -199,10 +256,10 @@ export default function UserManagement() {
                 return (
                     <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${
-                            value === 'Active' ? 'bg-green-500' :
-                            value === 'Pending' ? 'bg-amber-500' : 'bg-rose-500'
+                            value?.toLowerCase() === 'active' ? 'bg-green-500' :
+                            value?.toLowerCase() === 'pending' ? 'bg-amber-500' : 'bg-rose-500'
                         }`} />
-                        <span className="text-xs font-bold text-slate-700 uppercase">{value}</span>
+                        <span className="text-xs font-bold text-slate-700 uppercase">{value || 'Unknown'}</span>
                     </div>
                 );
             
@@ -212,9 +269,9 @@ export default function UserManagement() {
                         <button 
                             onClick={() => handleToggleStatus(user.id)}
                             className="p-2 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
-                            title={user.status === 'Active' ? 'Suspend user' : 'Activate user'}
+                            title={user.status === 'active' ? 'Suspend user' : 'Activate user'}
                         >
-                            {user.status === 'Active' ? <Ban size={16} /> : <CheckCircle size={16} />}
+                            {user.status?.toLowerCase() === 'active' ? <Ban size={16} /> : <CheckCircle size={16} />}
                         </button>
                         <button 
                             onClick={() => handleDeleteUser(user.id)}
@@ -227,9 +284,11 @@ export default function UserManagement() {
                 );
             
             case 'date':
+                return <span className="text-xs font-bold text-slate-600">{value ? new Date(value).toLocaleDateString() : '-'}</span>;
+            
             case 'text':
             default:
-                return <span className="text-xs font-bold text-slate-600">{value}</span>;
+                return <span className="text-xs font-bold text-slate-600">{value || '-'}</span>;
         }
     };
 
@@ -242,7 +301,7 @@ export default function UserManagement() {
                 </div>
                 <Button variant="primary" className="md:w-auto bg-[#0f2e22] hover:bg-black text-white">
                     <UserPlus size={16} />
-                    <span>Add New Admin</span>
+                    <span>Add New User</span>
                 </Button>
             </div>
 
@@ -268,7 +327,7 @@ export default function UserManagement() {
                             }`}
                         >
                             <Filter size={16} />
-                            <span>Filter</span>debouncedS
+                            <span>Filter</span>
                             {hasActiveFilters && <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white text-[#1E40AF] text-[10px]">{[roleFilter, statusFilter, searchTerm].filter(Boolean).length}</span>}
                         </button>
                         <button 
@@ -332,9 +391,9 @@ export default function UserManagement() {
                                         All Roles
                                     </button>
                                     <button
-                                        onClick={() => setRoleFilter('customer')}
+                                        onClick={() => setRoleFilter('user')}
                                         className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                                            roleFilter === 'customer'
+                                            roleFilter === 'user'
                                                 ? 'bg-[#1E40AF] text-white shadow-md'
                                                 : 'bg-white text-slate-600 border border-blue-200 hover:border-[#1E40AF]'
                                         }`}
@@ -370,16 +429,6 @@ export default function UserManagement() {
                                         }`}
                                     >
                                         Admin
-                                    </button>
-                                    <button
-                                        onClick={() => setRoleFilter('super_admin')}
-                                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                                            roleFilter === 'super_admin'
-                                                ? 'bg-purple-800 text-white shadow-md'
-                                                : 'bg-white text-slate-600 border border-blue-200 hover:border-purple-800'
-                                        }`}
-                                    >
-                                        Super Admin
                                     </button>
                                 </div>
                             </div>
@@ -426,13 +475,7 @@ export default function UserManagement() {
                     </div>
                 )}
 
-                {/* Fi      className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-blue-200 bg-white text-xs font-black uppercase text-[#1E40AF] hover:bg-blue-50 transition-colors disabled:opacity-50"
-                        >
-                            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                            <span>Refresh</span>
-                        </button>
-                    </div>
-                </div>
+                {/* Field controls end */}
 
                 {/* Field Settings Panel */}
                 {showFieldSettings && (
@@ -560,3 +603,6 @@ export default function UserManagement() {
         </div>
     );
 }
+
+export default React.memo(UserManagement);
+

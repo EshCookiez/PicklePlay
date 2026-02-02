@@ -2,15 +2,24 @@ import { userService } from './userService'; // Use the new Supabase service
 import { User as DBUser, UserRole, UserStatus } from '@/types/database';
 
 export interface User {
-  id: string; // Changed from number to string (UUID)
+  id: string;
   name: string;
   email: string;
   role: string;
   status: string;
   phone?: string;
   created_at: string;
+  updated_at?: string;
   last_login_at?: string;
   email_verified_at?: string;
+  date_of_birth?: string;
+  location?: string;
+  bio?: string;
+  skill_level?: string;
+  play_frequency?: string;
+  website_url?: string;
+  avatar_url?: string;
+  profile_picture_url?: string;
 }
 
 export interface UserFilters {
@@ -74,13 +83,23 @@ export const adminService = {
     // Map DBUser to admin User interface
     const users: User[] = data.map(u => ({
       id: u.id,
-      name: `${u.first_name} ${u.last_name}`,
+      name: `${u.first_name} ${u.last_name}`.trim(),
       email: u.email,
       role: u.role,
       status: u.status,
       phone: u.phone_number || undefined,
       created_at: u.created_at,
-      email_verified_at: u.email_verified_at || undefined
+      updated_at: u.updated_at,
+      email_verified_at: u.email_verified_at || undefined,
+      last_login_at: u.last_login_at || undefined,
+      date_of_birth: u.date_of_birth || undefined,
+      location: u.location || undefined,
+      bio: u.bio || undefined,
+      skill_level: u.skill_level || undefined,
+      play_frequency: u.play_frequency || undefined,
+      website_url: u.website_url || undefined,
+      avatar_url: u.avatar_url || undefined,
+      profile_picture_url: u.profile_picture_url || undefined,
     }));
 
     return {

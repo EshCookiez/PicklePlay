@@ -25,6 +25,7 @@ interface CourtsMapProps {
     courts: Court[];
     center?: { lat: number; lng: number };
     zoom?: number;
+    focusedCourtId?: number | null;
 }
 
 const mapContainerStyle = {
@@ -55,15 +56,27 @@ const mapOptions = {
 
 type RegionType = 'all' | 'luzon' | 'visayas' | 'mindanao' | 'others';
 
-export default function CourtsMap({ courts, center = defaultCenter, zoom = 12 }: CourtsMapProps) {
+export default function CourtsMap({ courts, center = defaultCenter, zoom = 12, focusedCourtId = null }: CourtsMapProps) {
     const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
-    const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [map, setMap] = useState<any>(null); // Google Maps API type
     const [mapCenter, setMapCenter] = useState(center);
     const [zoomLevel, setZoomLevel] = useState(zoom);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState<RegionType>('all');
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [locating, setLocating] = useState(false);
+
+    // Focus on a specific court when focusedCourtId changes
+    useEffect(() => {
+        if (focusedCourtId) {
+            const courtToFocus = courts.find(c => c.id === focusedCourtId);
+            if (courtToFocus && courtToFocus.latitude && courtToFocus.longitude) {
+                setMapCenter({ lat: courtToFocus.latitude, lng: courtToFocus.longitude });
+                setZoomLevel(16); // Zoom in close to the court
+                setSelectedCourt(courtToFocus);
+            }
+        }
+    }, [focusedCourtId, courts]);
 
     // Region grouping logic
     const regions = {
@@ -187,7 +200,7 @@ export default function CourtsMap({ courts, center = defaultCenter, zoom = 12 }:
         setZoomLevel(prev => Math.max(prev - 1, 2));
     };
 
-    const onLoad = useCallback((map: google.maps.Map) => {
+    const onLoad = useCallback((map: any) => {
         setMap(map);
     }, []);
 
@@ -210,7 +223,7 @@ export default function CourtsMap({ courts, center = defaultCenter, zoom = 12 }:
         }
 
         return {
-            path: google.maps.SymbolPath.CIRCLE,
+            path: (window as any).google?.maps?.SymbolPath?.CIRCLE || 0,
             fillColor: color,
             fillOpacity: 0.9,
             strokeColor: '#ffffff',
@@ -331,7 +344,7 @@ export default function CourtsMap({ courts, center = defaultCenter, zoom = 12 }:
                         <Marker
                             position={userLocation}
                             icon={{
-                                path: google.maps.SymbolPath.CIRCLE,
+                                path: (window as any).google?.maps?.SymbolPath?.CIRCLE || 0,
                                 fillColor: '#3B82F6',
                                 fillOpacity: 0.3,
                                 strokeColor: '#3B82F6',
