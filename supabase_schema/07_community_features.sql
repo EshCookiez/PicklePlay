@@ -56,16 +56,16 @@ CREATE TABLE IF NOT EXISTS public.groups (
 );
 
 -- Add indexes
-CREATE INDEX idx_groups_creator ON public.groups(creator_id);
-CREATE INDEX idx_groups_slug ON public.groups(slug);
-CREATE INDEX idx_groups_type ON public.groups(group_type);
-CREATE INDEX idx_groups_category ON public.groups(category);
-CREATE INDEX idx_groups_city ON public.groups(city);
-CREATE INDEX idx_groups_status ON public.groups(status);
-CREATE INDEX idx_groups_is_featured ON public.groups(is_featured);
+CREATE INDEX IF NOT EXISTS idx_groups_creator ON public.groups(creator_id);
+CREATE INDEX IF NOT EXISTS idx_groups_slug ON public.groups(slug);
+CREATE INDEX IF NOT EXISTS idx_groups_type ON public.groups(group_type);
+CREATE INDEX IF NOT EXISTS idx_groups_category ON public.groups(category);
+CREATE INDEX IF NOT EXISTS idx_groups_city ON public.groups(city);
+CREATE INDEX IF NOT EXISTS idx_groups_status ON public.groups(status);
+CREATE INDEX IF NOT EXISTS idx_groups_is_featured ON public.groups(is_featured);
 
 -- Full-text search
-CREATE INDEX idx_groups_search ON public.groups USING gin(
+CREATE INDEX IF NOT EXISTS idx_groups_search ON public.groups USING gin(
     to_tsvector('english', coalesce(name, '') || ' ' || coalesce(description, ''))
 );
 
@@ -133,10 +133,10 @@ CREATE TABLE IF NOT EXISTS public.group_members (
 );
 
 -- Add indexes
-CREATE INDEX idx_group_members_group ON public.group_members(group_id);
-CREATE INDEX idx_group_members_user ON public.group_members(user_id);
-CREATE INDEX idx_group_members_role ON public.group_members(role);
-CREATE INDEX idx_group_members_status ON public.group_members(status);
+CREATE INDEX IF NOT EXISTS idx_group_members_group ON public.group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_user ON public.group_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_role ON public.group_members(role);
+CREATE INDEX IF NOT EXISTS idx_group_members_status ON public.group_members(status);
 
 -- Add RLS policies
 ALTER TABLE public.group_members ENABLE ROW LEVEL SECURITY;
@@ -220,16 +220,16 @@ CREATE TABLE IF NOT EXISTS public.teams (
 );
 
 -- Add indexes
-CREATE INDEX idx_teams_captain ON public.teams(captain_id);
-CREATE INDEX idx_teams_slug ON public.teams(slug);
-CREATE INDEX idx_teams_type ON public.teams(team_type);
-CREATE INDEX idx_teams_city ON public.teams(city);
-CREATE INDEX idx_teams_status ON public.teams(status);
-CREATE INDEX idx_teams_is_recruiting ON public.teams(is_recruiting);
-CREATE INDEX idx_teams_ranking ON public.teams(team_ranking);
+CREATE INDEX IF NOT EXISTS idx_teams_captain ON public.teams(captain_id);
+CREATE INDEX IF NOT EXISTS idx_teams_slug ON public.teams(slug);
+CREATE INDEX IF NOT EXISTS idx_teams_type ON public.teams(team_type);
+CREATE INDEX IF NOT EXISTS idx_teams_city ON public.teams(city);
+CREATE INDEX IF NOT EXISTS idx_teams_status ON public.teams(status);
+CREATE INDEX IF NOT EXISTS idx_teams_is_recruiting ON public.teams(is_recruiting);
+CREATE INDEX IF NOT EXISTS idx_teams_ranking ON public.teams(team_ranking);
 
 -- Full-text search
-CREATE INDEX idx_teams_search ON public.teams USING gin(
+CREATE INDEX IF NOT EXISTS idx_teams_search ON public.teams USING gin(
     to_tsvector('english', coalesce(name, '') || ' ' || coalesce(description, '') || ' ' || coalesce(tagline, ''))
 );
 
@@ -283,10 +283,10 @@ CREATE TABLE IF NOT EXISTS public.team_members (
 );
 
 -- Add indexes
-CREATE INDEX idx_team_members_team ON public.team_members(team_id);
-CREATE INDEX idx_team_members_user ON public.team_members(user_id);
-CREATE INDEX idx_team_members_role ON public.team_members(role);
-CREATE INDEX idx_team_members_status ON public.team_members(status);
+CREATE INDEX IF NOT EXISTS idx_team_members_team ON public.team_members(team_id);
+CREATE INDEX IF NOT EXISTS idx_team_members_user ON public.team_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_team_members_role ON public.team_members(role);
+CREATE INDEX IF NOT EXISTS idx_team_members_status ON public.team_members(status);
 
 -- Add RLS policies
 ALTER TABLE public.team_members ENABLE ROW LEVEL SECURITY;
@@ -366,16 +366,16 @@ CREATE TABLE IF NOT EXISTS public.community_posts (
 );
 
 -- Add indexes
-CREATE INDEX idx_community_posts_author ON public.community_posts(author_id);
-CREATE INDEX idx_community_posts_postable ON public.community_posts(postable_type, postable_id);
-CREATE INDEX idx_community_posts_type ON public.community_posts(post_type);
-CREATE INDEX idx_community_posts_visibility ON public.community_posts(visibility);
-CREATE INDEX idx_community_posts_status ON public.community_posts(status);
-CREATE INDEX idx_community_posts_created_at ON public.community_posts(created_at DESC);
-CREATE INDEX idx_community_posts_is_pinned ON public.community_posts(is_pinned);
+CREATE INDEX IF NOT EXISTS idx_community_posts_author ON public.community_posts(author_id);
+CREATE INDEX IF NOT EXISTS idx_community_posts_postable ON public.community_posts(postable_type, postable_id);
+CREATE INDEX IF NOT EXISTS idx_community_posts_type ON public.community_posts(post_type);
+CREATE INDEX IF NOT EXISTS idx_community_posts_visibility ON public.community_posts(visibility);
+CREATE INDEX IF NOT EXISTS idx_community_posts_status ON public.community_posts(status);
+CREATE INDEX IF NOT EXISTS idx_community_posts_created_at ON public.community_posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_community_posts_is_pinned ON public.community_posts(is_pinned);
 
 -- Full-text search
-CREATE INDEX idx_community_posts_search ON public.community_posts USING gin(
+CREATE INDEX IF NOT EXISTS idx_community_posts_search ON public.community_posts USING gin(
     to_tsvector('english', coalesce(content, ''))
 );
 
@@ -444,11 +444,11 @@ CREATE TABLE IF NOT EXISTS public.post_comments (
 );
 
 -- Add indexes
-CREATE INDEX idx_post_comments_post ON public.post_comments(post_id);
-CREATE INDEX idx_post_comments_user ON public.post_comments(user_id);
-CREATE INDEX idx_post_comments_parent ON public.post_comments(parent_comment_id);
-CREATE INDEX idx_post_comments_status ON public.post_comments(status);
-CREATE INDEX idx_post_comments_created_at ON public.post_comments(created_at);
+CREATE INDEX IF NOT EXISTS idx_post_comments_post ON public.post_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_comments_user ON public.post_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_post_comments_parent ON public.post_comments(parent_comment_id);
+CREATE INDEX IF NOT EXISTS idx_post_comments_status ON public.post_comments(status);
+CREATE INDEX IF NOT EXISTS idx_post_comments_created_at ON public.post_comments(created_at);
 
 -- Add RLS policies
 ALTER TABLE public.post_comments ENABLE ROW LEVEL SECURITY;
@@ -486,8 +486,8 @@ CREATE TABLE IF NOT EXISTS public.post_likes (
 );
 
 -- Add indexes
-CREATE INDEX idx_post_likes_likeable ON public.post_likes(likeable_type, likeable_id);
-CREATE INDEX idx_post_likes_user ON public.post_likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_post_likes_likeable ON public.post_likes(likeable_type, likeable_id);
+CREATE INDEX IF NOT EXISTS idx_post_likes_user ON public.post_likes(user_id);
 
 -- Add RLS policies
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;

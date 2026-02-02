@@ -34,12 +34,12 @@ CREATE TABLE IF NOT EXISTS public.activity_logs (
 );
 
 -- Add indexes
-CREATE INDEX idx_activity_logs_user ON public.activity_logs(user_id);
-CREATE INDEX idx_activity_logs_type ON public.activity_logs(log_type);
-CREATE INDEX idx_activity_logs_action ON public.activity_logs(action);
-CREATE INDEX idx_activity_logs_subject ON public.activity_logs(subject_type, subject_id);
-CREATE INDEX idx_activity_logs_created_at ON public.activity_logs(created_at DESC);
-CREATE INDEX idx_activity_logs_ip ON public.activity_logs(ip_address);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_user ON public.activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_type ON public.activity_logs(log_type);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_action ON public.activity_logs(action);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_subject ON public.activity_logs(subject_type, subject_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON public.activity_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_ip ON public.activity_logs(ip_address);
 
 -- Add RLS policies
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
@@ -84,13 +84,13 @@ CREATE TABLE IF NOT EXISTS public.analytics_data (
 );
 
 -- Add indexes
-CREATE INDEX idx_analytics_data_metric_type ON public.analytics_data(metric_type);
-CREATE INDEX idx_analytics_data_date ON public.analytics_data(date DESC);
-CREATE INDEX idx_analytics_data_user ON public.analytics_data(user_id);
-CREATE INDEX idx_analytics_data_court ON public.analytics_data(court_id);
-CREATE INDEX idx_analytics_data_category ON public.analytics_data(category);
-CREATE INDEX idx_analytics_data_year_month ON public.analytics_data(year, month);
-CREATE INDEX idx_analytics_data_composite ON public.analytics_data(metric_type, date, category);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_metric_type ON public.analytics_data(metric_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_date ON public.analytics_data(date DESC);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_user ON public.analytics_data(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_court ON public.analytics_data(court_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_category ON public.analytics_data(category);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_year_month ON public.analytics_data(year, month);
+CREATE INDEX IF NOT EXISTS idx_analytics_data_composite ON public.analytics_data(metric_type, date, category);
 
 -- Add RLS policies
 ALTER TABLE public.analytics_data ENABLE ROW LEVEL SECURITY;
@@ -141,11 +141,11 @@ CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
 );
 
 -- Add indexes
-CREATE INDEX idx_admin_audit_logs_admin ON public.admin_audit_logs(admin_id);
-CREATE INDEX idx_admin_audit_logs_action ON public.admin_audit_logs(action);
-CREATE INDEX idx_admin_audit_logs_target ON public.admin_audit_logs(target_type, target_id);
-CREATE INDEX idx_admin_audit_logs_severity ON public.admin_audit_logs(severity);
-CREATE INDEX idx_admin_audit_logs_created_at ON public.admin_audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_admin ON public.admin_audit_logs(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action ON public.admin_audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_target ON public.admin_audit_logs(target_type, target_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_severity ON public.admin_audit_logs(severity);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created_at ON public.admin_audit_logs(created_at DESC);
 
 -- Add RLS policies
 ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
@@ -211,13 +211,13 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 );
 
 -- Add indexes
-CREATE INDEX idx_notifications_user ON public.notifications(user_id);
-CREATE INDEX idx_notifications_type ON public.notifications(type);
-CREATE INDEX idx_notifications_is_read ON public.notifications(is_read);
-CREATE INDEX idx_notifications_created_at ON public.notifications(created_at DESC);
-CREATE INDEX idx_notifications_related ON public.notifications(related_type, related_id);
-CREATE INDEX idx_notifications_priority ON public.notifications(priority);
-CREATE INDEX idx_notifications_user_unread ON public.notifications(user_id, is_read) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_type ON public.notifications(type);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_related ON public.notifications(related_type, related_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_priority ON public.notifications(priority);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON public.notifications(user_id, is_read) WHERE is_read = FALSE;
 
 -- Add RLS policies
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
@@ -247,9 +247,9 @@ CREATE TABLE IF NOT EXISTS public.system_settings (
 );
 
 -- Add indexes
-CREATE INDEX idx_system_settings_key ON public.system_settings(key);
-CREATE INDEX idx_system_settings_category ON public.system_settings(category);
-CREATE INDEX idx_system_settings_is_public ON public.system_settings(is_public);
+CREATE INDEX IF NOT EXISTS idx_system_settings_key ON public.system_settings(key);
+CREATE INDEX IF NOT EXISTS idx_system_settings_category ON public.system_settings(category);
+CREATE INDEX IF NOT EXISTS idx_system_settings_is_public ON public.system_settings(is_public);
 
 -- Add RLS policies
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
@@ -306,9 +306,9 @@ CREATE TABLE IF NOT EXISTS public.saved_locations (
 );
 
 -- Add indexes
-CREATE INDEX idx_saved_locations_user ON public.saved_locations(user_id);
-CREATE INDEX idx_saved_locations_is_default ON public.saved_locations(is_default);
-CREATE INDEX idx_saved_locations_location ON public.saved_locations USING gist (
+CREATE INDEX IF NOT EXISTS idx_saved_locations_user ON public.saved_locations(user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_locations_is_default ON public.saved_locations(is_default);
+CREATE INDEX IF NOT EXISTS idx_saved_locations_location ON public.saved_locations USING gist (
     point(longitude, latitude)
 );
 
@@ -370,10 +370,10 @@ CREATE TABLE IF NOT EXISTS public.player_profiles (
 );
 
 -- Add indexes
-CREATE INDEX idx_player_profiles_user ON public.player_profiles(user_id);
-CREATE INDEX idx_player_profiles_skill_level ON public.player_profiles(skill_level);
-CREATE INDEX idx_player_profiles_is_available ON public.player_profiles(is_available_for_lessons);
-CREATE INDEX idx_player_profiles_preferred_position ON public.player_profiles(preferred_position);
+CREATE INDEX IF NOT EXISTS idx_player_profiles_user ON public.player_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_player_profiles_skill_level ON public.player_profiles(skill_level);
+CREATE INDEX IF NOT EXISTS idx_player_profiles_is_available ON public.player_profiles(is_available_for_lessons);
+CREATE INDEX IF NOT EXISTS idx_player_profiles_preferred_position ON public.player_profiles(preferred_position);
 
 -- Add RLS policies
 ALTER TABLE public.player_profiles ENABLE ROW LEVEL SECURITY;
@@ -414,11 +414,11 @@ CREATE TABLE IF NOT EXISTS public.referrals (
 );
 
 -- Add indexes
-CREATE INDEX idx_referrals_referrer ON public.referrals(referrer_id);
-CREATE INDEX idx_referrals_referred_user ON public.referrals(referred_user_id);
-CREATE INDEX idx_referrals_code ON public.referrals(referral_code);
-CREATE INDEX idx_referrals_status ON public.referrals(status);
-CREATE INDEX idx_referrals_created_at ON public.referrals(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON public.referrals(referrer_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referred_user ON public.referrals(referred_user_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_code ON public.referrals(referral_code);
+CREATE INDEX IF NOT EXISTS idx_referrals_status ON public.referrals(status);
+CREATE INDEX IF NOT EXISTS idx_referrals_created_at ON public.referrals(created_at DESC);
 
 -- Add RLS policies
 ALTER TABLE public.referrals ENABLE ROW LEVEL SECURITY;

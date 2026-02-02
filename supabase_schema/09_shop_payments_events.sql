@@ -74,18 +74,18 @@ CREATE TABLE IF NOT EXISTS public.products (
 );
 
 -- Add indexes
-CREATE INDEX idx_products_slug ON public.products(slug);
-CREATE INDEX idx_products_category ON public.products(category);
-CREATE INDEX idx_products_brand ON public.products(brand);
-CREATE INDEX idx_products_status ON public.products(status);
-CREATE INDEX idx_products_is_featured ON public.products(is_featured);
-CREATE INDEX idx_products_is_on_sale ON public.products(is_on_sale);
-CREATE INDEX idx_products_price ON public.products(price);
-CREATE INDEX idx_products_rating ON public.products(rating);
-CREATE INDEX idx_products_deleted_at ON public.products(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_products_slug ON public.products(slug);
+CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
+CREATE INDEX IF NOT EXISTS idx_products_brand ON public.products(brand);
+CREATE INDEX IF NOT EXISTS idx_products_status ON public.products(status);
+CREATE INDEX IF NOT EXISTS idx_products_is_featured ON public.products(is_featured);
+CREATE INDEX IF NOT EXISTS idx_products_is_on_sale ON public.products(is_on_sale);
+CREATE INDEX IF NOT EXISTS idx_products_price ON public.products(price);
+CREATE INDEX IF NOT EXISTS idx_products_rating ON public.products(rating);
+CREATE INDEX IF NOT EXISTS idx_products_deleted_at ON public.products(deleted_at) WHERE deleted_at IS NULL;
 
 -- Full-text search
-CREATE INDEX idx_products_search ON public.products USING gin(
+CREATE INDEX IF NOT EXISTS idx_products_search ON public.products USING gin(
     to_tsvector('english', coalesce(name, '') || ' ' || coalesce(description, '') || ' ' || coalesce(brand, ''))
 );
 
@@ -114,9 +114,9 @@ CREATE TABLE IF NOT EXISTS public.shopping_cart (
 );
 
 -- Add indexes
-CREATE INDEX idx_shopping_cart_user ON public.shopping_cart(user_id);
-CREATE INDEX idx_shopping_cart_session ON public.shopping_cart(session_id);
-CREATE INDEX idx_shopping_cart_product ON public.shopping_cart(product_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_cart_user ON public.shopping_cart(user_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_cart_session ON public.shopping_cart(session_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_cart_product ON public.shopping_cart(product_id);
 
 -- Add RLS policies
 ALTER TABLE public.shopping_cart ENABLE ROW LEVEL SECURITY;
@@ -194,11 +194,11 @@ CREATE TABLE IF NOT EXISTS public.orders (
 );
 
 -- Add indexes
-CREATE INDEX idx_orders_user ON public.orders(user_id);
-CREATE INDEX idx_orders_number ON public.orders(order_number);
-CREATE INDEX idx_orders_status ON public.orders(status);
-CREATE INDEX idx_orders_payment_status ON public.orders(payment_status);
-CREATE INDEX idx_orders_created_at ON public.orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_user ON public.orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_number ON public.orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON public.orders(payment_status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);
 
 -- Add RLS policies
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
@@ -238,8 +238,8 @@ CREATE TABLE IF NOT EXISTS public.order_items (
 );
 
 -- Add indexes
-CREATE INDEX idx_order_items_order ON public.order_items(order_id);
-CREATE INDEX idx_order_items_product ON public.order_items(product_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON public.order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_product ON public.order_items(product_id);
 
 -- =====================================================
 -- PAYMENTS TABLE
@@ -297,13 +297,13 @@ CREATE TABLE IF NOT EXISTS public.payments (
 );
 
 -- Add indexes
-CREATE INDEX idx_payments_user ON public.payments(user_id);
-CREATE INDEX idx_payments_payable ON public.payments(payable_type, payable_id);
-CREATE INDEX idx_payments_transaction ON public.payments(transaction_id);
-CREATE INDEX idx_payments_gateway_transaction ON public.payments(gateway_transaction_id);
-CREATE INDEX idx_payments_status ON public.payments(status);
-CREATE INDEX idx_payments_payment_status ON public.payments(payment_status);
-CREATE INDEX idx_payments_created_at ON public.payments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON public.payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payable ON public.payments(payable_type, payable_id);
+CREATE INDEX IF NOT EXISTS idx_payments_transaction ON public.payments(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_payments_gateway_transaction ON public.payments(gateway_transaction_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON public.payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_payment_status ON public.payments(payment_status);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON public.payments(created_at DESC);
 
 -- Add RLS policies
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
@@ -345,11 +345,11 @@ CREATE TABLE IF NOT EXISTS public.transactions_log (
 );
 
 -- Add indexes
-CREATE INDEX idx_transactions_log_user ON public.transactions_log(user_id);
-CREATE INDEX idx_transactions_log_payment ON public.transactions_log(payment_id);
-CREATE INDEX idx_transactions_log_type ON public.transactions_log(type);
-CREATE INDEX idx_transactions_log_reference ON public.transactions_log(reference_type, reference_id);
-CREATE INDEX idx_transactions_log_created_at ON public.transactions_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_log_user ON public.transactions_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_log_payment ON public.transactions_log(payment_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_log_type ON public.transactions_log(type);
+CREATE INDEX IF NOT EXISTS idx_transactions_log_reference ON public.transactions_log(reference_type, reference_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_log_created_at ON public.transactions_log(created_at DESC);
 
 -- Add RLS policies
 ALTER TABLE public.transactions_log ENABLE ROW LEVEL SECURITY;
@@ -437,17 +437,17 @@ CREATE TABLE IF NOT EXISTS public.events (
 );
 
 -- Add indexes
-CREATE INDEX idx_events_organizer ON public.events(organizer_id);
-CREATE INDEX idx_events_slug ON public.events(slug);
-CREATE INDEX idx_events_type ON public.events(type);
-CREATE INDEX idx_events_status ON public.events(status);
-CREATE INDEX idx_events_start_date ON public.events(start_date);
-CREATE INDEX idx_events_city ON public.events(city);
-CREATE INDEX idx_events_is_featured ON public.events(is_featured);
-CREATE INDEX idx_events_deleted_at ON public.events(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_events_organizer ON public.events(organizer_id);
+CREATE INDEX IF NOT EXISTS idx_events_slug ON public.events(slug);
+CREATE INDEX IF NOT EXISTS idx_events_type ON public.events(type);
+CREATE INDEX IF NOT EXISTS idx_events_status ON public.events(status);
+CREATE INDEX IF NOT EXISTS idx_events_start_date ON public.events(start_date);
+CREATE INDEX IF NOT EXISTS idx_events_city ON public.events(city);
+CREATE INDEX IF NOT EXISTS idx_events_is_featured ON public.events(is_featured);
+CREATE INDEX IF NOT EXISTS idx_events_deleted_at ON public.events(deleted_at) WHERE deleted_at IS NULL;
 
 -- Full-text search
-CREATE INDEX idx_events_search ON public.events USING gin(
+CREATE INDEX IF NOT EXISTS idx_events_search ON public.events USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(description, ''))
 );
 
@@ -502,10 +502,10 @@ CREATE TABLE IF NOT EXISTS public.event_registrations (
 );
 
 -- Add indexes
-CREATE INDEX idx_event_registrations_event ON public.event_registrations(event_id);
-CREATE INDEX idx_event_registrations_user ON public.event_registrations(user_id);
-CREATE INDEX idx_event_registrations_status ON public.event_registrations(status);
-CREATE INDEX idx_event_registrations_confirmation ON public.event_registrations(confirmation_code);
+CREATE INDEX IF NOT EXISTS idx_event_registrations_event ON public.event_registrations(event_id);
+CREATE INDEX IF NOT EXISTS idx_event_registrations_user ON public.event_registrations(user_id);
+CREATE INDEX IF NOT EXISTS idx_event_registrations_status ON public.event_registrations(status);
+CREATE INDEX IF NOT EXISTS idx_event_registrations_confirmation ON public.event_registrations(confirmation_code);
 
 -- Add RLS policies
 ALTER TABLE public.event_registrations ENABLE ROW LEVEL SECURITY;
@@ -562,16 +562,16 @@ CREATE TABLE IF NOT EXISTS public.news (
 );
 
 -- Add indexes
-CREATE INDEX idx_news_author ON public.news(author_id);
-CREATE INDEX idx_news_slug ON public.news(slug);
-CREATE INDEX idx_news_category ON public.news(category);
-CREATE INDEX idx_news_status ON public.news(status);
-CREATE INDEX idx_news_published_at ON public.news(published_at DESC);
-CREATE INDEX idx_news_is_featured ON public.news(is_featured);
-CREATE INDEX idx_news_deleted_at ON public.news(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_news_author ON public.news(author_id);
+CREATE INDEX IF NOT EXISTS idx_news_slug ON public.news(slug);
+CREATE INDEX IF NOT EXISTS idx_news_category ON public.news(category);
+CREATE INDEX IF NOT EXISTS idx_news_status ON public.news(status);
+CREATE INDEX IF NOT EXISTS idx_news_published_at ON public.news(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_news_is_featured ON public.news(is_featured);
+CREATE INDEX IF NOT EXISTS idx_news_deleted_at ON public.news(deleted_at) WHERE deleted_at IS NULL;
 
 -- Full-text search
-CREATE INDEX idx_news_search ON public.news USING gin(
+CREATE INDEX IF NOT EXISTS idx_news_search ON public.news USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(content, '') || ' ' || coalesce(excerpt, ''))
 );
 
@@ -617,11 +617,11 @@ CREATE TABLE IF NOT EXISTS public.search_history (
 );
 
 -- Add indexes
-CREATE INDEX idx_search_history_user ON public.search_history(user_id);
-CREATE INDEX idx_search_history_session ON public.search_history(session_id);
-CREATE INDEX idx_search_history_type ON public.search_history(search_type);
-CREATE INDEX idx_search_history_query ON public.search_history(search_query);
-CREATE INDEX idx_search_history_created_at ON public.search_history(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_search_history_user ON public.search_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_search_history_session ON public.search_history(session_id);
+CREATE INDEX IF NOT EXISTS idx_search_history_type ON public.search_history(search_type);
+CREATE INDEX IF NOT EXISTS idx_search_history_query ON public.search_history(search_query);
+CREATE INDEX IF NOT EXISTS idx_search_history_created_at ON public.search_history(created_at DESC);
 
 -- =====================================================
 -- TAGS TABLE
@@ -639,9 +639,9 @@ CREATE TABLE IF NOT EXISTS public.tags (
 );
 
 -- Add indexes
-CREATE INDEX idx_tags_slug ON public.tags(slug);
-CREATE INDEX idx_tags_type ON public.tags(type);
-CREATE INDEX idx_tags_usage_count ON public.tags(usage_count DESC);
+CREATE INDEX IF NOT EXISTS idx_tags_slug ON public.tags(slug);
+CREATE INDEX IF NOT EXISTS idx_tags_type ON public.tags(type);
+CREATE INDEX IF NOT EXISTS idx_tags_usage_count ON public.tags(usage_count DESC);
 
 -- =====================================================
 -- TAGGABLES TABLE (Polymorphic)
@@ -657,8 +657,8 @@ CREATE TABLE IF NOT EXISTS public.taggables (
 );
 
 -- Add indexes
-CREATE INDEX idx_taggables_tag ON public.taggables(tag_id);
-CREATE INDEX idx_taggables_taggable ON public.taggables(taggable_type, taggable_id);
+CREATE INDEX IF NOT EXISTS idx_taggables_tag ON public.taggables(tag_id);
+CREATE INDEX IF NOT EXISTS idx_taggables_taggable ON public.taggables(taggable_type, taggable_id);
 
 -- =====================================================
 -- FUNCTIONS & TRIGGERS

@@ -61,14 +61,14 @@ CREATE TABLE IF NOT EXISTS public.player_rankings (
 );
 
 -- Add indexes
-CREATE INDEX idx_player_rankings_user ON public.player_rankings(user_id);
-CREATE INDEX idx_player_rankings_overall_rank ON public.player_rankings(overall_rank);
-CREATE INDEX idx_player_rankings_singles_rank ON public.player_rankings(singles_rank);
-CREATE INDEX idx_player_rankings_doubles_rank ON public.player_rankings(doubles_rank);
-CREATE INDEX idx_player_rankings_division ON public.player_rankings(division);
-CREATE INDEX idx_player_rankings_region ON public.player_rankings(region);
-CREATE INDEX idx_player_rankings_is_active ON public.player_rankings(is_active);
-CREATE INDEX idx_player_rankings_total_points ON public.player_rankings(total_points);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_user ON public.player_rankings(user_id);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_overall_rank ON public.player_rankings(overall_rank);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_singles_rank ON public.player_rankings(singles_rank);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_doubles_rank ON public.player_rankings(doubles_rank);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_division ON public.player_rankings(division);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_region ON public.player_rankings(region);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_is_active ON public.player_rankings(is_active);
+CREATE INDEX IF NOT EXISTS idx_player_rankings_total_points ON public.player_rankings(total_points);
 
 -- Add RLS policies
 ALTER TABLE public.player_rankings ENABLE ROW LEVEL SECURITY;
@@ -116,13 +116,13 @@ CREATE TABLE IF NOT EXISTS public.points_transactions (
 );
 
 -- Add indexes
-CREATE INDEX idx_points_transactions_user ON public.points_transactions(user_id);
-CREATE INDEX idx_points_transactions_type ON public.points_transactions(type);
-CREATE INDEX idx_points_transactions_source ON public.points_transactions(source);
-CREATE INDEX idx_points_transactions_reference ON public.points_transactions(reference_type, reference_id);
-CREATE INDEX idx_points_transactions_created_at ON public.points_transactions(created_at);
-CREATE INDEX idx_points_transactions_expires_at ON public.points_transactions(expires_at);
-CREATE INDEX idx_points_transactions_expired ON public.points_transactions(expired);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_user ON public.points_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_type ON public.points_transactions(type);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_source ON public.points_transactions(source);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_reference ON public.points_transactions(reference_type, reference_id);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_created_at ON public.points_transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_expires_at ON public.points_transactions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_points_transactions_expired ON public.points_transactions(expired);
 
 -- Add RLS policies
 ALTER TABLE public.points_transactions ENABLE ROW LEVEL SECURITY;
@@ -181,13 +181,13 @@ CREATE TABLE IF NOT EXISTS public.rewards_catalog (
 );
 
 -- Add indexes
-CREATE INDEX idx_rewards_catalog_status ON public.rewards_catalog(status);
-CREATE INDEX idx_rewards_catalog_type ON public.rewards_catalog(reward_type);
-CREATE INDEX idx_rewards_catalog_category ON public.rewards_catalog(category);
-CREATE INDEX idx_rewards_catalog_points ON public.rewards_catalog(points_required);
-CREATE INDEX idx_rewards_catalog_is_featured ON public.rewards_catalog(is_featured);
-CREATE INDEX idx_rewards_catalog_display_order ON public.rewards_catalog(display_order);
-CREATE INDEX idx_rewards_catalog_availability ON public.rewards_catalog(available_from, available_until);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_status ON public.rewards_catalog(status);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_type ON public.rewards_catalog(reward_type);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_category ON public.rewards_catalog(category);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_points ON public.rewards_catalog(points_required);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_is_featured ON public.rewards_catalog(is_featured);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_display_order ON public.rewards_catalog(display_order);
+CREATE INDEX IF NOT EXISTS idx_rewards_catalog_availability ON public.rewards_catalog(available_from, available_until);
 
 -- Add RLS policies
 ALTER TABLE public.rewards_catalog ENABLE ROW LEVEL SECURITY;
@@ -236,11 +236,11 @@ CREATE TABLE IF NOT EXISTS public.reward_redemptions (
 );
 
 -- Add indexes
-CREATE INDEX idx_reward_redemptions_user ON public.reward_redemptions(user_id);
-CREATE INDEX idx_reward_redemptions_reward ON public.reward_redemptions(reward_id);
-CREATE INDEX idx_reward_redemptions_status ON public.reward_redemptions(status);
-CREATE INDEX idx_reward_redemptions_code ON public.reward_redemptions(redemption_code);
-CREATE INDEX idx_reward_redemptions_created_at ON public.reward_redemptions(created_at);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_user ON public.reward_redemptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_reward ON public.reward_redemptions(reward_id);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_status ON public.reward_redemptions(status);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_code ON public.reward_redemptions(redemption_code);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_created_at ON public.reward_redemptions(created_at);
 
 -- Add RLS policies
 ALTER TABLE public.reward_redemptions ENABLE ROW LEVEL SECURITY;
@@ -290,10 +290,10 @@ CREATE TABLE IF NOT EXISTS public.player_achievements (
 );
 
 -- Add indexes
-CREATE INDEX idx_player_achievements_user ON public.player_achievements(user_id);
-CREATE INDEX idx_player_achievements_type ON public.player_achievements(achievement_type);
-CREATE INDEX idx_player_achievements_completed ON public.player_achievements(is_completed);
-CREATE INDEX idx_player_achievements_completed_at ON public.player_achievements(completed_at);
+CREATE INDEX IF NOT EXISTS idx_player_achievements_user ON public.player_achievements(user_id);
+CREATE INDEX IF NOT EXISTS idx_player_achievements_type ON public.player_achievements(achievement_type);
+CREATE INDEX IF NOT EXISTS idx_player_achievements_completed ON public.player_achievements(is_completed);
+CREATE INDEX IF NOT EXISTS idx_player_achievements_completed_at ON public.player_achievements(completed_at);
 
 -- Add RLS policies
 ALTER TABLE public.player_achievements ENABLE ROW LEVEL SECURITY;

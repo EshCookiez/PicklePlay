@@ -56,15 +56,15 @@ CREATE TABLE IF NOT EXISTS public.court_reviews (
 );
 
 -- Add indexes
-CREATE INDEX idx_court_reviews_court ON public.court_reviews(court_id);
-CREATE INDEX idx_court_reviews_user ON public.court_reviews(user_id);
-CREATE INDEX idx_court_reviews_booking ON public.court_reviews(booking_id);
-CREATE INDEX idx_court_reviews_status ON public.court_reviews(status);
-CREATE INDEX idx_court_reviews_rating ON public.court_reviews(overall_rating);
-CREATE INDEX idx_court_reviews_created_at ON public.court_reviews(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_court ON public.court_reviews(court_id);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_user ON public.court_reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_booking ON public.court_reviews(booking_id);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_status ON public.court_reviews(status);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_rating ON public.court_reviews(overall_rating);
+CREATE INDEX IF NOT EXISTS idx_court_reviews_created_at ON public.court_reviews(created_at DESC);
 
 -- Full-text search
-CREATE INDEX idx_court_reviews_search ON public.court_reviews USING gin(
+CREATE INDEX IF NOT EXISTS idx_court_reviews_search ON public.court_reviews USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(review, ''))
 );
 
@@ -142,15 +142,15 @@ CREATE TABLE IF NOT EXISTS public.coach_reviews (
 );
 
 -- Add indexes
-CREATE INDEX idx_coach_reviews_coach ON public.coach_reviews(coach_id);
-CREATE INDEX idx_coach_reviews_user ON public.coach_reviews(user_id);
-CREATE INDEX idx_coach_reviews_session ON public.coach_reviews(session_id);
-CREATE INDEX idx_coach_reviews_status ON public.coach_reviews(status);
-CREATE INDEX idx_coach_reviews_rating ON public.coach_reviews(overall_rating);
-CREATE INDEX idx_coach_reviews_created_at ON public.coach_reviews(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_coach ON public.coach_reviews(coach_id);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_user ON public.coach_reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_session ON public.coach_reviews(session_id);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_status ON public.coach_reviews(status);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_rating ON public.coach_reviews(overall_rating);
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_created_at ON public.coach_reviews(created_at DESC);
 
 -- Full-text search
-CREATE INDEX idx_coach_reviews_search ON public.coach_reviews USING gin(
+CREATE INDEX IF NOT EXISTS idx_coach_reviews_search ON public.coach_reviews USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(review, ''))
 );
 
@@ -223,16 +223,16 @@ CREATE TABLE IF NOT EXISTS public.product_reviews (
 );
 
 -- Add indexes
-CREATE INDEX idx_product_reviews_product ON public.product_reviews(product_id);
-CREATE INDEX idx_product_reviews_user ON public.product_reviews(user_id);
-CREATE INDEX idx_product_reviews_order ON public.product_reviews(order_id);
-CREATE INDEX idx_product_reviews_status ON public.product_reviews(status);
-CREATE INDEX idx_product_reviews_rating ON public.product_reviews(rating);
-CREATE INDEX idx_product_reviews_verified ON public.product_reviews(is_verified_purchase);
-CREATE INDEX idx_product_reviews_created_at ON public.product_reviews(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_product ON public.product_reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_user ON public.product_reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_order ON public.product_reviews(order_id);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_status ON public.product_reviews(status);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_rating ON public.product_reviews(rating);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_verified ON public.product_reviews(is_verified_purchase);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_created_at ON public.product_reviews(created_at DESC);
 
 -- Full-text search
-CREATE INDEX idx_product_reviews_search ON public.product_reviews USING gin(
+CREATE INDEX IF NOT EXISTS idx_product_reviews_search ON public.product_reviews USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(review, ''))
 );
 
@@ -270,8 +270,8 @@ CREATE TABLE IF NOT EXISTS public.review_helpful_votes (
 );
 
 -- Add indexes
-CREATE INDEX idx_review_votes_review ON public.review_helpful_votes(review_type, review_id);
-CREATE INDEX idx_review_votes_user ON public.review_helpful_votes(user_id);
+CREATE INDEX IF NOT EXISTS idx_review_votes_review ON public.review_helpful_votes(review_type, review_id);
+CREATE INDEX IF NOT EXISTS idx_review_votes_user ON public.review_helpful_votes(user_id);
 
 -- Add RLS policies
 ALTER TABLE public.review_helpful_votes ENABLE ROW LEVEL SECURITY;

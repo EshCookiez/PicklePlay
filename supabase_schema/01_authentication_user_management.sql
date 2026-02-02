@@ -56,18 +56,20 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 -- Add indexes for users table
-CREATE INDEX idx_users_role ON public.users(role);
-CREATE INDEX idx_users_status ON public.users(status);
-CREATE INDEX idx_users_email_verified ON public.users(email_verified_at);
-CREATE INDEX idx_users_created_at ON public.users(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
+CREATE INDEX IF NOT EXISTS idx_users_status ON public.users(status);
+CREATE INDEX IF NOT EXISTS idx_users_email_verified ON public.users(email_verified_at);
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users(created_at);
 
 -- Add RLS policies for users
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own data" ON public.users;
 CREATE POLICY "Users can view their own data"
     ON public.users FOR SELECT
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own data" ON public.users;
 CREATE POLICY "Users can update their own data"
     ON public.users FOR UPDATE
     USING (auth.uid() = id);
@@ -119,21 +121,24 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 );
 
 -- Add indexes
-CREATE INDEX idx_user_profiles_user_id ON public.user_profiles(user_id);
-CREATE INDEX idx_user_profiles_city ON public.user_profiles(city);
-CREATE INDEX idx_user_profiles_location ON public.user_profiles(latitude, longitude);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON public.user_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_city ON public.user_profiles(city);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_location ON public.user_profiles(latitude, longitude);
 
 -- Add RLS policies
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.user_profiles;
 CREATE POLICY "Users can view their own profile"
     ON public.user_profiles FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.user_profiles;
 CREATE POLICY "Users can update their own profile"
     ON public.user_profiles FOR UPDATE
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.user_profiles;
 CREATE POLICY "Users can insert their own profile"
     ON public.user_profiles FOR INSERT
     WITH CHECK (auth.uid() = user_id);
@@ -170,11 +175,12 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
 );
 
 -- Add indexes
-CREATE INDEX idx_user_preferences_user_id ON public.user_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user_id ON public.user_preferences(user_id);
 
 -- Add RLS policies
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own preferences" ON public.user_preferences;
 CREATE POLICY "Users can manage their own preferences"
     ON public.user_preferences FOR ALL
     USING (auth.uid() = user_id);
@@ -208,12 +214,13 @@ CREATE TABLE IF NOT EXISTS public.user_statistics (
 );
 
 -- Add indexes
-CREATE INDEX idx_user_statistics_user_id ON public.user_statistics(user_id);
-CREATE INDEX idx_user_statistics_ranking ON public.user_statistics(current_ranking);
+CREATE INDEX IF NOT EXISTS idx_user_statistics_user_id ON public.user_statistics(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_statistics_ranking ON public.user_statistics(current_ranking);
 
 -- Add RLS policies
 ALTER TABLE public.user_statistics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own statistics" ON public.user_statistics;
 CREATE POLICY "Users can view their own statistics"
     ON public.user_statistics FOR SELECT
     USING (auth.uid() = user_id);
@@ -240,15 +247,16 @@ CREATE TABLE IF NOT EXISTS public.authentication_logs (
 );
 
 -- Add indexes
-CREATE INDEX idx_auth_logs_user_id ON public.authentication_logs(user_id);
-CREATE INDEX idx_auth_logs_action ON public.authentication_logs(action);
-CREATE INDEX idx_auth_logs_status ON public.authentication_logs(status);
-CREATE INDEX idx_auth_logs_created_at ON public.authentication_logs(created_at);
-CREATE INDEX idx_auth_logs_email ON public.authentication_logs(email);
+CREATE INDEX IF NOT EXISTS idx_auth_logs_user_id ON public.authentication_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_auth_logs_action ON public.authentication_logs(action);
+CREATE INDEX IF NOT EXISTS idx_auth_logs_status ON public.authentication_logs(status);
+CREATE INDEX IF NOT EXISTS idx_auth_logs_created_at ON public.authentication_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_auth_logs_email ON public.authentication_logs(email);
 
 -- Add RLS policies (admins only can view)
 ALTER TABLE public.authentication_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Only admins can view auth logs" ON public.authentication_logs;
 CREATE POLICY "Only admins can view auth logs"
     ON public.authentication_logs FOR SELECT
     USING (
@@ -293,22 +301,25 @@ CREATE TABLE IF NOT EXISTS public.role_applications (
 );
 
 -- Add indexes
-CREATE INDEX idx_role_applications_user_id ON public.role_applications(user_id);
-CREATE INDEX idx_role_applications_status ON public.role_applications(status);
-CREATE INDEX idx_role_applications_role ON public.role_applications(role_applied_for);
-CREATE INDEX idx_role_applications_created_at ON public.role_applications(created_at);
+CREATE INDEX IF NOT EXISTS idx_role_applications_user_id ON public.role_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_role_applications_status ON public.role_applications(status);
+CREATE INDEX IF NOT EXISTS idx_role_applications_role ON public.role_applications(role_applied_for);
+CREATE INDEX IF NOT EXISTS idx_role_applications_created_at ON public.role_applications(created_at);
 
 -- Add RLS policies
 ALTER TABLE public.role_applications ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own applications" ON public.role_applications;
 CREATE POLICY "Users can view their own applications"
     ON public.role_applications FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create their own applications" ON public.role_applications;
 CREATE POLICY "Users can create their own applications"
     ON public.role_applications FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all applications" ON public.role_applications;
 CREATE POLICY "Admins can view all applications"
     ON public.role_applications FOR SELECT
     USING (
@@ -319,6 +330,7 @@ CREATE POLICY "Admins can view all applications"
         )
     );
 
+DROP POLICY IF EXISTS "Admins can update applications" ON public.role_applications;
 CREATE POLICY "Admins can update applications"
     ON public.role_applications FOR UPDATE
     USING (
@@ -343,18 +355,23 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Apply updated_at trigger to all tables
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON public.user_profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_preferences_updated_at ON public.user_preferences;
 CREATE TRIGGER update_user_preferences_updated_at BEFORE UPDATE ON public.user_preferences
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_statistics_updated_at ON public.user_statistics;
 CREATE TRIGGER update_user_statistics_updated_at BEFORE UPDATE ON public.user_statistics
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_role_applications_updated_at ON public.role_applications;
 CREATE TRIGGER update_role_applications_updated_at BEFORE UPDATE ON public.role_applications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -378,6 +395,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS on_user_created ON public.users;
 CREATE TRIGGER on_user_created
     AFTER INSERT ON public.users
     FOR EACH ROW EXECUTE FUNCTION create_user_related_records();

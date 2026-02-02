@@ -69,15 +69,15 @@ CREATE TABLE IF NOT EXISTS public.coaches (
 );
 
 -- Add indexes
-CREATE INDEX idx_coaches_user_id ON public.coaches(user_id);
-CREATE INDEX idx_coaches_status ON public.coaches(status);
-CREATE INDEX idx_coaches_is_accepting ON public.coaches(is_accepting_students);
-CREATE INDEX idx_coaches_is_featured ON public.coaches(is_featured);
-CREATE INDEX idx_coaches_average_rating ON public.coaches(average_rating);
-CREATE INDEX idx_coaches_certifications_verified ON public.coaches(certifications_verified);
+CREATE INDEX IF NOT EXISTS idx_coaches_user_id ON public.coaches(user_id);
+CREATE INDEX IF NOT EXISTS idx_coaches_status ON public.coaches(status);
+CREATE INDEX IF NOT EXISTS idx_coaches_is_accepting ON public.coaches(is_accepting_students);
+CREATE INDEX IF NOT EXISTS idx_coaches_is_featured ON public.coaches(is_featured);
+CREATE INDEX IF NOT EXISTS idx_coaches_average_rating ON public.coaches(average_rating);
+CREATE INDEX IF NOT EXISTS idx_coaches_certifications_verified ON public.coaches(certifications_verified);
 
 -- Full-text search
-CREATE INDEX idx_coaches_search ON public.coaches USING gin(
+CREATE INDEX IF NOT EXISTS idx_coaches_search ON public.coaches USING gin(
     to_tsvector('english', coalesce(bio, '') || ' ' || coalesce(coaching_philosophy, ''))
 );
 
@@ -168,13 +168,13 @@ CREATE TABLE IF NOT EXISTS public.coaching_sessions (
 );
 
 -- Add indexes
-CREATE INDEX idx_coaching_sessions_coach ON public.coaching_sessions(coach_id);
-CREATE INDEX idx_coaching_sessions_student ON public.coaching_sessions(student_id);
-CREATE INDEX idx_coaching_sessions_date ON public.coaching_sessions(session_date);
-CREATE INDEX idx_coaching_sessions_status ON public.coaching_sessions(status);
-CREATE INDEX idx_coaching_sessions_payment_status ON public.coaching_sessions(payment_status);
-CREATE INDEX idx_coaching_sessions_court ON public.coaching_sessions(court_id);
-CREATE INDEX idx_coaching_sessions_confirmation ON public.coaching_sessions(confirmation_code);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_coach ON public.coaching_sessions(coach_id);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_student ON public.coaching_sessions(student_id);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_date ON public.coaching_sessions(session_date);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_status ON public.coaching_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_payment_status ON public.coaching_sessions(payment_status);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_court ON public.coaching_sessions(court_id);
+CREATE INDEX IF NOT EXISTS idx_coaching_sessions_confirmation ON public.coaching_sessions(confirmation_code);
 
 -- Add RLS policies
 ALTER TABLE public.coaching_sessions ENABLE ROW LEVEL SECURITY;
@@ -226,8 +226,8 @@ CREATE TABLE IF NOT EXISTS public.coaching_session_participants (
 );
 
 -- Add indexes
-CREATE INDEX idx_session_participants_session ON public.coaching_session_participants(session_id);
-CREATE INDEX idx_session_participants_user ON public.coaching_session_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_session_participants_session ON public.coaching_session_participants(session_id);
+CREATE INDEX IF NOT EXISTS idx_session_participants_user ON public.coaching_session_participants(user_id);
 
 -- Add RLS policies
 ALTER TABLE public.coaching_session_participants ENABLE ROW LEVEL SECURITY;

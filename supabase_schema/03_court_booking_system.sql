@@ -55,14 +55,14 @@ CREATE TABLE IF NOT EXISTS public.bookings (
 );
 
 -- Add indexes
-CREATE INDEX idx_bookings_user_id ON public.bookings(user_id);
-CREATE INDEX idx_bookings_court_id ON public.bookings(court_id);
-CREATE INDEX idx_bookings_booking_date ON public.bookings(booking_date);
-CREATE INDEX idx_bookings_status ON public.bookings(status);
-CREATE INDEX idx_bookings_payment_status ON public.bookings(payment_status);
-CREATE INDEX idx_bookings_confirmation_code ON public.bookings(confirmation_code);
-CREATE INDEX idx_bookings_created_at ON public.bookings(created_at);
-CREATE INDEX idx_bookings_court_date ON public.bookings(court_id, booking_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON public.bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_court_id ON public.bookings(court_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_booking_date ON public.bookings(booking_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_payment_status ON public.bookings(payment_status);
+CREATE INDEX IF NOT EXISTS idx_bookings_confirmation_code ON public.bookings(confirmation_code);
+CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON public.bookings(created_at);
+CREATE INDEX IF NOT EXISTS idx_bookings_court_date ON public.bookings(court_id, booking_date);
 
 -- Add RLS policies
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
@@ -126,9 +126,9 @@ CREATE TABLE IF NOT EXISTS public.availability_slots (
 );
 
 -- Add indexes
-CREATE INDEX idx_availability_slots_court_id ON public.availability_slots(court_id);
-CREATE INDEX idx_availability_slots_day ON public.availability_slots(day_of_week);
-CREATE INDEX idx_availability_slots_is_available ON public.availability_slots(is_available);
+CREATE INDEX IF NOT EXISTS idx_availability_slots_court_id ON public.availability_slots(court_id);
+CREATE INDEX IF NOT EXISTS idx_availability_slots_day ON public.availability_slots(day_of_week);
+CREATE INDEX IF NOT EXISTS idx_availability_slots_is_available ON public.availability_slots(is_available);
 
 -- Add RLS policies
 ALTER TABLE public.availability_slots ENABLE ROW LEVEL SECURITY;
@@ -172,9 +172,9 @@ CREATE TABLE IF NOT EXISTS public.booking_reminders (
 );
 
 -- Add indexes
-CREATE INDEX idx_booking_reminders_booking_id ON public.booking_reminders(booking_id);
-CREATE INDEX idx_booking_reminders_send_at ON public.booking_reminders(send_at);
-CREATE INDEX idx_booking_reminders_status ON public.booking_reminders(status);
+CREATE INDEX IF NOT EXISTS idx_booking_reminders_booking_id ON public.booking_reminders(booking_id);
+CREATE INDEX IF NOT EXISTS idx_booking_reminders_send_at ON public.booking_reminders(send_at);
+CREATE INDEX IF NOT EXISTS idx_booking_reminders_status ON public.booking_reminders(status);
 
 -- =====================================================
 -- FUNCTIONS & TRIGGERS

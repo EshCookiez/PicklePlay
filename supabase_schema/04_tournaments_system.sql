@@ -98,21 +98,21 @@ CREATE TABLE IF NOT EXISTS public.tournaments (
 );
 
 -- Add indexes
-CREATE INDEX idx_tournaments_organizer ON public.tournaments(organizer_id);
-CREATE INDEX idx_tournaments_status ON public.tournaments(status);
-CREATE INDEX idx_tournaments_slug ON public.tournaments(slug);
-CREATE INDEX idx_tournaments_city ON public.tournaments(city);
-CREATE INDEX idx_tournaments_start_date ON public.tournaments(tournament_start_date);
-CREATE INDEX idx_tournaments_registration_dates ON public.tournaments(registration_start, registration_end);
-CREATE INDEX idx_tournaments_is_featured ON public.tournaments(is_featured);
-CREATE INDEX idx_tournaments_is_public ON public.tournaments(is_public);
-CREATE INDEX idx_tournaments_deleted_at ON public.tournaments(deleted_at) WHERE deleted_at IS NULL;
-CREATE INDEX idx_tournaments_location ON public.tournaments USING gist (
+CREATE INDEX IF NOT EXISTS idx_tournaments_organizer ON public.tournaments(organizer_id);
+CREATE INDEX IF NOT EXISTS idx_tournaments_status ON public.tournaments(status);
+CREATE INDEX IF NOT EXISTS idx_tournaments_slug ON public.tournaments(slug);
+CREATE INDEX IF NOT EXISTS idx_tournaments_city ON public.tournaments(city);
+CREATE INDEX IF NOT EXISTS idx_tournaments_start_date ON public.tournaments(tournament_start_date);
+CREATE INDEX IF NOT EXISTS idx_tournaments_registration_dates ON public.tournaments(registration_start, registration_end);
+CREATE INDEX IF NOT EXISTS idx_tournaments_is_featured ON public.tournaments(is_featured);
+CREATE INDEX IF NOT EXISTS idx_tournaments_is_public ON public.tournaments(is_public);
+CREATE INDEX IF NOT EXISTS idx_tournaments_deleted_at ON public.tournaments(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_tournaments_location ON public.tournaments USING gist (
     point(longitude, latitude)
 ) WHERE longitude IS NOT NULL AND latitude IS NOT NULL;
 
 -- Full-text search
-CREATE INDEX idx_tournaments_search ON public.tournaments USING gin(
+CREATE INDEX IF NOT EXISTS idx_tournaments_search ON public.tournaments USING gin(
     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(description, '') || ' ' || coalesce(city, ''))
 );
 
@@ -185,11 +185,11 @@ CREATE TABLE IF NOT EXISTS public.tournament_participants (
 );
 
 -- Add indexes
-CREATE INDEX idx_tournament_participants_tournament ON public.tournament_participants(tournament_id);
-CREATE INDEX idx_tournament_participants_user ON public.tournament_participants(user_id);
-CREATE INDEX idx_tournament_participants_status ON public.tournament_participants(status);
-CREATE INDEX idx_tournament_participants_partner ON public.tournament_participants(partner_user_id);
-CREATE INDEX idx_tournament_participants_placement ON public.tournament_participants(placement);
+CREATE INDEX IF NOT EXISTS idx_tournament_participants_tournament ON public.tournament_participants(tournament_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_participants_user ON public.tournament_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_participants_status ON public.tournament_participants(status);
+CREATE INDEX IF NOT EXISTS idx_tournament_participants_partner ON public.tournament_participants(partner_user_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_participants_placement ON public.tournament_participants(placement);
 
 -- Add RLS policies
 ALTER TABLE public.tournament_participants ENABLE ROW LEVEL SECURITY;
@@ -260,13 +260,13 @@ CREATE TABLE IF NOT EXISTS public.tournament_matches (
 );
 
 -- Add indexes
-CREATE INDEX idx_tournament_matches_tournament ON public.tournament_matches(tournament_id);
-CREATE INDEX idx_tournament_matches_round ON public.tournament_matches(tournament_id, round_number);
-CREATE INDEX idx_tournament_matches_participant_1 ON public.tournament_matches(participant_1_id);
-CREATE INDEX idx_tournament_matches_participant_2 ON public.tournament_matches(participant_2_id);
-CREATE INDEX idx_tournament_matches_winner ON public.tournament_matches(winner_id);
-CREATE INDEX idx_tournament_matches_status ON public.tournament_matches(status);
-CREATE INDEX idx_tournament_matches_scheduled ON public.tournament_matches(scheduled_date, scheduled_time);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_tournament ON public.tournament_matches(tournament_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_round ON public.tournament_matches(tournament_id, round_number);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_participant_1 ON public.tournament_matches(participant_1_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_participant_2 ON public.tournament_matches(participant_2_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_winner ON public.tournament_matches(winner_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_status ON public.tournament_matches(status);
+CREATE INDEX IF NOT EXISTS idx_tournament_matches_scheduled ON public.tournament_matches(scheduled_date, scheduled_time);
 
 -- Add RLS policies
 ALTER TABLE public.tournament_matches ENABLE ROW LEVEL SECURITY;

@@ -72,21 +72,21 @@ CREATE TABLE IF NOT EXISTS public.courts (
 );
 
 -- Add indexes for courts
-CREATE INDEX idx_courts_owner_id ON public.courts(owner_id);
-CREATE INDEX idx_courts_status ON public.courts(status);
-CREATE INDEX idx_courts_city ON public.courts(city);
-CREATE INDEX idx_courts_country ON public.courts(country);
-CREATE INDEX idx_courts_location ON public.courts USING gist (
+CREATE INDEX IF NOT EXISTS idx_courts_owner_id ON public.courts(owner_id);
+CREATE INDEX IF NOT EXISTS idx_courts_status ON public.courts(status);
+CREATE INDEX IF NOT EXISTS idx_courts_city ON public.courts(city);
+CREATE INDEX IF NOT EXISTS idx_courts_country ON public.courts(country);
+CREATE INDEX IF NOT EXISTS idx_courts_location ON public.courts USING gist (
     point(longitude, latitude)
 );
-CREATE INDEX idx_courts_is_active ON public.courts(is_active);
-CREATE INDEX idx_courts_is_featured ON public.courts(is_featured);
-CREATE INDEX idx_courts_rating ON public.courts(rating);
-CREATE INDEX idx_courts_created_at ON public.courts(created_at);
-CREATE INDEX idx_courts_deleted_at ON public.courts(deleted_at) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_courts_is_active ON public.courts(is_active);
+CREATE INDEX IF NOT EXISTS idx_courts_is_featured ON public.courts(is_featured);
+CREATE INDEX IF NOT EXISTS idx_courts_rating ON public.courts(rating);
+CREATE INDEX IF NOT EXISTS idx_courts_created_at ON public.courts(created_at);
+CREATE INDEX IF NOT EXISTS idx_courts_deleted_at ON public.courts(deleted_at) WHERE deleted_at IS NULL;
 
 -- Add full-text search index
-CREATE INDEX idx_courts_search ON public.courts USING gin(
+CREATE INDEX IF NOT EXISTS idx_courts_search ON public.courts USING gin(
     to_tsvector('english', coalesce(name, '') || ' ' || coalesce(description, '') || ' ' || coalesce(city, ''))
 );
 
@@ -177,8 +177,8 @@ CREATE TABLE IF NOT EXISTS public.court_amenity_relations (
 );
 
 -- Add indexes
-CREATE INDEX idx_court_amenity_relations_court ON public.court_amenity_relations(court_id);
-CREATE INDEX idx_court_amenity_relations_amenity ON public.court_amenity_relations(amenity_id);
+CREATE INDEX IF NOT EXISTS idx_court_amenity_relations_court ON public.court_amenity_relations(court_id);
+CREATE INDEX IF NOT EXISTS idx_court_amenity_relations_amenity ON public.court_amenity_relations(amenity_id);
 
 -- =====================================================
 -- COURT IMAGES TABLE (Normalized)
@@ -198,8 +198,8 @@ CREATE TABLE IF NOT EXISTS public.court_images (
 );
 
 -- Add indexes
-CREATE INDEX idx_court_images_court_id ON public.court_images(court_id);
-CREATE INDEX idx_court_images_is_cover ON public.court_images(is_cover);
+CREATE INDEX IF NOT EXISTS idx_court_images_court_id ON public.court_images(court_id);
+CREATE INDEX IF NOT EXISTS idx_court_images_is_cover ON public.court_images(is_cover);
 
 -- Add RLS policies
 ALTER TABLE public.court_images ENABLE ROW LEVEL SECURITY;
@@ -239,8 +239,8 @@ CREATE TABLE IF NOT EXISTS public.saved_courts (
 );
 
 -- Add indexes
-CREATE INDEX idx_saved_courts_user_id ON public.saved_courts(user_id);
-CREATE INDEX idx_saved_courts_court_id ON public.saved_courts(court_id);
+CREATE INDEX IF NOT EXISTS idx_saved_courts_user_id ON public.saved_courts(user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_courts_court_id ON public.saved_courts(court_id);
 
 -- Add RLS policies
 ALTER TABLE public.saved_courts ENABLE ROW LEVEL SECURITY;
