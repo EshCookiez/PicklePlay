@@ -59,6 +59,7 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default open for desktop
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const initialAuthLoadDone = React.useRef(false);
 
   const isSuperAdmin = authUser?.role === 'super_admin';
   const isAdmin = authUser?.role === 'admin';
@@ -79,11 +80,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!authLoading && !authUser) {
-      router.replace('/'); 
+      if (initialAuthLoadDone.current) {
+        router.replace('/'); 
+      }
       return;
     }
 
-    if (authUser) {
+    if (authUser && !initialAuthLoadDone.current) {
+      initialAuthLoadDone.current = true;
+      
       setUser(prev => ({
         ...prev,
         id: authUser.id.toString(),
@@ -170,16 +175,27 @@ export default function ProfilePage() {
         </nav>
 
         <main className="flex-1 px-3 sm:px-4 lg:px-6 py-3 overflow-x-hidden mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
-            {/* Render content based on active tab */}
-            {activeTab === 'overview' && (
-              isAnyAdmin ? <AdminOverview /> : <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />
-            )}
+            {/* Render content based on active tab - Keep admin components mounted to preserve state */}
+            <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
+              {isAnyAdmin ? <AdminOverview /> : <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />}
+            </div>
             
-            {activeTab === 'admin-overview' && <AdminOverview />}
+            <div style={{ display: activeTab === 'admin-overview' ? 'block' : 'none' }}>
+              {isAnyAdmin && <AdminOverview />}
+            </div>
             
-            {activeTab === 'user-mgmt' && isAnyAdmin && <UserManagement />}
-            {activeTab === 'court-mgmt' && isAnyAdmin && <CourtManagement />}
-            {activeTab === 'analytics' && isAnyAdmin && <AdminAnalytics />}
+            <div style={{ display: activeTab === 'user-mgmt' ? 'block' : 'none' }}>
+              {isAnyAdmin && <UserManagement />}
+            </div>
+            
+            <div style={{ display: activeTab === 'court-mgmt' ? 'block' : 'none' }}>
+              {isAnyAdmin && <CourtManagement />}
+            </div>
+            
+            <div style={{ display: activeTab === 'analytics' ? 'block' : 'none' }}>
+              {isAnyAdmin && <AdminAnalytics />}
+            </div>
+            
             {activeTab === 'roles' && <RolesManagement activeRole={activeRole} applications={MOCK_APPLICATIONS} onSwitchRole={() => {}} onApplyRole={(role) => setActiveRole(role)} />}
             
             {/* Other Profile Tabs */}

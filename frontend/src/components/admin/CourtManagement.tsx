@@ -6,6 +6,7 @@ import CourtsMap from '@/components/admin/CourtsMap';
 import { courtService } from '@/services/courtService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Court as DbCourt } from '@/types/database';
+import { globalCache } from '@/lib/cacheManager';
 import {
     MapPin,
     Plus,
@@ -29,7 +30,8 @@ import {
     AlertCircle,
     TrendingUp,
     Map,
-    List
+    List,
+    RefreshCw
 } from 'lucide-react';
 
 interface Court extends DbCourt {
@@ -58,6 +60,9 @@ function CourtManagement() {
     const [courts, setCourts] = useState<Court[]>([]);
     const [stats, setStats] = useState<CourtStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -268,6 +273,17 @@ function CourtManagement() {
     const inflightRef = useRef(0);
     const lastFetchKeyRef = useRef<string | null>(null);
     const lastFetchAtRef = useRef<number>(0);
+    const isVisibleRef = useRef(true);
+    const initialLoadDone = useRef(false);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            isVisibleRef.current = document.visibilityState === 'visible';
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -278,12 +294,23 @@ function CourtManagement() {
     }, [searchTerm]);
 
     useEffect(() => {
-        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+        if (!isVisibleRef.current) return;
 
         const searchValue = debouncedSearchTerm.trim();
+        const cacheKey = `courts_${statusFilter}_${typeFilter}_${searchValue}`;
+        
+        // Check if we have valid cached data
+        const cachedCourts = globalCache.get<Court[]>(cacheKey);
+        if (cachedCourts && initialLoadDone.current) {
+            setCourts(cachedCourts);
+            setLoading(false);
+            setIsFiltering(false);
+            return;
+        }
+
         const fetchKey = JSON.stringify({ statusFilter, typeFilter, searchValue, useMock });
         const now = Date.now();
-        const isDuplicate = fetchKey === lastFetchKeyRef.current && now - lastFetchAtRef.current < 5000;
+        const isDuplicate = fetchKey === lastFetchKeyRef.current && now - lastFetchAtRef.current < 3000;
 
         if (isDuplicate) return;
 
@@ -291,14 +318,18 @@ function CourtManagement() {
         lastFetchAtRef.current = now;
 
         const requestId = ++inflightRef.current;
-        fetchCourts(requestId, searchValue);
+        fetchCourts(requestId, searchValue, cacheKey);
         fetchStats(requestId);
     }, [statusFilter, typeFilter, debouncedSearchTerm, useMock]);
 
-    const fetchCourts = async (requestId: number, searchValue: string) => {
+    const fetchCourts = async (requestId: number, searchValue: string, cacheKey: string) => {
         try {
             if (requestId === inflightRef.current) {
-                setLoading(true);
+                if (initialLoadDone.current) {
+                    setIsFiltering(true);
+                } else {
+                    setLoading(true);
+                }
             }
             if (useMock) {
                 // Client-side filter on mock data
@@ -315,6 +346,7 @@ function CourtManagement() {
                 }
                 if (requestId === inflightRef.current) {
                     setCourts(data);
+                    globalCache.set(cacheKey, data); // Cache the result
                 }
             } else {
                 const result = await courtService.getCourts({
@@ -324,6 +356,7 @@ function CourtManagement() {
                 });
                 if (requestId === inflightRef.current) {
                     setCourts(result.data as Court[]);
+                    globalCache.set(cacheKey, result.data as Court[]); // Cache the result
                 }
             }
         } catch (error) {
@@ -331,6 +364,10 @@ function CourtManagement() {
         } finally {
             if (requestId === inflightRef.current) {
                 setLoading(false);
+                setIsFiltering(false);
+                setIsRefreshing(false);
+                setLastUpdated(new Date());
+                initialLoadDone.current = true;
             }
         }
     };
@@ -369,6 +406,16 @@ function CourtManagement() {
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
+    };
+
+    const handleManualRefresh = () => {
+        setIsRefreshing(true);
+        lastFetchKeyRef.current = null;
+        globalCache.clearAll(); // Clear all cache on manual refresh
+        const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+        const requestId = ++inflightRef.current;
+        fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+        fetchStats(requestId);
     };
 
     const handleApprove = async (courtId: number) => {
@@ -490,9 +537,25 @@ function CourtManagement() {
                     <h1 className="text-3xl font-black text-[#0f2e22] tracking-tight">Court Moderation</h1>
                     <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mt-2">
                         Manage court listings and verification status
+                        {lastUpdated && (
+                            <span className="ml-3 text-slate-400 font-normal normal-case">
+                                • Last updated: {lastUpdated.toLocaleTimeString()}
+                            </span>
+                        )}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    {/* Refresh Button */}
+                    <button
+                        onClick={handleManualRefresh}
+                        disabled={isRefreshing || loading}
+                        className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        title="Refresh data"
+                    >
+                        <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                    </button>
+                    
                     {/* View Toggle */}
                     <div className="flex bg-white border border-green-200 rounded-xl p-1">
                         <button
@@ -830,7 +893,13 @@ function CourtManagement() {
             )}
 
             {/* Filters and Search */}
-            <Card className="p-4 bg-white border border-slate-200">
+            <Card className="p-4 bg-white border border-slate-200 relative">
+                {isFiltering && (
+                    <div className="absolute top-2 right-2 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full animate-pulse">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-spin"></div>
+                        Filtering...
+                    </div>
+                )}
                 <div className="flex flex-col md:flex-row gap-4">
                     {/* Search Input */}
                     <div className="flex-1">
@@ -917,7 +986,7 @@ function CourtManagement() {
             {/* List View */}
             {viewMode === 'list' && (
                 <div className="space-y-4">
-                    {loading ? (
+                    {loading && !initialLoadDone.current ? (
                         <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0f2e22]"></div>
                         </div>
