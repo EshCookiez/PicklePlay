@@ -27,10 +27,10 @@ import PaymentInfo from '@/components/profile/PaymentInfo';
 import ProfessionalInfo from '@/components/profile/ProfessionalInfo';
 import ProfileCompletion from '@/components/profile/ProfileCompletion';
 import EditProfileModal from '@/components/profile/Modals/EditProfile';
-import { 
-  Menu, 
-  Settings as SettingsIcon, 
-  LogOut, 
+import {
+  Menu,
+  Settings as SettingsIcon,
+  LogOut,
   Bell,
   Search,
   ChevronDown,
@@ -74,21 +74,21 @@ export default function ProfilePage() {
     if (navItems.some(item => item.id === hash)) {
       setActiveTab(hash);
     } else {
-      setActiveTab(isAnyAdmin ? 'admin-overview' : 'overview');
+      setActiveTab('overview');
     }
   }, [isAnyAdmin, isSuperAdmin, isAdmin, navItems]);
 
   useEffect(() => {
     if (!authLoading && !authUser) {
       if (initialAuthLoadDone.current) {
-        router.replace('/'); 
+        router.replace('/');
       }
       return;
     }
 
     if (authUser && !initialAuthLoadDone.current) {
       initialAuthLoadDone.current = true;
-      
+
       setUser(prev => ({
         ...prev,
         id: authUser.id.toString(),
@@ -153,20 +153,18 @@ export default function ProfilePage() {
               // Get the correct icon component
               const IconComponent = item.icon;
               const isActive = activeTab === item.id;
-              
+
               return (
                 <button
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${
-                    isActive
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${isActive
                       ? 'border-[#0f2e22] text-[#0f2e22]'
                       : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
-                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                    isActive ? 'text-[#a3e635]' : 'text-slate-400'
-                  }`} />
+                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-[#a3e635]' : 'text-slate-400'
+                    }`} />
                   <span className="hidden sm:inline">{item.label}</span>
                 </button>
               );
@@ -175,40 +173,40 @@ export default function ProfilePage() {
         </nav>
 
         <main className="flex-1 px-3 sm:px-4 lg:px-6 py-3 overflow-x-hidden mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
-            {/* Render content based on active tab - Keep admin components mounted to preserve state */}
-            <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
-              {isAnyAdmin ? <AdminOverview /> : <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />}
-            </div>
-            
-            <div style={{ display: activeTab === 'admin-overview' ? 'block' : 'none' }}>
-              {isAnyAdmin && <AdminOverview />}
-            </div>
-            
-            <div style={{ display: activeTab === 'user-mgmt' ? 'block' : 'none' }}>
-              {isAnyAdmin && <UserManagement />}
-            </div>
-            
-            <div style={{ display: activeTab === 'court-mgmt' ? 'block' : 'none' }}>
-              {isAnyAdmin && <CourtManagement />}
-            </div>
-            
-            <div style={{ display: activeTab === 'analytics' ? 'block' : 'none' }}>
-              {isAnyAdmin && <AdminAnalytics />}
-            </div>
-            
-            {activeTab === 'roles' && <RolesManagement activeRole={activeRole} applications={MOCK_APPLICATIONS} onSwitchRole={() => {}} onApplyRole={(role) => setActiveRole(role)} />}
-            
-            {/* Other Profile Tabs */}
-            {activeTab === 'stats' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
-            {activeTab === 'financials' && <PaymentInfo />}
-            {activeTab === 'verification' && <Verification user={user} />}
-            {activeTab === 'statistics' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
-            {activeTab === 'applications' && <Verification user={user} />}
-            {activeTab === 'settings' && <Settings />}
-            {activeTab === 'security' && <Security />}
-            {activeTab === 'payment' && <PaymentInfo />}
-            {activeTab === 'professional' && <ProfessionalInfo role={activeRole} />}
-            {activeTab === 'completion' && <ProfileCompletion user={user} />}
+          {/* Render content based on active tab - Keep admin components mounted to preserve state */}
+          <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
+            <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />
+          </div>
+
+          <div style={{ display: activeTab === 'admin-overview' ? 'block' : 'none' }}>
+            {isAnyAdmin && <AdminOverview />}
+          </div>
+
+          <div style={{ display: activeTab === 'user-mgmt' ? 'block' : 'none' }}>
+            {isAnyAdmin && <UserManagement />}
+          </div>
+
+          <div style={{ display: activeTab === 'court-mgmt' ? 'block' : 'none' }}>
+            {isAnyAdmin && <CourtManagement />}
+          </div>
+
+          <div style={{ display: activeTab === 'analytics' ? 'block' : 'none' }}>
+            {isAnyAdmin && <AdminAnalytics />}
+          </div>
+
+          {activeTab === 'roles' && <RolesManagement activeRole={activeRole} applications={MOCK_APPLICATIONS} onSwitchRole={() => { }} onApplyRole={(role) => setActiveRole(role)} />}
+
+          {/* Other Profile Tabs */}
+          {activeTab === 'stats' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
+          {activeTab === 'financials' && <PaymentInfo />}
+          {activeTab === 'verification' && <Verification user={user} />}
+          {activeTab === 'statistics' && <Statistics stats={MOCK_STATS} activeRole={activeRole} />}
+          {activeTab === 'applications' && <Verification user={user} />}
+          {activeTab === 'settings' && <Settings />}
+          {activeTab === 'security' && <Security />}
+          {activeTab === 'payment' && <PaymentInfo />}
+          {activeTab === 'professional' && <ProfessionalInfo role={activeRole} />}
+          {activeTab === 'completion' && <ProfileCompletion user={user} />}
         </main>
 
       </div>
