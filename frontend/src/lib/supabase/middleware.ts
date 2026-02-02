@@ -3,12 +3,43 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 /**
  * Middleware Supabase client for authentication
- * This refreshes the user's session on every request
+ * Only refreshes session on protected routes to minimize refetches
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
+
+  // Protected routes that require authentication
+  const protectedRoutes = [
+    '/profile',
+    '/dashboard', 
+    '/activity',
+    '/wallet',
+    '/billing',
+    '/messages',
+    '/settings',
+    '/players',
+    '/tournaments',
+    '/teams',
+    '/community',
+    '/rankings',
+    '/rewards',
+    '/coaching',
+    '/articles',
+    '/traffic',
+    '/statistic',
+  ];
+  
+  const isProtectedRoute = protectedRoutes.some(route => 
+    request.nextUrl.pathname.startsWith(route)
+  );
+
+  // Only check auth for protected routes to minimize session refreshes
+  // This prevents unnecessary auth checks on every navigation/focus
+  if (!isProtectedRoute) {
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,33 +70,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes that require authentication
-  const protectedRoutes = [
-    '/profile',
-    '/dashboard', 
-    '/activity',
-    '/wallet',
-    '/billing',
-    '/messages',
-    '/settings',
-    '/players',
-    '/tournaments',
-    '/teams',
-    '/community',
-    '/rankings',
-    '/rewards',
-    '/coaching',
-    '/articles',
-    '/traffic',
-    '/statistic',
-  ];
-  
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  );
-
   // Redirect to home page if trying to access protected route without authentication
-  if (!user && isProtectedRoute) {
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     // Add a query param to trigger login modal
@@ -74,14 +80,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Add cache control headers to prevent back button from showing stale authenticated pages
-  if (isProtectedRoute) {
-    supabaseResponse.headers.set(
-      'Cache-Control',
-      'no-store, no-cache, must-revalidate, proxy-revalidate'
-    )
-    supabaseResponse.headers.set('Pragma', 'no-cache')
-    supabaseResponse.headers.set('Expires', '0')
-  }
+  supabaseResponse.headers.set(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, proxy-revalidate'
+  )
+  supabaseResponse.headers.set('Pragma', 'no-cache')
+  supabaseResponse.headers.set('Expires', '0')
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:

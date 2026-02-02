@@ -91,6 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted || !initialCheckDone) return;
 
+      // Ignore focus events - refetch only on actual auth changes
+      if (event === 'INITIAL_SESSION' || event === 'MFA_CHALLENGE_VERIFIED') {
+        return;
+      }
+
       // Only refetch user data on actual auth state changes, not on focus/visibility
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         setSession(session);

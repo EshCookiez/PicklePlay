@@ -1,6 +1,7 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, Badge, Input, Button } from '@/components/profile/ui/Common';
+import { globalCache } from '@/lib/cacheManager';
 import {
     Search,
     Filter,
@@ -56,6 +57,9 @@ function UserManagement() {
     const [users, setUsers] = useState<User[]>([]);
     const [statistics, setStatistics] = useState<UserStatistics | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isFiltering, setIsFiltering] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -64,8 +68,22 @@ function UserManagement() {
     const [roleFilter, setRoleFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
     const initialLoadDone = React.useRef(false);
+    const inflightRef = useRef(0);
+    const lastFetchKeyRef = useRef<string | null>(null);
+    const lastFetchAtRef = useRef<number>(0);
+    const isVisibleRef = useRef(true);
 
     const visibleFields = useMemo(() => fieldConfig.filter(f => f.visible), [fieldConfig]);
+
+    // Track visibility state
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            isVisibleRef.current = document.visibilityState === 'visible';
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
 
     // Debounce search term
     useEffect(() => {
@@ -78,9 +96,28 @@ function UserManagement() {
     }, [searchTerm]);
 
     // Fetch users from API
-    const fetchUsers = async () => {
+    const fetchUsers = async (requestId: number, cacheKey: string) => {
         try {
-            setLoading(true);
+            // Check cache first
+            const cachedUsers = globalCache.get<any>(cacheKey);
+            if (cachedUsers && initialLoadDone.current) {
+                if (requestId === inflightRef.current) {
+                    setUsers(cachedUsers.users);
+                    setTotalPages(cachedUsers.lastPage);
+                    setTotalUsers(cachedUsers.total);
+                    setLoading(false);
+                    setIsFiltering(false);
+                }
+                return;
+            }
+
+            if (requestId === inflightRef.current) {
+                if (initialLoadDone.current) {
+                    setIsFiltering(true);
+                } else {
+                    setLoading(true);
+                }
+            }
             setError(null);
             
             const filters: UserFilters = {
@@ -100,7 +137,7 @@ function UserManagement() {
             
             const response = await adminService.getUsers(filters);
             
-            if (response.success) {
+            if (response.success && requestId === inflightRef.current) {
                 // Transform users to include joined and lastActive dates
                 const transformedUsers = response.data.users.map(u => ({
                     ...u,
@@ -110,12 +147,26 @@ function UserManagement() {
                 setUsers(transformedUsers);
                 setTotalPages(response.data.pagination.last_page);
                 setTotalUsers(response.data.pagination.total);
+                // Cache the result
+                globalCache.set(cacheKey, {
+                    users: transformedUsers,
+                    lastPage: response.data.pagination.last_page,
+                    total: response.data.pagination.total,
+                });
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to fetch users');
+            if (requestId === inflightRef.current) {
+                setError(err.response?.data?.message || 'Failed to fetch users');
+            }
             console.error('Error fetching users:', err);
         } finally {
-            setLoading(false);
+            if (requestId === inflightRef.current) {
+                setLoading(false);
+                setIsFiltering(false);
+                setIsRefreshing(false);
+                setLastUpdated(new Date());
+                initialLoadDone.current = true;
+            }
         }
     };
 
@@ -131,8 +182,21 @@ function UserManagement() {
 
     // Load data on mount and when filters change
     useEffect(() => {
-        fetchUsers();
-        initialLoadDone.current = true;
+        if (!isVisibleRef.current) return;
+
+        const cacheKey = `users_${currentPage}_${perPage}_${debouncedSearchTerm}_${roleFilter}_${statusFilter}`;
+        
+        const fetchKey = JSON.stringify({ currentPage, perPage, debouncedSearchTerm, roleFilter, statusFilter });
+        const now = Date.now();
+        const isDuplicate = fetchKey === lastFetchKeyRef.current && now - lastFetchAtRef.current < 3000;
+
+        if (isDuplicate) return;
+
+        lastFetchKeyRef.current = fetchKey;
+        lastFetchAtRef.current = now;
+
+        const requestId = ++inflightRef.current;
+        fetchUsers(requestId, cacheKey);
     }, [currentPage, perPage, debouncedSearchTerm, roleFilter, statusFilter]);
 
     useEffect(() => {
@@ -142,22 +206,25 @@ function UserManagement() {
         }
     }, []);
 
-    // Prevent refetch on window focus unless filters changed
-    useEffect(() => {
-        const handleVisibilityChange = () => {
-            // Do nothing on visibility change to prevent unnecessary refetch
-            // Data will only be fetched when user explicitly changes filters
-        };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, []);
+    // Add manual refresh function
+    const handleManualRefresh = () => {
+        setIsRefreshing(true);
+        lastFetchKeyRef.current = null;
+        globalCache.clearAll();
+        const cacheKey = `users_${currentPage}_${perPage}_${debouncedSearchTerm}_${roleFilter}_${statusFilter}`;
+        const requestId = ++inflightRef.current;
+        fetchUsers(requestId, cacheKey);
+    };
 
     // Handle user actions
     const handleToggleStatus = async (userId: string) => {
         try {
             await adminService.toggleUserStatus(userId);
-            fetchUsers(); // Refresh list
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `users_${currentPage}_${perPage}_${debouncedSearchTerm}_${roleFilter}_${statusFilter}`;
+            const requestId = ++inflightRef.current;
+            fetchUsers(requestId, cacheKey);
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to toggle user status');
         }
@@ -168,7 +235,11 @@ function UserManagement() {
         
         try {
             await adminService.deleteUser(userId);
-            fetchUsers(); // Refresh list
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `users_${currentPage}_${perPage}_${debouncedSearchTerm}_${roleFilter}_${statusFilter}`;
+            const requestId = ++inflightRef.current;
+            fetchUsers(requestId, cacheKey);
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to delete user');
         }
@@ -297,15 +368,40 @@ function UserManagement() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-[#0f2e22] tracking-tight">User Management</h1>
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mt-2">Manage global user accounts and permissions</p>
+                    <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mt-2">
+                        Manage global user accounts and permissions
+                        {lastUpdated && (
+                            <span className="ml-3 text-slate-400 font-normal normal-case">
+                                • Last updated: {lastUpdated.toLocaleTimeString()}
+                            </span>
+                        )}
+                    </p>
                 </div>
-                <Button variant="primary" className="md:w-auto bg-[#0f2e22] hover:bg-black text-white">
-                    <UserPlus size={16} />
-                    <span>Add New User</span>
-                </Button>
+                <div className="flex items-center gap-3">
+                    {/* Refresh Button */}
+                    <button
+                        onClick={handleManualRefresh}
+                        disabled={isRefreshing || loading}
+                        className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        title="Refresh data"
+                    >
+                        <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                    </button>
+                    
+                    <Button variant="primary" className="md:w-auto bg-[#0f2e22] hover:bg-black text-white">
+                        <UserPlus size={16} />
+                        <span>Add New User</span>
+                    </Button>
+                </div>
             </div>
 
-            <Card className="overflow-visible shadow-lg border border-blue-100 bg-white">
+            <Card className="overflow-visible shadow-lg border border-blue-100 bg-white relative">{isFiltering && (
+                    <div className="absolute top-2 right-2 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full animate-pulse">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-spin"></div>
+                        Filtering...
+                    </div>
+                )}
                 <div className="p-6 border-b border-blue-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-gradient-to-r from-blue-50 to-transparent">
                     <div className="relative w-full md:max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1E40AF]" size={18} />
@@ -514,7 +610,7 @@ function UserManagement() {
                 )}
 
                 <div className="overflow-x-auto">
-                    {loading ? (
+                    {loading && !initialLoadDone.current ? (
                         <div className="flex items-center justify-center py-12">
                             <RefreshCw className="animate-spin text-[#1E40AF]" size={32} />
                             <span className="ml-3 text-sm font-bold text-slate-600">Loading users...</span>
@@ -524,7 +620,13 @@ function UserManagement() {
                             <XCircle className="text-rose-500" size={48} />
                             <p className="mt-3 text-sm font-bold text-slate-600">{error}</p>
                             <button 
-                                onClick={fetchUsers}
+                                onClick={() => {
+                                    lastFetchKeyRef.current = null;
+                                    globalCache.clearAll();
+                                    const cacheKey = `users_${currentPage}_${perPage}_${debouncedSearchTerm}_${roleFilter}_${statusFilter}`;
+                                    const requestId = ++inflightRef.current;
+                                    fetchUsers(requestId, cacheKey);
+                                }}
                                 className="mt-4 px-6 py-2 bg-[#1E40AF] text-white rounded-xl font-bold hover:bg-blue-900 transition-colors"
                             >
                                 Try Again
