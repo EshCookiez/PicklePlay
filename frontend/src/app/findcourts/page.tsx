@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, MapPin, Star, Clock, Users, Filter, ChevronDown, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import { useCourts } from "@/hooks/useCourts";
 
-interface Court {
+// UI-normalized Court type used by the page regardless of data source
+interface UICourt {
   id: string;
   name: string;
   address: string;
@@ -27,7 +29,7 @@ interface Court {
   description?: string;
 }
 
-const mockCourts: Court[] = [
+const mockCourts: UICourt[] = [
   {
     id: "1",
     name: "Makati Sports Club",
@@ -160,12 +162,27 @@ const cities = [
   "Pasay"
 ];
 
+// Helper to format hours from DB structure
+function formatDbHours(hours: Record<string, { open: string; close: string }> | null): string {
+  if (!hours || typeof hours !== "object") return "See hours";
+  const days = Object.keys(hours);
+  if (days.length === 0) return "See hours";
+  // Check if all days have same open/close
+  const first = hours[days[0]];
+  const allSame = days.every((d) => hours[d]?.open === first.open && hours[d]?.close === first.close);
+  if (allSame && first?.open && first?.close) {
+    return `Daily ${first.open} - ${first.close}`;
+  }
+  return "Varies by day";
+}
+
 export default function FindCourts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredCourts, setFilteredCourts] = useState(mockCourts);
-  const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
+  const [filteredCourts, setFilteredCourts] = useState<UICourt[]>(mockCourts);
+  const [selectedCourt, setSelectedCourt] = useState<UICourt | null>(null);
+  const [useMock, setUseMock] = useState(false); // Toggle between live (Supabase) and mock
   
   // Filter states
   const [indoorOnly, setIndoorOnly] = useState(false);
@@ -173,39 +190,109 @@ export default function FindCourts() {
   const [lightsOnly, setLightsOnly] = useState(false);
   const [equipmentOnly, setEquipmentOnly] = useState(false);
 
+  // Build filters for live data
+  const liveFilters = useMemo(() => {
+    const type = indoorOnly && outdoorOnly
+      ? "both"
+      : indoorOnly
+      ? "indoor"
+      : outdoorOnly
+      ? "outdoor"
+      : undefined;
+    return {
+      status: "approved",
+      city: selectedCity !== "All Cities" ? selectedCity : undefined,
+      type,
+    } as { status?: string; city?: string; type?: string };
+  }, [indoorOnly, outdoorOnly, selectedCity]);
+
+  // Fetch real courts when using live data
+  const { courts: realCourts, loading: realLoading, error: realError } = useCourts(liveFilters);
+
+  // Normalize real courts to UI type
+  const normalizedRealCourts: UICourt[] = useMemo(() => {
+    if (!realCourts) return [];
+    return realCourts.map((c: any) => {
+      const amenities: string[] = Array.isArray(c.amenities) ? c.amenities : [];
+      const image = c.cover_image || (Array.isArray(c.images) && c.images.length > 0 ? c.images[0] : "https://placehold.co/600x400/0a56a7/white?text=PicklePlay+Court");
+      const indoor = c.type === "indoor" || c.type === "both";
+      const outdoor = c.type === "outdoor" || c.type === "both";
+      const lights = amenities.map(a => a.toLowerCase()).includes("lights");
+      const equipment = amenities.map(a => a.toLowerCase()).includes("equipment");
+      const price = c.is_free ? "Free" : (typeof c.price_per_hour === "number" ? `₱${c.price_per_hour}/hour` : "See pricing");
+      const hours = formatDbHours(c.hours_of_operation || null);
+      return {
+        id: String(c.id),
+        name: c.name,
+        address: c.address,
+        city: c.city,
+        rating: typeof c.rating === "number" ? c.rating : 0,
+        reviews: typeof c.total_reviews === "number" ? c.total_reviews : 0,
+        image,
+        courts: typeof c.number_of_courts === "number" ? c.number_of_courts : 0,
+        indoor,
+        outdoor,
+        lights,
+        equipment,
+        price,
+        hours,
+        phone: c.phone_number || undefined,
+        website: c.website || undefined,
+        description: c.description || undefined,
+      } as UICourt;
+    });
+  }, [realCourts]);
+
+  // Compute filtered list based on source
   useEffect(() => {
-    let filtered = mockCourts;
+    if (useMock) {
+      let filtered = mockCourts;
 
-    // Search filter
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(court =>
-        court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        court.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        court.city.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+      // Search filter
+      if (searchQuery.trim()) {
+        filtered = filtered.filter(court =>
+          court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          court.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          court.city.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
 
-    // City filter
-    if (selectedCity !== "All Cities") {
-      filtered = filtered.filter(court => court.city === selectedCity);
-    }
+      // City filter
+      if (selectedCity !== "All Cities") {
+        filtered = filtered.filter(court => court.city === selectedCity);
+      }
 
-    // Feature filters
-    if (indoorOnly) {
-      filtered = filtered.filter(court => court.indoor);
-    }
-    if (outdoorOnly) {
-      filtered = filtered.filter(court => court.outdoor);
-    }
-    if (lightsOnly) {
-      filtered = filtered.filter(court => court.lights);
-    }
-    if (equipmentOnly) {
-      filtered = filtered.filter(court => court.equipment);
-    }
+      // Feature filters
+      if (indoorOnly) filtered = filtered.filter(court => court.indoor);
+      if (outdoorOnly) filtered = filtered.filter(court => court.outdoor);
+      if (lightsOnly) filtered = filtered.filter(court => court.lights);
+      if (equipmentOnly) filtered = filtered.filter(court => court.equipment);
 
-    setFilteredCourts(filtered);
-  }, [searchQuery, selectedCity, indoorOnly, outdoorOnly, lightsOnly, equipmentOnly]);
+      setFilteredCourts(filtered);
+    } else {
+      // Live data: start from normalizedRealCourts and apply client-side search + amenities filters
+      let filtered = normalizedRealCourts;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(court =>
+          court.name.toLowerCase().includes(q) ||
+          court.address.toLowerCase().includes(q) ||
+          court.city.toLowerCase().includes(q)
+        );
+      }
+
+      // City already filtered server-side, but keep as safety
+      if (selectedCity !== "All Cities") {
+        filtered = filtered.filter(court => court.city === selectedCity);
+      }
+
+      if (lightsOnly) filtered = filtered.filter(c => c.lights);
+      if (equipmentOnly) filtered = filtered.filter(c => c.equipment);
+
+      setFilteredCourts(filtered);
+    }
+  }, [useMock, searchQuery, selectedCity, indoorOnly, outdoorOnly, lightsOnly, equipmentOnly, normalizedRealCourts]);
 
   const clearFilters = () => {
     setIndoorOnly(false);
@@ -277,6 +364,15 @@ export default function FindCourts() {
               )}
             </button>
 
+            {/* Data Source Toggle */}
+            <button
+              onClick={() => setUseMock((v) => !v)}
+              className={`px-4 py-2 rounded-lg border transition-colors ${useMock ? 'border-amber-400 text-amber-700 hover:bg-amber-50' : 'border-emerald-500 text-emerald-700 hover:bg-emerald-50'}`}
+              title={useMock ? 'Currently showing mock data' : 'Currently showing live data'}
+            >
+              {useMock ? 'Use Live Data' : 'Use Mock Data'}
+            </button>
+
             {/* Results Count */}
             <div className="ml-auto text-gray-600">
               {filteredCourts.length} courts found
@@ -338,7 +434,17 @@ export default function FindCourts() {
       {/* Courts Grid */}
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-4">
-          {filteredCourts.length === 0 ? (
+          {!useMock && realLoading ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 mx-auto mb-4">
+                <svg className="animate-spin w-full h-full text-[#0a56a7]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              <p className="text-gray-600">Loading courts...</p>
+            </div>
+          ) : filteredCourts.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-10 h-10 text-gray-400" />

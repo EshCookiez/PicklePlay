@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, Badge, Button } from '@/components/profile/ui/Common';
 import CourtsMap from '@/components/admin/CourtsMap';
 import { courtService } from '@/services/courtService';
@@ -53,12 +53,13 @@ interface CourtStats {
     total_bookings: number;
 }
 
-export default function CourtManagement() {
+function CourtManagement() {
     const { user } = useAuth();
     const [courts, setCourts] = useState<Court[]>([]);
     const [stats, setStats] = useState<CourtStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
@@ -66,39 +67,305 @@ export default function CourtManagement() {
     const [rejectReason, setRejectReason] = useState('');
     const [actionLoading, setActionLoading] = useState<number | null>(null);
     const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+    const [useMock, setUseMock] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [focusedCourtId, setFocusedCourtId] = useState<number | null>(null);
+    const [creating, setCreating] = useState(false);
+    const [createError, setCreateError] = useState<string | null>(null);
+
+    type NewCourtForm = {
+        name: string;
+        description: string;
+        type: 'indoor' | 'outdoor' | 'both';
+        surface: 'concrete' | 'asphalt' | 'sport_court' | 'wood' | 'other';
+        address: string;
+        city: string;
+        state_province: string;
+        country: string;
+        postal_code: string;
+        latitude?: string;
+        longitude?: string;
+        number_of_courts: number;
+        amen_lights: boolean;
+        amen_equipment: boolean;
+        is_free: boolean;
+        price_per_hour?: number | '';
+        requires_booking: boolean;
+        booking_url: string;
+        phone_number: string;
+        email: string;
+        website: string;
+        cover_image: string;
+        open_time: string; // HH:mm
+        close_time: string; // HH:mm
+    };
+
+    const [newCourt, setNewCourt] = useState<NewCourtForm>({
+        name: '',
+        description: '',
+        type: 'indoor',
+        surface: 'sport_court',
+        address: '',
+        city: '',
+        state_province: '',
+        country: 'Philippines',
+        postal_code: '',
+        latitude: '',
+        longitude: '',
+        number_of_courts: 1,
+        amen_lights: false,
+        amen_equipment: false,
+        is_free: false,
+        price_per_hour: 300,
+        requires_booking: false,
+        booking_url: '',
+        phone_number: '',
+        email: '',
+        website: '',
+        cover_image: '',
+        open_time: '06:00',
+        close_time: '22:00',
+    });
+
+    // UI helpers for consistent styling
+    const inputCls =
+        "w-full mt-1 px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0f2e22]/40 focus:border-[#0f2e22] text-sm";
+    const labelCls = "text-[11px] font-black text-slate-600 uppercase tracking-widest";
+
+    // Lightweight mock dataset for admin moderation views
+    const mockCourtsAdmin: Court[] = [
+        {
+            id: 101,
+            owner_id: 'mock-owner-1',
+            owner: { id: 1, first_name: 'Maya', last_name: 'Santos', email: 'maya@example.com' },
+            name: 'Mock Indoor Arena',
+            description: 'Premium indoor courts for testing moderation.',
+            type: 'indoor',
+            surface: 'sport_court',
+            address: '123 Mock St',
+            city: 'Makati',
+            state_province: 'NCR',
+            country: 'PH',
+            postal_code: '1200',
+            latitude: 14.5547,
+            longitude: 121.0244,
+            number_of_courts: 4,
+            amenities: ['lights', 'equipment'],
+            hours_of_operation: { mon: { open: '06:00', close: '22:00' } },
+            is_free: false,
+            price_per_hour: 500,
+            peak_hour_price: 700,
+            pricing_details: null,
+            phone_number: '+63 2 8888 1234',
+            email: 'contact@mockindoor.test',
+            website: 'mockindoor.test',
+            requires_booking: true,
+            booking_url: 'https://mockindoor.test/book',
+            images: [],
+            cover_image: null,
+            status: 'pending',
+            rejection_reason: null,
+            approved_by: null,
+            approved_at: null,
+            rating: 4.6,
+            total_reviews: 23,
+            total_bookings: 120,
+            view_count: 980,
+            is_featured: false,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            deleted_at: null,
+        } as unknown as Court,
+        {
+            id: 102,
+            owner_id: 'mock-owner-2',
+            owner: { id: 2, first_name: 'Leo', last_name: 'Cruz', email: 'leo@example.com' },
+            name: 'Mock Outdoor Courts',
+            description: 'Sunny outdoor complex for QA.',
+            type: 'outdoor',
+            surface: 'concrete',
+            address: '456 QA Ave',
+            city: 'Taguig',
+            state_province: 'NCR',
+            country: 'PH',
+            postal_code: '1630',
+            latitude: 14.5213,
+            longitude: 121.0537,
+            number_of_courts: 6,
+            amenities: ['lights'],
+            hours_of_operation: { mon: { open: '05:00', close: '21:00' } },
+            is_free: true,
+            price_per_hour: null,
+            peak_hour_price: null,
+            pricing_details: null,
+            phone_number: null,
+            email: null,
+            website: null,
+            requires_booking: false,
+            booking_url: null,
+            images: [],
+            cover_image: null,
+            status: 'approved',
+            rejection_reason: null,
+            approved_by: 'admin-1',
+            approved_at: new Date().toISOString(),
+            rating: 4.2,
+            total_reviews: 10,
+            total_bookings: 45,
+            view_count: 320,
+            is_featured: true,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            deleted_at: null,
+        } as unknown as Court,
+        {
+            id: 103,
+            owner_id: 'mock-owner-3',
+            owner: { id: 3, first_name: 'Ara', last_name: 'Dizon', email: 'ara@example.com' },
+            name: 'Mock Mixed Courts',
+            description: 'Both indoor and outdoor sample venue.',
+            type: 'both',
+            surface: 'asphalt',
+            address: '789 Sample Blvd',
+            city: 'Quezon City',
+            state_province: 'NCR',
+            country: 'PH',
+            postal_code: '1100',
+            latitude: 14.6760,
+            longitude: 121.0437,
+            number_of_courts: 3,
+            amenities: ['equipment'],
+            hours_of_operation: { mon: { open: '07:00', close: '20:00' } },
+            is_free: false,
+            price_per_hour: 250,
+            peak_hour_price: 350,
+            pricing_details: null,
+            phone_number: '+63 2 7777 5678',
+            email: 'info@mockmixed.test',
+            website: 'mockmixed.test',
+            requires_booking: false,
+            booking_url: null,
+            images: [],
+            cover_image: null,
+            status: 'rejected',
+            rejection_reason: 'Insufficient details provided',
+            approved_by: null,
+            approved_at: null,
+            rating: 0,
+            total_reviews: 0,
+            total_bookings: 0,
+            view_count: 12,
+            is_featured: false,
+            is_active: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            deleted_at: null,
+        } as unknown as Court,
+    ];
+
+    const inflightRef = useRef(0);
+    const lastFetchKeyRef = useRef<string | null>(null);
+    const lastFetchAtRef = useRef<number>(0);
 
     useEffect(() => {
-        fetchCourts();
-        fetchStats();
-    }, [statusFilter, typeFilter, searchTerm]);
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 400);
 
-    const fetchCourts = async () => {
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+
+        const searchValue = debouncedSearchTerm.trim();
+        const fetchKey = JSON.stringify({ statusFilter, typeFilter, searchValue, useMock });
+        const now = Date.now();
+        const isDuplicate = fetchKey === lastFetchKeyRef.current && now - lastFetchAtRef.current < 5000;
+
+        if (isDuplicate) return;
+
+        lastFetchKeyRef.current = fetchKey;
+        lastFetchAtRef.current = now;
+
+        const requestId = ++inflightRef.current;
+        fetchCourts(requestId, searchValue);
+        fetchStats(requestId);
+    }, [statusFilter, typeFilter, debouncedSearchTerm, useMock]);
+
+    const fetchCourts = async (requestId: number, searchValue: string) => {
         try {
-            setLoading(true);
-            const result = await courtService.getCourts({
-                status: statusFilter !== 'all' ? statusFilter as any : undefined,
-                type: typeFilter !== 'all' ? typeFilter : undefined,
-                search: searchTerm || undefined,
-            });
-            setCourts(result.data as Court[]);
+            if (requestId === inflightRef.current) {
+                setLoading(true);
+            }
+            if (useMock) {
+                // Client-side filter on mock data
+                let data = mockCourtsAdmin;
+                if (statusFilter !== 'all') data = data.filter(c => c.status === statusFilter);
+                if (typeFilter !== 'all') data = data.filter(c => c.type === (typeFilter as any));
+                if (searchValue) {
+                    const q = searchValue.toLowerCase();
+                    data = data.filter(c =>
+                        c.name.toLowerCase().includes(q) ||
+                        c.city.toLowerCase().includes(q) ||
+                        c.address.toLowerCase().includes(q)
+                    );
+                }
+                if (requestId === inflightRef.current) {
+                    setCourts(data);
+                }
+            } else {
+                const result = await courtService.getCourts({
+                    status: statusFilter !== 'all' ? (statusFilter as any) : undefined,
+                    type: typeFilter !== 'all' ? typeFilter : undefined,
+                    search: searchValue || undefined,
+                });
+                if (requestId === inflightRef.current) {
+                    setCourts(result.data as Court[]);
+                }
+            }
         } catch (error) {
             console.error('Error fetching courts:', error);
         } finally {
-            setLoading(false);
+            if (requestId === inflightRef.current) {
+                setLoading(false);
+            }
         }
     };
 
-    const fetchStats = async () => {
+    const fetchStats = async (requestId: number) => {
         try {
-            const data = await courtService.getStatistics();
-            setStats({
-                ...data,
-                suspended: 0,
-                active: 0,
-                featured: 0,
-                average_rating: 0,
-                total_bookings: 0,
-            });
+            if (useMock) {
+                const dataset = mockCourtsAdmin;
+                const summary: CourtStats = {
+                    total: dataset.length,
+                    pending: dataset.filter(c => c.status === 'pending').length,
+                    approved: dataset.filter(c => c.status === 'approved').length,
+                    rejected: dataset.filter(c => c.status === 'rejected').length,
+                    suspended: dataset.filter(c => c.status === 'suspended').length,
+                    active: dataset.filter(c => c.is_active).length,
+                    featured: dataset.filter(c => c.is_featured).length,
+                    average_rating: Number((dataset.reduce((s, c) => s + (c.rating || 0), 0) / Math.max(1, dataset.length)).toFixed(1)),
+                    total_bookings: dataset.reduce((s, c) => s + (c.total_bookings || 0), 0),
+                };
+                if (requestId === inflightRef.current) {
+                    setStats(summary);
+                }
+            } else {
+                const data = await courtService.getStatistics();
+                if (requestId === inflightRef.current) {
+                    setStats({
+                        ...data,
+                        suspended: 0,
+                        active: 0,
+                        featured: 0,
+                        average_rating: 0,
+                        total_bookings: 0,
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error fetching stats:', error);
         }
@@ -107,6 +374,10 @@ export default function CourtManagement() {
     const handleApprove = async (courtId: number) => {
         if (!confirm('Are you sure you want to approve this court?')) return;
         if (!user) return;
+        if (useMock) {
+            alert('Mock mode: action disabled');
+            return;
+        }
 
         try {
             setActionLoading(courtId);
@@ -125,6 +396,10 @@ export default function CourtManagement() {
     const handleReject = async () => {
         if (!selectedCourt || !rejectReason.trim()) {
             alert('Please provide a rejection reason');
+            return;
+        }
+        if (useMock) {
+            alert('Mock mode: action disabled');
             return;
         }
 
@@ -147,6 +422,10 @@ export default function CourtManagement() {
 
     const handleSuspend = async (courtId: number, reason: string = '') => {
         if (!confirm('Are you sure you want to suspend this court?')) return;
+        if (useMock) {
+            alert('Mock mode: action disabled');
+            return;
+        }
 
         try {
             setActionLoading(courtId);
@@ -164,6 +443,10 @@ export default function CourtManagement() {
 
     const handleDelete = async (courtId: number) => {
         if (!confirm('Are you sure you want to delete this court? This action cannot be undone.')) return;
+        if (useMock) {
+            alert('Mock mode: action disabled');
+            return;
+        }
 
         try {
             setActionLoading(courtId);
@@ -236,13 +519,23 @@ export default function CourtManagement() {
                         </button>
                     </div>
 
+                    {/* Data Source Toggle */}
+                    <button
+                        onClick={() => setUseMock(v => !v)}
+                        className={`px-4 py-2 rounded-xl border text-xs font-bold transition-colors ${useMock ? 'border-amber-400 text-amber-700 hover:bg-amber-50' : 'border-emerald-500 text-emerald-700 hover:bg-emerald-50'}`}
+                        title={useMock ? 'Currently showing mock admin courts' : 'Currently showing live admin courts'}
+                    >
+                        {useMock ? 'Use Live Data' : 'Use Mock Data'}
+                    </button>
+
                     <Button 
                         variant="secondary" 
                         className="bg-[#a3e635] text-[#0f2e22] hover:bg-lime-400 font-black"
-                        onClick={() => alert('Add new court feature coming soon!')}
+                        onClick={() => setShowCreateModal(true)}
+                        disabled={useMock}
                     >
                         <Plus size={16} />
-                        <span>New Court Listing</span>
+                        <span>{useMock ? 'New Court (Disabled in Mock)' : 'New Court Listing'}</span>
                     </Button>
                 </div>
             </div>
@@ -263,6 +556,271 @@ export default function CourtManagement() {
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-[#0f2e22] uppercase tracking-widest">{stat.label}</p>
+                                    {/* Create Court Modal */}
+                                    {showCreateModal && (
+                                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                            <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden">
+                                                {/* Modal Header */}
+                                                <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-white">
+                                                    <div>
+                                                        <h3 className="text-xl font-black text-[#0f2e22]">Create New Court Listing</h3>
+                                                        <p className="text-xs text-slate-600 font-semibold">Fill in the details below. New listings are set to Pending.</p>
+                                                    </div>
+                                                    <button
+                                                        className="px-3 py-1 text-sm rounded-lg border border-slate-300 hover:bg-slate-50"
+                                                        onClick={() => setShowCreateModal(false)}
+                                                        disabled={creating}
+                                                    >
+                                                        Close
+                                                    </button>
+                                                </div>
+
+                                                <div className="p-6 overflow-y-auto max-h-[80vh]">
+                                                {createError && (
+                                                    <div className="mb-4 p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm">
+                                                        {createError}
+                                                    </div>
+                                                )}
+
+                                                <form
+                                                    onSubmit={async (e) => {
+                                                        e.preventDefault();
+                                                        setCreateError(null);
+                                                        if (useMock) {
+                                                            setCreateError('Mock mode: creation is disabled');
+                                                            return;
+                                                        }
+                                                        try {
+                                                            // Basic validation
+                                                            if (!newCourt.name.trim()) throw new Error('Name is required');
+                                                            if (!newCourt.address.trim()) throw new Error('Address is required');
+                                                            if (!newCourt.city.trim()) throw new Error('City is required');
+                                                            if (!newCourt.country.trim()) throw new Error('Country is required');
+                                                            if (newCourt.number_of_courts < 1) throw new Error('Number of courts must be at least 1');
+
+                                                            setCreating(true);
+
+                                                            const amenities: string[] = [];
+                                                            if (newCourt.amen_lights) amenities.push('lights');
+                                                            if (newCourt.amen_equipment) amenities.push('equipment');
+
+                                                            const hours = {
+                                                                mon: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                tue: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                wed: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                thu: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                fri: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                sat: { open: newCourt.open_time, close: newCourt.close_time },
+                                                                sun: { open: newCourt.open_time, close: newCourt.close_time },
+                                                            } as Record<string, { open: string; close: string }>;
+
+                                                            // Build payload expected by POST /api/courts
+                                                            const payload: any = {
+                                                                name: newCourt.name,
+                                                                description: newCourt.description || null,
+                                                                type: newCourt.type,
+                                                                surface: newCourt.surface,
+                                                                address: newCourt.address,
+                                                                city: newCourt.city,
+                                                                state_province: newCourt.state_province || null,
+                                                                country: newCourt.country,
+                                                                postal_code: newCourt.postal_code || null,
+                                                                latitude: newCourt.latitude ? Number(newCourt.latitude) : null,
+                                                                longitude: newCourt.longitude ? Number(newCourt.longitude) : null,
+                                                                number_of_courts: Number(newCourt.number_of_courts),
+                                                                amenities,
+                                                                hours_of_operation: hours,
+                                                                is_free: newCourt.is_free,
+                                                                price_per_hour: newCourt.is_free ? null : (newCourt.price_per_hour === '' ? null : Number(newCourt.price_per_hour)),
+                                                                peak_hour_price: null,
+                                                                pricing_details: null,
+                                                                phone_number: newCourt.phone_number || null,
+                                                                email: newCourt.email || null,
+                                                                website: newCourt.website || null,
+                                                                requires_booking: newCourt.requires_booking,
+                                                                booking_url: newCourt.booking_url || null,
+                                                                images: [],
+                                                                cover_image: newCourt.cover_image || null,
+                                                                is_featured: false,
+                                                                is_active: true,
+                                                            };
+
+                                                            const res = await fetch('/api/courts', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify(payload),
+                                                            });
+
+                                                            const json = await res.json();
+                                                            if (!res.ok || !json.success) {
+                                                                throw new Error(json.error || 'Failed to create court');
+                                                            }
+
+                                                            setShowCreateModal(false);
+                                                            // reset form
+                                                            setNewCourt(prev => ({ ...prev, name: '', description: '', address: '', city: '', state_province: '', postal_code: '', latitude: '', longitude: '', phone_number: '', email: '', website: '', booking_url: '', cover_image: '' }));
+                                                            await fetchCourts();
+                                                            await fetchStats();
+                                                            alert('Court created successfully. Pending moderation.');
+                                                        } catch (err: any) {
+                                                            setCreateError(err.message || 'Unexpected error');
+                                                        } finally {
+                                                            setCreating(false);
+                                                        }
+                                                    }}
+                                                >
+                                                    {/* Basic Info */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Name</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.name} onChange={e => setNewCourt({ ...newCourt, name: e.target.value })} required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Type</label>
+                                                            <select className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.type} onChange={e => setNewCourt({ ...newCourt, type: e.target.value as any })}>
+                                                                <option value="indoor">Indoor</option>
+                                                                <option value="outdoor">Outdoor</option>
+                                                                <option value="both">Both</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <label className="text-xs font-bold text-slate-600">Description</label>
+                                                            <textarea className="w-full mt-1 px-3 py-2 border rounded-lg" rows={3} value={newCourt.description} onChange={e => setNewCourt({ ...newCourt, description: e.target.value })} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Location */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div className="md:col-span-2">
+                                                            <label className="text-xs font-bold text-slate-600">Address</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.address} onChange={e => setNewCourt({ ...newCourt, address: e.target.value })} required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">City</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.city} onChange={e => setNewCourt({ ...newCourt, city: e.target.value })} required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">State/Province</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.state_province} onChange={e => setNewCourt({ ...newCourt, state_province: e.target.value })} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Country</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.country} onChange={e => setNewCourt({ ...newCourt, country: e.target.value })} required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Postal Code</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.postal_code} onChange={e => setNewCourt({ ...newCourt, postal_code: e.target.value })} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Details */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Surface</label>
+                                                            <select className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.surface} onChange={e => setNewCourt({ ...newCourt, surface: e.target.value as any })}>
+                                                                <option value="sport_court">Sport Court</option>
+                                                                <option value="concrete">Concrete</option>
+                                                                <option value="asphalt">Asphalt</option>
+                                                                <option value="wood">Wood</option>
+                                                                <option value="other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Number of Courts</label>
+                                                            <input type="number" min={1} className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.number_of_courts} onChange={e => setNewCourt({ ...newCourt, number_of_courts: Number(e.target.value) })} required />
+                                                        </div>
+                                                        <div className="flex items-center gap-4 md:col-span-2">
+                                                            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={newCourt.amen_lights} onChange={e => setNewCourt({ ...newCourt, amen_lights: e.target.checked })} /> Night Lights</label>
+                                                            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={newCourt.amen_equipment} onChange={e => setNewCourt({ ...newCourt, amen_equipment: e.target.checked })} /> Equipment Rental</label>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Hours */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Open Time</label>
+                                                            <input type="time" className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.open_time} onChange={e => setNewCourt({ ...newCourt, open_time: e.target.value })} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Close Time</label>
+                                                            <input type="time" className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.close_time} onChange={e => setNewCourt({ ...newCourt, close_time: e.target.value })} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Pricing & Booking */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <input id="is_free" type="checkbox" checked={newCourt.is_free} onChange={e => setNewCourt({ ...newCourt, is_free: e.target.checked })} />
+                                                            <label htmlFor="is_free" className="text-sm">Free to play</label>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Price per Hour (₱)</label>
+                                                            <input type="number" min={0} disabled={newCourt.is_free} className="w-full mt-1 px-3 py-2 border rounded-lg" value={newCourt.is_free ? '' : newCourt.price_per_hour} onChange={e => setNewCourt({ ...newCourt, price_per_hour: e.target.value === '' ? '' : Number(e.target.value) })} />
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <input id="requires_booking" type="checkbox" checked={newCourt.requires_booking} onChange={e => setNewCourt({ ...newCourt, requires_booking: e.target.checked })} />
+                                                            <label htmlFor="requires_booking" className="text-sm">Requires booking</label>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-600">Booking URL</label>
+                                                            <input className="w-full mt-1 px-3 py-2 border rounded-lg" placeholder="https://..." value={newCourt.booking_url} onChange={e => setNewCourt({ ...newCourt, booking_url: e.target.value })} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Contact & Media */}
+                                                    <div className="mb-6">
+                                                        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Contact & Media</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className={labelCls}>Phone</label>
+                                                                <input className={inputCls} value={newCourt.phone_number} onChange={e => setNewCourt({ ...newCourt, phone_number: e.target.value })} />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Email</label>
+                                                                <input type="email" className={inputCls} value={newCourt.email} onChange={e => setNewCourt({ ...newCourt, email: e.target.value })} />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Website</label>
+                                                                <input className={inputCls} placeholder="example.com" value={newCourt.website} onChange={e => setNewCourt({ ...newCourt, website: e.target.value })} />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Cover Image URL</label>
+                                                                <input className={inputCls} placeholder="https://..." value={newCourt.cover_image} onChange={e => setNewCourt({ ...newCourt, cover_image: e.target.value })} />
+                                                                {newCourt.cover_image && (
+                                                                    <div className="mt-2 w-full h-32 rounded-xl overflow-hidden border border-slate-200">
+                                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                        <img src={newCourt.cover_image} alt="Cover preview" className="w-full h-full object-cover" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Coordinates */}
+                                                    <div className="mb-6">
+                                                        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Coordinates (optional)</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className={labelCls}>Latitude</label>
+                                                                <input className={inputCls} value={newCourt.latitude} onChange={e => setNewCourt({ ...newCourt, latitude: e.target.value })} />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Longitude</label>
+                                                                <input className={inputCls} value={newCourt.longitude} onChange={e => setNewCourt({ ...newCourt, longitude: e.target.value })} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-3 pt-2">
+                                                        <button type="button" className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50" onClick={() => setShowCreateModal(false)} disabled={creating}>Cancel</button>
+                                                        <button type="submit" className="flex-1 px-4 py-3 bg-[#0f2e22] text-white rounded-xl font-semibold hover:bg-[#0c241b] disabled:opacity-50" disabled={creating}>{creating ? 'Creating...' : 'Create Court'}</button>
+                                                    </div>
+                                                </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <p className="text-2xl font-black text-[#0f2e22]">{stat.value}</p>
                                 </div>
                             </div>
@@ -271,218 +829,319 @@ export default function CourtManagement() {
                 </div>
             )}
 
-            {/* Filters */}
-            <Card className="shadow-lg border border-blue-100 bg-white">
-                <div className="p-6 border-b border-blue-100 flex flex-col md:flex-row md:items-center gap-4 bg-gradient-to-r from-blue-50 to-transparent">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0f2e22]" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Search courts by name, city, or address..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-[#0f2e22]/50 focus:border-[#0f2e22] text-sm font-medium transition-all"
-                        />
+            {/* Filters and Search */}
+            <Card className="p-4 bg-white border border-slate-200">
+                <div className="flex flex-col md:flex-row gap-4">
+                    {/* Search Input */}
+                    <div className="flex-1">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search by name, city, or address..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0f2e22] focus:border-transparent"
+                            />
+                        </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2 flex-wrap">
+
+                    {/* Status Filter */}
+                    <div className="w-full md:w-48">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 text-sm font-semibold text-[#1E40AF]"
+                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0f2e22] focus:border-transparent"
                         >
                             <option value="all">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="suspended">Suspended</option>
+                            <option value="pending">⏳ Pending</option>
+                            <option value="approved">✅ Approved</option>
+                            <option value="rejected">❌ Rejected</option>
+                            <option value="suspended">🚫 Suspended</option>
                         </select>
+                    </div>
 
+                    {/* Type Filter */}
+                    <div className="w-full md:w-48">
                         <select
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/50 text-sm font-semibold text-[#1E40AF]"
+                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0f2e22] focus:border-transparent"
                         >
                             <option value="all">All Types</option>
-                            <option value="indoor">Indoor</option>
-                            <option value="outdoor">Outdoor</option>
-                            <option value="both">Both</option>
+                            <option value="indoor">🏢 Indoor</option>
+                            <option value="outdoor">🌳 Outdoor</option>
+                            <option value="both">🏢🌳 Both</option>
                         </select>
                     </div>
+
+                    {/* Clear Filters */}
+                    {(searchTerm || statusFilter !== 'all' || typeFilter !== 'all') && (
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setStatusFilter('all');
+                                setTypeFilter('all');
+                            }}
+                            className="px-4 py-2.5 text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg border border-red-200 transition-colors whitespace-nowrap"
+                        >
+                            Clear Filters
+                        </button>
+                    )}
                 </div>
 
-                {/* Map View */}
-                {viewMode === 'map' && !loading && (
-                    <div className="p-6">
-                        <CourtsMap 
-                            courts={courts.filter(c => c.status === 'approved')} 
-                            center={courts.length > 0 && courts[0].latitude && courts[0].longitude
-                                ? { lat: courts[0].latitude, lng: courts[0].longitude }
-                                : undefined
-                            }
-                        />
-                        <p className="text-xs text-slate-500 mt-4 text-center">
-                            Showing {courts.filter(c => c.status === 'approved' && c.latitude && c.longitude).length} approved courts with locations
-                        </p>
+                {/* Active Filters Display */}
+                {(searchTerm || statusFilter !== 'all' || typeFilter !== 'all') && (
+                    <div className="mt-3 flex items-center gap-2 text-xs">
+                        <Filter size={14} className="text-slate-500" />
+                        <span className="text-slate-600 font-semibold">Active filters:</span>
+                        {searchTerm && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-medium">
+                                Search: "{searchTerm}"
+                            </span>
+                        )}
+                        {statusFilter !== 'all' && (
+                            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-md font-medium">
+                                Status: {statusFilter}
+                            </span>
+                        )}
+                        {typeFilter !== 'all' && (
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md font-medium">
+                                Type: {typeFilter}
+                            </span>
+                        )}
                     </div>
                 )}
+            </Card>
 
-                {/* Courts List */}
-                {viewMode === 'list' && (
-                    <div className="divide-y divide-blue-100">
+            {/* List View */}
+            {viewMode === 'list' && (
+                <div className="space-y-4">
                     {loading ? (
-                        <div className="p-12 text-center">
-                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#0f2e22] border-t-transparent"></div>
-                            <p className="mt-4 text-sm font-semibold text-slate-600">Loading courts...</p>
+                        <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0f2e22]"></div>
                         </div>
                     ) : courts.length === 0 ? (
-                        <div className="p-12 text-center">
-                            <MapPin className="mx-auto h-12 w-12 text-slate-300" />
-                            <p className="mt-4 text-sm font-semibold text-slate-600">No courts found</p>
-                        </div>
+                        <Card className="p-12 text-center border-2 border-dashed border-slate-200">
+                            <MapPin size={40} className="mx-auto text-slate-300 mb-4" />
+                            <p className="text-slate-500 font-semibold">No courts found</p>
+                        </Card>
                     ) : (
                         courts.map((court) => (
-                            <div key={court.id} className="p-6 hover:bg-blue-50 transition-colors group">
-                                <div className="flex flex-col lg:flex-row gap-6">
-                                    {/* Court Image Placeholder */}
-                                    <div className="w-full lg:w-40 h-32 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 overflow-hidden flex-shrink-0 relative">
-                                        <div className="absolute inset-0 flex items-center justify-center text-4xl">
-                                            {getTypeIcon(court.type)}
-                                        </div>
-                                    </div>
-
-                                    {/* Court Details */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                            <Card key={court.id} className="p-6 border-l-4 hover:shadow-lg transition-shadow" style={{
+                                borderColor: court.status === 'approved' ? '#10b981' : court.status === 'pending' ? '#f59e0b' : '#ef4444'
+                            }}>
+                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                                    {/* Left: Info */}
+                                    <div className="flex-1 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{getTypeIcon(court.type)}</span>
                                             <div>
-                                                <div className="flex flex-wrap items-center gap-3 mb-2">
-                                                    <h3 className="text-lg font-black text-[#0f2e22]">{court.name}</h3>
-                                                    <Badge className={`${getStatusColor(court.status)} font-black capitalize`}>
-                                                        {court.status}
-                                                    </Badge>
-                                                    {court.is_featured && (
-                                                        <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 font-black">
-                                                            ⭐ Featured
-                                                        </Badge>
+                                                <h3 className="text-lg font-black text-[#0f2e22]">{court.name}</h3>
+                                                <p className="text-xs text-slate-500 font-semibold">{court.city}, {court.state_province}</p>
+                                            </div>
+                                        </div>
+                                        {court.description && (
+                                            <p className="text-sm text-slate-600">{court.description}</p>
+                                        )}
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge className={`border ${getStatusColor(court.status)}`}>{court.status.toUpperCase()}</Badge>
+                                            {court.is_featured && <Badge className="border border-amber-200 bg-amber-50 text-amber-700">Featured</Badge>}
+                                            {court.is_active && <Badge className="border border-green-200 bg-green-50 text-green-700">Active</Badge>}
+                                        </div>
+
+                                        {/* Location Info */}
+                                        <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                                            <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest">Location</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                                <div><span className="font-semibold text-slate-600">Address:</span> {court.address}</div>
+                                                <div><span className="font-semibold text-slate-600">Country:</span> {court.country}</div>
+                                                <div><span className="font-semibold text-slate-600">Postal Code:</span> {court.postal_code || 'N/A'}</div>
+                                                {court.latitude && court.longitude && (
+                                                    <div><span className="font-semibold text-slate-600">Coordinates:</span> {court.latitude}, {court.longitude}</div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Details Info */}
+                                        <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                                            <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest">Details</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                                <div className="space-y-1">
+                                                    <p className="font-bold text-slate-600">TYPE</p>
+                                                    <p className="text-sm font-semibold text-[#0f2e22] capitalize">{court.type}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="font-bold text-slate-600">SURFACE</p>
+                                                    <p className="text-sm font-semibold text-[#0f2e22] capitalize">{court.surface}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="font-bold text-slate-600">COURTS</p>
+                                                    <p className="text-lg font-black text-[#0f2e22]">{court.number_of_courts}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="font-bold text-slate-600">RATING</p>
+                                                    <p className="text-lg font-black text-[#0f2e22]">{court.rating?.toFixed(1) || 'N/A'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Hours & Pricing */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-blue-50 rounded-lg p-4 space-y-2">
+                                                <h4 className="text-xs font-black text-blue-700 uppercase tracking-widest">Hours</h4>
+                                                {court.hours_of_operation && court.hours_of_operation.mon ? (
+                                                    <div className="text-sm space-y-1">
+                                                        <div><span className="font-semibold">Mon-Sun:</span> {court.hours_of_operation.mon.open} - {court.hours_of_operation.mon.close}</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm text-slate-600">Varies by day</div>
+                                                )}
+                                            </div>
+
+                                            <div className="bg-green-50 rounded-lg p-4 space-y-2">
+                                                <h4 className="text-xs font-black text-green-700 uppercase tracking-widest">Pricing</h4>
+                                                <div className="text-sm space-y-1">
+                                                    <div><span className="font-semibold">Status:</span> {court.is_free ? '🆓 Free' : `₱${court.price_per_hour || 0}/hr`}</div>
+                                                    {court.requires_booking && (
+                                                        <div><span className="font-semibold text-amber-700">🔖 Booking Required</span></div>
+                                                    )}
+                                                    {court.booking_url && (
+                                                        <div className="text-xs"><a href={court.booking_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Booking URL</a></div>
                                                     )}
                                                 </div>
-                                                <p className="text-sm text-slate-600 line-clamp-2">{court.description}</p>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <MapPin size={14} className="text-[#0f2e22]" />
-                                                <span>{court.city}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <Building2 size={14} className="text-[#1E40AF]" />
-                                                <span className="capitalize">{court.type}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <ShieldCheck size={14} className="text-[#1E40AF]" />
-                                                <span>{court.number_of_courts} Courts</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <Star size={14} className="text-[#FDE047] fill-[#FDE047]" />
-                                                <span className="text-[#1E40AF] font-black">
-                                                    {court.rating > 0 ? court.rating.toFixed(1) : 'N/A'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <DollarSign size={14} className="text-[#064e3b]" />
-                                                <span>{court.is_free ? 'Free' : `₱${court.price_per_hour}/hr`}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <Calendar size={14} className="text-[#1E40AF]" />
-                                                <span>{court.total_bookings} Bookings</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <Eye size={14} className="text-[#1E40AF]" />
-                                                <span>{court.view_count} Views</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                <TrendingUp size={14} className="text-[#064e3b]" />
-                                                <span>{court.total_reviews} Reviews</span>
-                                            </div>
-                                        </div>
-
-                                        {court.rejection_reason && (
-                                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                                <div className="flex items-start gap-2">
-                                                    <AlertCircle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
-                                                    <div>
-                                                        <p className="text-xs font-bold text-red-900">Rejection Reason:</p>
-                                                        <p className="text-xs text-red-700">{court.rejection_reason}</p>
-                                                    </div>
+                                        {/* Amenities */}
+                                        {court.amenities && court.amenities.length > 0 && (
+                                            <div className="bg-purple-50 rounded-lg p-4 space-y-2">
+                                                <h4 className="text-xs font-black text-purple-700 uppercase tracking-widest">Amenities</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {court.amenities.map((amenity, idx) => (
+                                                        <span key={idx} className="px-3 py-1 bg-purple-200 text-purple-800 rounded-full text-xs font-semibold capitalize">
+                                                            {amenity === 'lights' ? '💡 Lights' : amenity === 'equipment' ? '🎾 Equipment' : amenity}
+                                                        </span>
+                                                    ))}
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Owner Info */}
-                                        <div className="text-xs text-slate-500">
-                                            Owner: <span className="font-semibold text-slate-700">
-                                                {court.owner.first_name} {court.owner.last_name}
-                                            </span> ({court.owner.email})
+                                        {/* Contact Info */}
+                                        {(court.phone_number || court.email || court.website) && (
+                                            <div className="bg-orange-50 rounded-lg p-4 space-y-2">
+                                                <h4 className="text-xs font-black text-orange-700 uppercase tracking-widest">Contact</h4>
+                                                <div className="text-sm space-y-1">
+                                                    {court.phone_number && <div><span className="font-semibold">📱 Phone:</span> {court.phone_number}</div>}
+                                                    {court.email && <div><span className="font-semibold">📧 Email:</span> {court.email}</div>}
+                                                    {court.website && <div><span className="font-semibold">🌐 Website:</span> {court.website}</div>}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Cover Image */}
+                                        {court.cover_image && (
+                                            <div className="rounded-lg overflow-hidden border border-slate-200 h-48">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={court.cover_image} alt={court.name} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+
+                                        {/* Stats */}
+                                        <div className="grid grid-cols-3 gap-3 text-xs">
+                                            <div className="space-y-1 bg-indigo-50 rounded-lg p-3 text-center">
+                                                <p className="font-bold text-indigo-600">BOOKINGS</p>
+                                                <p className="text-lg font-black text-indigo-700">{court.total_bookings || 0}</p>
+                                            </div>
+                                            <div className="space-y-1 bg-cyan-50 rounded-lg p-3 text-center">
+                                                <p className="font-bold text-cyan-600">VIEWS</p>
+                                                <p className="text-lg font-black text-cyan-700">{court.view_count || 0}</p>
+                                            </div>
+                                            <div className="space-y-1 bg-rose-50 rounded-lg p-3 text-center">
+                                                <p className="font-bold text-rose-600">REVIEWS</p>
+                                                <p className="text-lg font-black text-rose-700">{court.total_reviews || 0}</p>
+                                            </div>
                                         </div>
+
+                                        {court.status === 'rejected' && court.rejection_reason && (
+                                            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                                <p className="text-xs font-bold text-red-700 mb-1">REJECTION REASON:</p>
+                                                <p className="text-sm text-red-700">{court.rejection_reason}</p>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="flex lg:flex-col items-center gap-2 shrink-0">
-                                        {court.status === 'pending' && (
+                                    {/* Right: Actions */}
+                                    <div className="flex flex-col gap-2 md:min-w-fit">
+                                        {court.status === 'pending' && !useMock && (
                                             <>
-                                                <button
+                                                <Button 
+                                                    variant="secondary"
+                                                    className="bg-emerald-500 hover:bg-emerald-600 text-white"
                                                     onClick={() => handleApprove(court.id)}
                                                     disabled={actionLoading === court.id}
-                                                    className="flex-1 lg:flex-none p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white hover:shadow-lg transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    title="Approve"
                                                 >
-                                                    <CheckCircle2 size={18} />
-                                                </button>
-                                                <button
+                                                    <CheckCircle2 size={14} />
+                                                    {actionLoading === court.id ? 'Approving...' : 'Approve'}
+                                                </Button>
+                                                <Button 
+                                                    variant="secondary"
+                                                    className="bg-red-500 hover:bg-red-600 text-white"
                                                     onClick={() => {
                                                         setSelectedCourt(court);
                                                         setShowRejectModal(true);
                                                     }}
-                                                    disabled={actionLoading === court.id}
-                                                    className="flex-1 lg:flex-none p-3 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white hover:shadow-lg transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    title="Reject"
                                                 >
-                                                    <XCircle size={18} />
-                                                </button>
+                                                    <XCircle size={14} />
+                                                    Reject
+                                                </Button>
                                             </>
                                         )}
-                                        
-                                        {court.status === 'approved' && (
-                                            <button
+                                        {court.status === 'approved' && !useMock && (
+                                            <Button 
+                                                variant="secondary"
+                                                className="bg-gray-500 hover:bg-gray-600 text-white"
                                                 onClick={() => handleSuspend(court.id)}
                                                 disabled={actionLoading === court.id}
-                                                className="flex-1 lg:flex-none p-3 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                                                title="Suspend"
                                             >
-                                                <Ban size={18} />
-                                            </button>
+                                                <Ban size={14} />
+                                                {actionLoading === court.id ? 'Suspending...' : 'Suspend'}
+                                            </Button>
                                         )}
-
-                                        <button
-                                            onClick={() => handleDelete(court.id)}
-                                            disabled={actionLoading === court.id}
-                                            className="flex-1 lg:flex-none p-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                                            title="Delete"
+                                        <Button 
+                                            variant="secondary"
+                                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                                            onClick={() => {
+                                                if (court.latitude && court.longitude) {
+                                                    setFocusedCourtId(court.id);
+                                                    setViewMode('map');
+                                                } else {
+                                                    alert('This court does not have location coordinates set.');
+                                                }
+                                            }}
                                         >
-                                            <Trash2 size={18} />
-                                        </button>
+                                            <Eye size={14} />
+                                            View on Map
+                                        </Button>
+                                        {!useMock && (
+                                            <Button 
+                                                variant="secondary"
+                                                className="bg-slate-500 hover:bg-slate-600 text-white"
+                                            >
+                                                <Edit size={14} />
+                                                Edit
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
+                            </Card>
                         ))
                     )}
-                    </div>
-                )}
-            </Card>
+                </div>
+            )}
+
+            {/* Map View */}
+            {viewMode === 'map' && <CourtsMap courts={courts} focusedCourtId={focusedCourtId} />}
 
             {/* Reject Modal */}
             {showRejectModal && selectedCourt && (
@@ -523,3 +1182,5 @@ export default function CourtManagement() {
         </div>
     );
 }
+
+export default React.memo(CourtManagement);

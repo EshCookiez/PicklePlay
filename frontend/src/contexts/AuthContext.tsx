@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
@@ -88,32 +88,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes - only update after initial check is done
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted || !initialCheckDone) return;
 
-      setSession(session);
-      
-      if (session?.user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+      // Only refetch user data on actual auth state changes, not on focus/visibility
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        setSession(session);
         
-        if (isMounted) {
-          setUser(userData || null);
+        if (session?.user) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (isMounted) {
+            setUser(userData || null);
+          }
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         if (isMounted) {
+          setSession(null);
           setUser(null);
         }
       }
+      // Ignore other events like INITIAL_SESSION to prevent unnecessary refetches
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
+  }, []);
+
+  const openAuthModal = useCallback((view: "login" | "signup" = "login") => {
+    setAuthView(view);
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
   }, []);
 
   // Check for login=required URL parameter (from protected route redirect)
@@ -127,16 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         openAuthModal("login");
       }
     }
-  }, [user, isLoading]);
-
-  const openAuthModal = (view: "login" | "signup" = "login") => {
-    setAuthView(view);
-    setIsAuthModalOpen(true);
-  };
-
-  const closeAuthModal = () => {
-    setIsAuthModalOpen(false);
-  };
+  }, [user, isLoading, openAuthModal]);
 
   const login = async (credentials: { email: string; password: string }) => {
     const { data, error } = await supabase.auth.signInWithPassword(credentials);
