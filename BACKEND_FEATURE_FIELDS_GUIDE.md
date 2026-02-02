@@ -14,11 +14,16 @@
 6. [Shop/Merchandise](#shopmerchandise)
 7. [Payment Processing](#payment-processing)
 8. [Events & News](#events--news)
-9. [Admin Dashboard](#admin-dashboard)
-10. [Integrations](#integrations)
-11. [Data Management & Export](#data-management--export)
-12. [Analytics & Logging](#analytics--logging)
-13. [Player Profile System](#player-profile-system)
+9. [Tournaments System](#tournaments-system)
+10. [Coaching System](#coaching-system)
+11. [Rankings & Points System](#rankings--points-system)
+12. [Community Features](#community-features)
+13. [Reviews & Ratings](#reviews--ratings)
+14. [Admin Dashboard](#admin-dashboard)
+15. [Integrations](#integrations)
+16. [Data Management & Export](#data-management--export)
+17. [Analytics & Logging](#analytics--logging)
+18. [Player Profile System](#player-profile-system)
 
 ---
 
@@ -195,6 +200,37 @@
 'user_agent'                => 'text|nullable'
 'details'                   => 'text|nullable'
 'created_at'                => 'timestamp'
+```
+
+---
+
+### **Role Applications Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id'
+'role_applied_for'          => 'enum:coach,court_owner,organizer'
+'status'                    => 'enum:pending,approved,rejected|default:pending'
+
+// Application Details
+'business_name'             => 'string|max:255|nullable' // For court owners
+'business_registration'     => 'string|max:255|nullable'
+'certifications'            => 'json|nullable' // For coaches
+'experience_years'          => 'integer|nullable'
+'description'               => 'text' // Why they want this role
+
+// Documents
+'documents'                 => 'json|nullable' // Array of document paths
+'id_verification'           => 'string|nullable'
+
+// Review
+'reviewed_by'               => 'uuid|foreign:users.id|nullable'
+'reviewed_at'               => 'timestamp|nullable'
+'rejection_reason'          => 'text|nullable'
+'admin_notes'               => 'text|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
 ```
 
 ---
@@ -792,6 +828,943 @@
 'created_at'                => 'timestamp'
 'updated_at'                => 'timestamp'
 'deleted_at'                => 'timestamp|nullable'
+```
+
+---
+
+## **TOURNAMENTS SYSTEM**
+
+### **Tournaments Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'organizer_id'              => 'uuid|foreign:users.id'
+'title'                     => 'string|max:255'
+'slug'                      => 'string|unique|max:255'
+'description'               => 'text'
+'short_description'         => 'string|max:500|nullable'
+
+// Tournament Type
+'format'                    => 'enum:singles,doubles,mixed_doubles,round_robin,single_elimination,double_elimination'
+'category'                  => 'enum:recreational,competitive,professional,junior,senior'
+'skill_level'               => 'enum:all,beginner,intermediate,advanced,professional|default:all'
+
+// Date & Time
+'registration_start'        => 'datetime'
+'registration_end'          => 'datetime'
+'tournament_start_date'     => 'date'
+'tournament_end_date'       => 'date'
+'check_in_time'             => 'time|nullable'
+'start_time'                => 'time|nullable'
+
+// Location
+'court_id'                  => 'bigint|foreign:courts.id|nullable'
+'venue_name'                => 'string|max:255|nullable'
+'address'                   => 'string|max:500|nullable'
+'city'                      => 'string|max:255'
+'state'                     => 'string|max:255|nullable'
+'country'                   => 'string|max:255'
+'latitude'                  => 'decimal:10,8|nullable'
+'longitude'                 => 'decimal:11,8|nullable'
+
+// Participation
+'min_participants'          => 'integer|default:4'
+'max_participants'          => 'integer'
+'current_participants'      => 'integer|default:0'
+'team_size'                 => 'integer|default:1' // 1 for singles, 2 for doubles
+'age_restriction'           => 'string|max:100|nullable'
+'gender_restriction'        => 'enum:all,male,female,mixed|default:all'
+
+// Fees & Prizes
+'entry_fee'                 => 'decimal:10,2|default:0.00'
+'currency'                  => 'string|max:3|default:PHP'
+'prize_pool'                => 'decimal:10,2|nullable'
+'prizes'                    => 'json|nullable' // Array of prize objects
+
+// Rules & Scoring
+'rules'                     => 'text|nullable'
+'scoring_format'            => 'string|max:255|nullable' // e.g., "Best of 3 games to 11"
+'match_duration'            => 'integer|nullable' // in minutes
+
+// Points & Ranking
+'points_awarded'            => 'json|nullable' // Points for 1st, 2nd, 3rd, etc.
+'affects_ranking'           => 'boolean|default:true'
+
+// Media
+'banner_image'              => 'string|nullable'
+'images'                    => 'json|nullable'
+
+// Status
+'status'                    => 'enum:draft,registration_open,registration_closed,in_progress,completed,cancelled|default:draft'
+'is_featured'               => 'boolean|default:false'
+'is_public'                 => 'boolean|default:true'
+
+// Contact
+'contact_name'              => 'string|max:255|nullable'
+'contact_email'             => 'string|email|max:255'
+'contact_phone'             => 'string|max:20|nullable'
+
+// Additional
+'sponsors'                  => 'json|nullable'
+'special_notes'             => 'text|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+'deleted_at'                => 'timestamp|nullable'
+```
+
+---
+
+### **Tournament Participants Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'tournament_id'             => 'bigint|foreign:tournaments.id'
+'user_id'                   => 'uuid|foreign:users.id'
+
+// Team Information
+'team_name'                 => 'string|max:255|nullable'
+'partner_user_id'           => 'uuid|foreign:users.id|nullable' // For doubles
+'seed_number'               => 'integer|nullable'
+
+// Registration
+'registration_date'         => 'datetime'
+'status'                    => 'enum:pending,confirmed,checked_in,withdrawn,disqualified'
+'payment_status'            => 'enum:unpaid,paid,refunded|nullable'
+'payment_id'                => 'bigint|foreign:payments.id|nullable'
+
+// Check-in
+'checked_in_at'             => 'timestamp|nullable'
+'check_in_notes'            => 'text|nullable'
+
+// Emergency Contact
+'emergency_contact_name'    => 'string|max:255|nullable'
+'emergency_contact_phone'   => 'string|max:20|nullable'
+
+// Performance
+'placement'                 => 'integer|nullable' // Final ranking (1st, 2nd, 3rd, etc.)
+'matches_played'            => 'integer|default:0'
+'matches_won'               => 'integer|default:0'
+'matches_lost'              => 'integer|default:0'
+'points_earned'             => 'integer|default:0'
+
+// Additional
+'waiver_signed'             => 'boolean|default:false'
+'waiver_signed_at'          => 'timestamp|nullable'
+'special_notes'             => 'text|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Tournament Matches Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'tournament_id'             => 'bigint|foreign:tournaments.id'
+'round_number'              => 'integer' // 1, 2, 3, etc. (finals, semifinals, etc.)
+'match_number'              => 'integer' // Match number within the round
+
+// Participants
+'participant_1_id'          => 'bigint|foreign:tournament_participants.id'
+'participant_2_id'          => 'bigint|foreign:tournament_participants.id'
+
+// Scheduling
+'court_id'                  => 'bigint|foreign:courts.id|nullable'
+'court_number'              => 'integer|nullable'
+'scheduled_date'            => 'date|nullable'
+'scheduled_time'            => 'time|nullable'
+'actual_start_time'         => 'datetime|nullable'
+'actual_end_time'           => 'datetime|nullable'
+
+// Score
+'participant_1_score'       => 'json|nullable' // Array of game scores [11, 8, 11]
+'participant_2_score'       => 'json|nullable' // Array of game scores [9, 11, 7]
+'winner_id'                 => 'bigint|foreign:tournament_participants.id|nullable'
+
+// Status
+'status'                    => 'enum:scheduled,in_progress,completed,forfeited,postponed,cancelled'
+'forfeit_reason'            => 'text|nullable'
+
+// Officiating
+'referee_id'                => 'uuid|foreign:users.id|nullable'
+'referee_notes'             => 'text|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+## **COACHING SYSTEM**
+
+### **Coaches Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id|unique'
+
+// Professional Info
+'bio'                       => 'text|nullable'
+'specialties'               => 'json|nullable' // Array: ['beginners', 'advanced_techniques', 'tournament_prep']
+'years_of_experience'       => 'integer|min:0'
+'coaching_philosophy'       => 'text|nullable'
+
+// Certifications
+'certifications'            => 'json|nullable' // Array of certification objects
+'certifications_verified'   => 'boolean|default:false'
+'verified_by'               => 'uuid|foreign:users.id|nullable'
+'verified_at'               => 'timestamp|nullable'
+
+// Services
+'offers_private_lessons'    => 'boolean|default:true'
+'offers_group_lessons'      => 'boolean|default:false'
+'offers_online_coaching'    => 'boolean|default:false'
+'offers_tournament_coaching'=> 'boolean|default:false'
+
+// Pricing
+'hourly_rate'               => 'decimal:8,2'
+'group_rate'                => 'decimal:8,2|nullable'
+'package_deals'             => 'json|nullable' // Array of package objects
+'currency'                  => 'string|max:3|default:PHP'
+
+// Availability
+'is_accepting_students'     => 'boolean|default:true'
+'max_students'              => 'integer|nullable'
+'current_students'          => 'integer|default:0'
+'availability_schedule'     => 'json|nullable' // Weekly schedule
+
+// Location
+'service_areas'             => 'json|nullable' // Array of cities/regions
+'willing_to_travel'         => 'boolean|default:false'
+'max_travel_distance_km'    => 'integer|nullable'
+'travel_fee'                => 'decimal:8,2|nullable'
+
+// Media
+'profile_video'             => 'string|nullable'
+'action_photos'             => 'json|nullable'
+
+// Statistics
+'total_lessons_given'       => 'integer|default:0'
+'total_students'            => 'integer|default:0'
+'average_rating'            => 'decimal:3,2|default:0.00'
+'review_count'              => 'integer|default:0'
+
+// Status
+'status'                    => 'enum:pending,active,inactive,suspended|default:pending'
+'is_featured'               => 'boolean|default:false'
+'featured_until'            => 'timestamp|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Coaching Sessions Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'coach_id'                  => 'bigint|foreign:coaches.id'
+'student_id'                => 'uuid|foreign:users.id'
+
+// Session Type
+'session_type'              => 'enum:private,group,online,tournament_prep'
+'skill_focus'               => 'json|nullable' // Array: ['serves', 'volleys', 'strategy']
+
+// Scheduling
+'session_date'              => 'date'
+'start_time'                => 'time'
+'end_time'                  => 'time'
+'duration_minutes'          => 'integer'
+
+// Location
+'location_type'             => 'enum:court,online,other'
+'court_id'                  => 'bigint|foreign:courts.id|nullable'
+'location_details'          => 'text|nullable'
+'meeting_link'              => 'string|url|max:500|nullable'
+
+// Group Sessions
+'is_group_session'          => 'boolean|default:false'
+'max_participants'          => 'integer|nullable'
+'current_participants'      => 'integer|default:1'
+
+// Pricing
+'rate'                      => 'decimal:8,2'
+'currency'                  => 'string|max:3|default:PHP'
+'payment_status'            => 'enum:unpaid,paid,refunded,partially_refunded'
+'payment_id'                => 'bigint|foreign:payments.id|nullable'
+
+// Status
+'status'                    => 'enum:scheduled,confirmed,in_progress,completed,cancelled,no_show'
+'confirmation_code'         => 'string|unique|max:20'
+
+// Cancellation
+'cancelled_at'              => 'timestamp|nullable'
+'cancelled_by'              => 'uuid|foreign:users.id|nullable'
+'cancellation_reason'       => 'text|nullable'
+'cancellation_fee'          => 'decimal:8,2|nullable'
+
+// Notes
+'student_goals'             => 'text|nullable'
+'coach_notes_before'        => 'text|nullable'
+'coach_notes_after'         => 'text|nullable'
+'homework_assigned'         => 'text|nullable'
+
+// Completion
+'completed_at'              => 'timestamp|nullable'
+'student_attended'          => 'boolean|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Coaching Session Participants Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'session_id'                => 'bigint|foreign:coaching_sessions.id'
+'user_id'                   => 'uuid|foreign:users.id'
+'joined_at'                 => 'timestamp'
+'attended'                  => 'boolean|default:false'
+'created_at'                => 'timestamp'
+```
+
+---
+
+## **RANKINGS & POINTS SYSTEM**
+
+### **Player Rankings Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id|unique'
+
+// Current Rankings
+'overall_rank'              => 'integer|nullable'
+'singles_rank'              => 'integer|nullable'
+'doubles_rank'              => 'integer|nullable'
+'mixed_doubles_rank'        => 'integer|nullable'
+
+// Points
+'total_points'              => 'integer|default:0'
+'singles_points'            => 'integer|default:0'
+'doubles_points'            => 'integer|default:0'
+'mixed_doubles_points'      => 'integer|default:0'
+
+// Previous Rankings (for trend)
+'previous_overall_rank'     => 'integer|nullable'
+'previous_singles_rank'     => 'integer|nullable'
+'previous_doubles_rank'     => 'integer|nullable'
+'rank_change'               => 'integer|default:0' // Positive = up, Negative = down
+
+// Regional Rankings
+'regional_rank'             => 'integer|nullable'
+'region'                    => 'string|max:255|nullable'
+'city_rank'                 => 'integer|nullable'
+
+// Division/Skill Level
+'division'                  => 'enum:beginner,intermediate,advanced,professional,elite|default:beginner'
+'skill_rating'              => 'decimal:4,2|nullable' // DUPR or similar rating
+
+// Statistics
+'tournaments_played'        => 'integer|default:0'
+'tournaments_won'           => 'integer|default:0'
+'matches_played'            => 'integer|default:0'
+'matches_won'               => 'integer|default:0'
+'win_rate'                  => 'decimal:5,2|default:0.00'
+
+// Last Updated
+'last_tournament_date'      => 'date|nullable'
+'last_ranking_update'       => 'timestamp|nullable'
+
+// Status
+'is_active'                 => 'boolean|default:true'
+'status'                    => 'enum:active,inactive,retired|default:active'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Points Transactions Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id'
+
+// Transaction Type
+'type'                      => 'enum:earned,redeemed,bonus,penalty,expired,adjusted'
+'source'                    => 'enum:tournament,contest,referral,purchase,admin,event,achievement'
+
+// Points
+'points'                    => 'integer'
+'balance_before'            => 'integer'
+'balance_after'             => 'integer'
+
+// Reference
+'reference_type'            => 'string|nullable' // Polymorphic: Tournament, Contest, etc.
+'reference_id'              => 'bigint|nullable' // Polymorphic ID
+'description'               => 'string|max:500'
+
+// Expiration
+'expires_at'                => 'timestamp|nullable'
+'expired'                   => 'boolean|default:false'
+
+// Metadata
+'metadata'                  => 'json|nullable'
+
+'created_at'                => 'timestamp'
+```
+
+---
+
+### **Rewards Catalog Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'name'                      => 'string|max:255'
+'description'               => 'text'
+'short_description'         => 'string|max:500|nullable'
+
+// Type
+'reward_type'               => 'enum:physical,digital,discount,voucher,premium_feature,merchandise'
+'category'                  => 'string|max:100|nullable'
+
+// Points
+'points_required'           => 'integer'
+
+// Inventory
+'stock_quantity'            => 'integer|nullable' // Null = unlimited
+'is_in_stock'               => 'boolean|default:true'
+'total_redeemed'            => 'integer|default:0'
+
+// Limits
+'limit_per_user'            => 'integer|nullable'
+'daily_limit'               => 'integer|nullable'
+
+// Media
+'image'                     => 'string|nullable'
+'images'                    => 'json|nullable'
+
+// Terms
+'terms_and_conditions'      => 'text|nullable'
+'redemption_instructions'   => 'text|nullable'
+
+// Availability
+'available_from'            => 'datetime|nullable'
+'available_until'           => 'datetime|nullable'
+
+// Status
+'status'                    => 'enum:active,inactive,out_of_stock,expired|default:active'
+'is_featured'               => 'boolean|default:false'
+'display_order'             => 'integer|default:0'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Reward Redemptions Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id'
+'reward_id'                 => 'bigint|foreign:rewards_catalog.id'
+'points_transaction_id'     => 'bigint|foreign:points_transactions.id'
+
+// Redemption Details
+'points_spent'              => 'integer'
+'redemption_code'           => 'string|unique|max:50'
+'status'                    => 'enum:pending,processing,fulfilled,shipped,delivered,cancelled|default:pending'
+
+// Fulfillment
+'fulfilled_at'              => 'timestamp|nullable'
+'fulfilled_by'              => 'uuid|foreign:users.id|nullable'
+
+// Shipping (if applicable)
+'shipping_address'          => 'json|nullable'
+'tracking_number'           => 'string|max:255|nullable'
+'shipped_at'                => 'timestamp|nullable'
+'delivered_at'              => 'timestamp|nullable'
+
+// Notes
+'user_notes'                => 'text|nullable'
+'admin_notes'               => 'text|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+## **COMMUNITY FEATURES**
+
+### **Groups Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'creator_id'                => 'uuid|foreign:users.id'
+'name'                      => 'string|max:255'
+'slug'                      => 'string|unique|max:255'
+'description'               => 'text|nullable'
+'short_description'         => 'string|max:500|nullable'
+
+// Type & Category
+'group_type'                => 'enum:public,private,invite_only|default:public'
+'category'                  => 'enum:recreational,competitive,social,training,regional,age_based,skill_based,other'
+
+// Location
+'is_location_based'         => 'boolean|default:false'
+'city'                      => 'string|max:255|nullable'
+'state'                     => 'string|max:255|nullable'
+'country'                   => 'string|max:255|nullable'
+
+// Membership
+'max_members'               => 'integer|nullable'
+'current_member_count'      => 'integer|default:1'
+'requires_approval'         => 'boolean|default:false'
+
+// Settings
+'allow_member_posts'        => 'boolean|default:true'
+'allow_member_invites'      => 'boolean|default:true'
+'is_featured'               => 'boolean|default:false'
+
+// Media
+'cover_photo'               => 'string|nullable'
+'group_photo'               => 'string|nullable'
+
+// Rules
+'rules'                     => 'text|nullable'
+
+// Status
+'status'                    => 'enum:active,inactive,archived|default:active'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Group Members Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'group_id'                  => 'bigint|foreign:groups.id'
+'user_id'                   => 'uuid|foreign:users.id'
+
+// Membership
+'role'                      => 'enum:owner,admin,moderator,member|default:member'
+'status'                    => 'enum:pending,active,banned|default:active'
+
+// Dates
+'joined_at'                 => 'timestamp'
+'approved_at'               => 'timestamp|nullable'
+'approved_by'               => 'uuid|foreign:users.id|nullable'
+
+// Settings
+'notifications_enabled'     => 'boolean|default:true'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+
+// Unique constraint
+UNIQUE KEY unique_group_member (group_id, user_id)
+```
+
+---
+
+### **Teams Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'captain_id'                => 'uuid|foreign:users.id'
+'name'                      => 'string|max:255'
+'slug'                      => 'string|unique|max:255'
+'tagline'                   => 'string|max:255|nullable'
+'description'               => 'text|nullable'
+
+// Team Type
+'team_type'                 => 'enum:singles,doubles,mixed,league|default:doubles'
+'skill_level'               => 'enum:beginner,intermediate,advanced,professional|nullable'
+
+// Location
+'city'                      => 'string|max:255|nullable'
+'state'                     => 'string|max:255|nullable'
+'country'                   => 'string|max:255'
+
+// Membership
+'max_members'               => 'integer|default:10'
+'current_member_count'      => 'integer|default:1'
+'is_recruiting'             => 'boolean|default:true'
+
+// Media
+'logo'                      => 'string|nullable'
+'cover_photo'               => 'string|nullable'
+'team_photos'               => 'json|nullable'
+
+// Colors
+'primary_color'             => 'string|max:7|nullable' // Hex color
+'secondary_color'           => 'string|max:7|nullable'
+
+// Statistics
+'tournaments_entered'       => 'integer|default:0'
+'tournaments_won'           => 'integer|default:0'
+'total_matches_played'      => 'integer|default:0'
+'total_matches_won'         => 'integer|default:0'
+'team_ranking'              => 'integer|nullable'
+
+// Status
+'status'                    => 'enum:active,inactive,disbanded|default:active'
+'is_verified'               => 'boolean|default:false'
+'verified_at'               => 'timestamp|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Team Members Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'team_id'                   => 'bigint|foreign:teams.id'
+'user_id'                   => 'uuid|foreign:users.id'
+
+// Membership
+'role'                      => 'enum:captain,co_captain,player,substitute|default:player'
+'jersey_number'             => 'integer|nullable'
+'position'                  => 'string|max:100|nullable'
+
+// Dates
+'joined_at'                 => 'timestamp'
+'status'                    => 'enum:active,inactive,removed|default:active'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+
+// Unique constraint
+UNIQUE KEY unique_team_member (team_id, user_id)
+```
+
+---
+
+### **Community Posts Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'author_id'                 => 'uuid|foreign:users.id'
+
+// Post Context
+'postable_type'             => 'string|nullable' // Polymorphic: Group, Team, etc.
+'postable_id'               => 'bigint|nullable' // Polymorphic ID
+
+// Content
+'content'                   => 'text'
+'post_type'                 => 'enum:text,image,video,poll,achievement,match_result|default:text'
+
+// Media
+'media'                     => 'json|nullable' // Array of media objects
+
+// Poll (if applicable)
+'poll_options'              => 'json|nullable'
+'poll_ends_at'              => 'timestamp|nullable'
+'allow_multiple_votes'      => 'boolean|default:false'
+
+// Engagement
+'like_count'                => 'integer|default:0'
+'comment_count'             => 'integer|default:0'
+'share_count'               => 'integer|default:0'
+
+// Visibility
+'visibility'                => 'enum:public,group,team,friends|default:public'
+'is_pinned'                 => 'boolean|default:false'
+
+// Moderation
+'is_edited'                 => 'boolean|default:false'
+'edited_at'                 => 'timestamp|nullable'
+'status'                    => 'enum:published,hidden,deleted,flagged|default:published'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+'deleted_at'                => 'timestamp|nullable'
+```
+
+---
+
+### **Post Comments Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'post_id'                   => 'bigint|foreign:community_posts.id'
+'user_id'                   => 'uuid|foreign:users.id'
+'parent_comment_id'         => 'bigint|foreign:post_comments.id|nullable' // For nested comments
+
+// Content
+'content'                   => 'text'
+
+// Engagement
+'like_count'                => 'integer|default:0'
+
+// Moderation
+'is_edited'                 => 'boolean|default:false'
+'edited_at'                 => 'timestamp|nullable'
+'status'                    => 'enum:published,hidden,deleted|default:published'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+'deleted_at'                => 'timestamp|nullable'
+```
+
+---
+
+### **Post Likes Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'likeable_type'             => 'string' // Polymorphic: Post, Comment
+'likeable_id'               => 'bigint' // Polymorphic ID
+'user_id'                   => 'uuid|foreign:users.id'
+'created_at'                => 'timestamp'
+
+// Unique constraint
+UNIQUE KEY unique_like (likeable_type, likeable_id, user_id)
+```
+
+---
+
+## **REVIEWS & RATINGS**
+
+### **Court Reviews Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'court_id'                  => 'bigint|foreign:courts.id'
+'user_id'                   => 'uuid|foreign:users.id'
+'booking_id'                => 'bigint|foreign:bookings.id|nullable' // Optional link to booking
+
+// Rating
+'overall_rating'            => 'decimal:3,2' // 0.00 to 5.00
+'cleanliness_rating'        => 'decimal:3,2|nullable'
+'facility_rating'           => 'decimal:3,2|nullable'
+'staff_rating'              => 'decimal:3,2|nullable'
+'value_rating'              => 'decimal:3,2|nullable'
+
+// Review
+'title'                     => 'string|max:255|nullable'
+'review'                    => 'text'
+'pros'                      => 'text|nullable'
+'cons'                      => 'text|nullable'
+
+// Media
+'photos'                    => 'json|nullable' // Array of photo paths
+
+// Helpful
+'helpful_count'             => 'integer|default:0'
+'not_helpful_count'         => 'integer|default:0'
+
+// Visit Info
+'visit_date'                => 'date|nullable'
+'would_recommend'           => 'boolean|default:true'
+
+// Response
+'owner_response'            => 'text|nullable'
+'owner_response_date'       => 'timestamp|nullable'
+
+// Moderation
+'is_verified_visit'         => 'boolean|default:false' // Based on booking
+'status'                    => 'enum:pending,published,hidden,flagged|default:published'
+'is_edited'                 => 'boolean|default:false'
+'edited_at'                 => 'timestamp|nullable'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+
+// Unique constraint to prevent duplicate reviews
+UNIQUE KEY unique_court_review (court_id, user_id, booking_id)
+```
+
+---
+
+### **Coach Reviews Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'coach_id'                  => 'bigint|foreign:coaches.id'
+'user_id'                   => 'uuid|foreign:users.id'
+'session_id'                => 'bigint|foreign:coaching_sessions.id|nullable'
+
+// Rating
+'overall_rating'            => 'decimal:3,2' // 0.00 to 5.00
+'teaching_quality'          => 'decimal:3,2|nullable'
+'communication'             => 'decimal:3,2|nullable'
+'professionalism'           => 'decimal:3,2|nullable'
+'value_for_money'           => 'decimal:3,2|nullable'
+
+// Review
+'title'                     => 'string|max:255|nullable'
+'review'                    => 'text'
+'what_i_learned'            => 'text|nullable'
+
+// Helpful
+'helpful_count'             => 'integer|default:0'
+
+// Recommendation
+'would_recommend'           => 'boolean|default:true'
+'skill_improvement'         => 'enum:significant,moderate,minimal,none|nullable'
+
+// Response
+'coach_response'            => 'text|nullable'
+'coach_response_date'       => 'timestamp|nullable'
+
+// Moderation
+'is_verified_session'       => 'boolean|default:false'
+'status'                    => 'enum:pending,published,hidden|default:published'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+
+// Unique constraint
+UNIQUE KEY unique_coach_review (coach_id, user_id, session_id)
+```
+
+---
+
+### **Product Reviews Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'product_id'                => 'bigint|foreign:products.id'
+'user_id'                   => 'uuid|foreign:users.id'
+'order_id'                  => 'bigint|foreign:orders.id|nullable'
+
+// Rating
+'rating'                    => 'decimal:3,2' // 0.00 to 5.00
+'quality_rating'            => 'decimal:3,2|nullable'
+'value_rating'              => 'decimal:3,2|nullable'
+
+// Review
+'title'                     => 'string|max:255|nullable'
+'review'                    => 'text'
+
+// Media
+'photos'                    => 'json|nullable'
+'videos'                    => 'json|nullable'
+
+// Helpful
+'helpful_count'             => 'integer|default:0'
+'not_helpful_count'         => 'integer|default:0'
+
+// Purchase verification
+'is_verified_purchase'      => 'boolean|default:false'
+'would_recommend'           => 'boolean|default:true'
+
+// Moderation
+'status'                    => 'enum:pending,published,hidden,flagged|default:pending'
+
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+## **SEARCH & FILTER ENGINE**
+
+### **Search History Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id|nullable'
+'session_id'                => 'string|max:255|nullable' // For guest users
+
+// Search Query
+'search_query'              => 'string|max:500'
+'search_type'               => 'enum:courts,players,coaches,tournaments,products,events,general'
+
+// Filters Applied
+'filters'                   => 'json|nullable' // Object of filters applied
+
+// Results
+'results_count'             => 'integer|default:0'
+'clicked_result_id'         => 'bigint|nullable'
+'clicked_result_type'       => 'string|nullable'
+
+// Location context
+'search_latitude'           => 'decimal:10,8|nullable'
+'search_longitude'          => 'decimal:11,8|nullable'
+'search_location'           => 'string|max:255|nullable'
+
+// Metadata
+'ip_address'                => 'string|max:45|nullable'
+'user_agent'                => 'text|nullable'
+
+'created_at'                => 'timestamp'
+```
+
+---
+
+### **Tags Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'name'                      => 'string|unique|max:100'
+'slug'                      => 'string|unique|max:100'
+'type'                      => 'enum:court,player,coach,tournament,product,general|default:general'
+'description'               => 'text|nullable'
+'usage_count'               => 'integer|default:0'
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
+```
+
+---
+
+### **Taggables Table Fields (Polymorphic)**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'tag_id'                    => 'bigint|foreign:tags.id'
+'taggable_type'             => 'string' // Polymorphic: Court, Player, Coach, etc.
+'taggable_id'               => 'bigint' // Polymorphic ID
+'created_at'                => 'timestamp'
+
+// Indexes
+INDEX idx_taggable (taggable_type, taggable_id)
+INDEX idx_tag (tag_id)
+```
+
+---
+
+## **LOCATION & MAP FEATURES**
+
+### **Additional Fields for Courts Table** *(Already in Courts section)*
+
+The courts table already includes necessary location fields:
+- `latitude`, `longitude`
+- `address`, `city`, `state_province`, `country`, `postal_code`
+
+### **Saved Locations Table Fields**
+
+```php
+'id'                        => 'bigint|primary|auto_increment'
+'user_id'                   => 'uuid|foreign:users.id'
+'name'                      => 'string|max:255' // e.g., "Home", "Work", "Favorite Court"
+'address'                   => 'string|max:500'
+'city'                      => 'string|max:255|nullable'
+'state'                     => 'string|max:255|nullable'
+'country'                   => 'string|max:255'
+'postal_code'               => 'string|max:20|nullable'
+'latitude'                  => 'decimal:10,8'
+'longitude'                 => 'decimal:11,8'
+'is_default'                => 'boolean|default:false'
+'created_at'                => 'timestamp'
+'updated_at'                => 'timestamp'
 ```
 
 ---

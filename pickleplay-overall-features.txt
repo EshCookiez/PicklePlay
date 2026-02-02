@@ -1,0 +1,483 @@
+PicklePlay Backend - Trello Checklist Organized by Feature
+AUTHENTICATION & USER MANAGEMENT
+Core Features
+ User registration endpoint
+ User login/logout endpoints
+ Password reset functionality
+ JWT/Session token management
+ Role-based access control (Admin, User, Organizer)
+ User profile management endpoint
+ Email verification
+Database
+ Users table/collection
+ Authentication logs
+COURT MANAGEMENT
+Core Features
+ Create court endpoint (Admin only)
+ Get all courts endpoint
+ Get court by ID endpoint
+ Update court details endpoint
+ Delete court endpoint
+ Court search with filters (location, amenities, rating)
+ Court ratings/reviews system
+Database
+ Courts table/collection
+ Court amenities table
+ Court reviews/ratings table
+ Court images storage
+COURT BOOKING SYSTEM
+Core Features
+ Create booking endpoint
+ Get user bookings endpoint
+ Cancel booking endpoint
+ Update booking endpoint
+ Real-time availability checker
+ Booking history
+ Booking confirmation emails
+Database
+ Bookings table/collection
+ Availability slots table
+ Booking status tracking
+LOCATION & MAP FEATURES
+Core Features
+ Geolocation API integration
+ Nearby courts search endpoint
+ Distance calculation service
+ Location-based filtering
+ Map data formatting endpoint
+Database
+ Coordinates storage for courts
+SEARCH & FILTER ENGINE
+Core Features
+ Advanced search endpoint
+ Filter by location, availability, amenities, price
+ Search history tracking
+ Search suggestions/autocomplete
+ Data tagging system for courts
+Database
+ Search history table
+ Tags/categories table
+SHOP/MERCHANDISE
+Core Features
+ Get products endpoint
+ Get product by ID endpoint
+ Create product endpoint (Admin)
+ Update product endpoint (Admin)
+ Delete product endpoint (Admin)
+ Shopping cart management
+ Order creation endpoint
+ Order history endpoint
+Database
+ Products table
+ Cart table
+ Orders table
+ Order items table
+PAYMENT PROCESSING
+Core Features
+ Payment gateway integration (Stripe, PayPal, etc.)
+ Process booking payment endpoint
+ Process shop payment endpoint
+ Payment verification endpoint
+ Refund processing endpoint
+ Payment history endpoint
+ Invoice generation
+Database
+ Payments table
+ Transactions log
+EVENTS & NEWS
+Core Features
+ Create event endpoint (Admin/Organizer)
+ Get all events endpoint
+ Get event by ID endpoint
+ Update event endpoint
+ Delete event endpoint
+ Create news post endpoint (Admin)
+ Get news endpoint
+ Update/delete news endpoint
+Database
+ Events table
+ News table
+ Event registrations table
+ADMIN DASHBOARD
+Core Features
+ Dashboard statistics endpoint (total bookings, revenue, users)
+ User management endpoint
+ Court management endpoint
+ Booking management endpoint
+ Report generation endpoint
+ Data export endpoint (CSV, JSON)
+ Admin activity logs
+Database
+ Admin audit logs table
+INTEGRATIONS
+Core Features
+ WhatsApp API integration (notifications, support)
+ Instagram API integration (feed, links)
+ AI feature integration (Noupe/Tawt.to - clarify requirements)
+ Email notification service (SendGrid/Mailgun)
+ SMS notifications (Twilio)
+DATA MANAGEMENT & EXPORT
+Core Features
+ Export bookings data endpoint
+ Export courts data endpoint
+ Export user data endpoint
+ Export financial reports endpoint
+ Data backup functionality
+ANALYTICS & LOGGING
+Core Features
+ User activity tracking
+ Court popularity analytics
+ Booking trends analysis
+ Revenue analytics
+ Error logging system
+ Performance monitoring
+Database
+ Activity logs table
+ Analytics data table
+INFRASTRUCTURE & SECURITY
+Core Features
+ API rate limiting
+ Input validation & sanitization
+ SQL injection prevention
+ CORS configuration
+ API documentation (Swagger/OpenAPI)
+ Health check endpoint
+ Caching strategy (Redis)
+ Database backup strategy
+ Error handling & logging
+TESTING
+Core Features
+ Unit tests for services
+ Integration tests for API endpoints
+ Authentication tests
+ Payment processing tests
+ Load testing
+ 
+ 
+ goal= source of pickle court also we have our own court
+ coaches
+ promote players
+ add contests with points and ranking
+ create video on how to play pickleball= static make it easy 
+ account = for players who are good for to hire a coach
+ directory of players on courts available
+ create community
+ post players on community about the team and to boast their team 
+ connect groups in the community
+ choosing of group for the user
+ navigate the courts available nationwide
+ find other users so that they can play
+ add user ID
+ point system and point exchange/rewards
+ retrieve position, work, name, email, how many times a week they play, ranking, pfp,= player details
+ tournaments
+premium features
+ 
+ 
+PicklePlay Website - Feature Summary
+🏀 Court Discovery & Management
+	Court directory (sources of pickle courts nationwide)
+	Own court information/listing
+	Navigate available courts nationwide
+	Court location-based features
+👨‍🏫 Coaching & Training
+	Coaches directory
+	Hire coaches feature (for good players)
+	How-to-play pickleball video tutorials (static content)
+👥 Player Profiles & Discovery
+	Player directory (available on courts)
+	User profiles with details:
+	User ID
+	Position
+	Work/profession
+	Name & email
+	Play frequency
+	Ranking
+	Profile picture
+	Find other users to play with
+🏆 Ranking & Competitive Features
+	Point system
+	Point exchange/rewards system
+	Ranking system
+	Contests with points & ranking
+	Tournaments
+💬 Community & Social
+	Community platform
+	Player posts about teams
+	Team showcasing/boasting
+	Group connections
+	User group selection/joining
+	Team-based networking
+💎 Premium Features
+	Premium tier (features to be defined)
+	Key Takeaway: PicklePlay is a comprehensive social + competitive pickleball platform combining court discovery, player networking, coaching, community engagement, and a competitive ranking/tournament system.
+	
+	how to integrate tournas
+	
+	
+	
+			Mapbox 			vs		 	Google MAP
+	🔥 Insane customization 			❌ Limited styling	
+	👍 Best docs						👍 Strong React & React Native SDKs, Slightly more setup
+	👍mobile & low-bandwidth scenarios 👍Optimized worldwide
+	✅ More flexible licensing			⚠️ Strict usage rules
+	✅ Easier to switch later			⚠️ Can’t mix with other map providers
+	✅ Fewer restrictions				⚠️ Branding required
+	| Feature             | Google Maps | Mapbox |
+	| ------------------- | ----------- | ------ |
+	| Court pinning       | ✅           | ✅      |
+	| Nearby courts       | ✅           | ✅      |
+	| Directions          | ✅           | ✅      |
+	| Distance filtering  | ✅           | ✅      |
+	| Custom court layers | ❌           | ✅      |
+	| Player heatmaps     | ❌           | ✅      |
+	| Offline maps        | ❌           | ✅      |
+	| Cost predictability | ❌           | ✅      |
+	
+Mapbox ✅
+
+Why?
+
+PH-based MVP → cost matters
+
+Court finder → custom layers are useful
+
+Community growth → pricing won’t explode
+
+React + React Native → Mapbox fits perfectly
+
+Stripe vs Xendit
+✅Global 		✅South Asian payment platform design for PH
+🔥Xendit generally has clear, competitive local pricing with no hidden monthly costs — often cheaper for local wallets and bank payments. Stripe’s pricing is robust but may be slightly higher and more complex depending on country setup.
+
+| Feature                | **Stripe**     							|	**Xendit**      |
+| ---------------------- | --------------------------------------  
+| Local e-wallets        | *Via custom setup*                     | ✅ (GCash, ShopeePay, Maya, GrabPay) ([Xendit Help Center][1]) |
+| Cards                  | ✅ Worldwide support ([Stripe][2])      | ✅ Local & international cards ([Xendit Help Center][1])       |
+| Subscriptions          | ✅ Built-in billing tools ([Stripe][3]) | ✅ Recurring billing support ([Xendit Help Center][1])         |
+| Payment Links          | ✅                                      | ✅ Free to create ([Xendit][4])                                |
+| Invoicing              | ✅                                      | ✅ Integrated invoicing capability ([Xendit][5])               |
+| Marketplace payouts    | Stripe Connect                         | Xendit Platform Fee system possible ([Xendit][6])             |
+| Multi-currency support | ✅ Strong global support ([Stripe][2])  | Limited local focus (but can expand regionally) ([Xendit][4]) |
+
+Use Stripe if:
+
+✅ You plan for international users or revenue outside the Philippines
+✅ You need advanced subscription, marketplace, or complex billing flows
+✅ You want a large global developer ecosystem and extensive built-in tools
+
+Use Xendit if:
+
+✅ Your early users will be Philippines-based
+✅ You want broad local payment support (GCash, Maya, bank transfers)
+✅ You want simple pricing with no monthly fees
+✅ You want local settlement and reconciliation tools
+
+
+| Aspect                      | **Stripe**      `						  | **Xendit**      |
+
+| Best for                    | Global scale, advanced billing features     | Philippines local payment options       
+| Pricing                     | Transparent but potentially higher globally | Typically lower local fees, pay-per-use 
+| Developer Ecosystem         | Large, mature APIs                          | Growing, region-focused APIs            
+| Local Payments              | Limited without custom add-ons              | Extensive local support                
+| Marketplace & Subscriptions | Strong built-in tools                       | Good support with optional features    
+
+
+EMAIL NOTIFICATIONS
+Resend 
+Send Email API - Transactional emails
+Email Templates - React Email templates
+Analytics - Open rates, clicks
+Welcome emails
+Email verification
+Password reset
+Booking confirmations
+Tournament registration confirmations
+Payment receipts
+Coach session confirmations
+Event reminders
+
+SendGrid: Free (100 emails/day), ₱855/month (40,000 emails)
+
+ SMS NOTIFICATIONS
+ 
+Twilio vs Semaphore 
+| Feature                       | **Twilio**               | **Semaphore**         |
+| ----------------------------- | ------------------------ | --------------------- |
+| SMS API                       | ✅ Enterprise-grade       | ✅ Simple & local      |
+| Bulk SMS                      | ✅                        | ✅                     |
+| OTP API support               | Via API                  | Built-in OTP routes   |
+| Sender ID customization       | Supported (varies)       | Sender Name supported |
+| Delivery reports              | Detailed & programmatic  | Basic logging         |
+| Global SMS reach              | ✅                        | Primarily PH          |
+| Pricing model                 | Usage + optional monthly | Pay-per-SMS credits   |
+| Ease of setup                 | Medium                   | Easy                  |
+| Multi-channel (WhatsApp etc.) | Yes                      | Focused on SMS        |
+
+
+🔥Twilio is more feature rich and global, but can be costlier especially for high OTP volume.
+
+🔥Semaphore is much more cost-predictable for Philippines locales, easy to integrate, and often cheaper for transactional/OTP SMS.
+
+
+WHATSAPP INTEGRATION (FUTURE IMPLEMENT)
+Twilio WhatsApp Business API
+Send Messages API - WhatsApp notifications
+Templates - Pre-approved message templates
+Media Messages - Send images, PDFs
+
+FILE/IMAGE UPLOADS
+
+Uploadthing vs Supabase Storage - Built-in with Supabase (FREE on Pro plan)
+| Feature         				| **Supabase Storage (built-in)**  													|  **UploadThing**  | 
+| **Integration with Supabase stack** | 🌟 Natively integrated (Auth + RBAC, RLS) ([Supabase][1])					| ❌ Separate — needs custom integration          |
+| **Global CDN**                      | ✅ Built-in (285+ cities) ([Supabase][1])                                       | ⚠️ Depends on storage backend                                        |
+| **Auth & Access control**           | 🎯 Fine-grained RLS + bucket policies ([Supabase][1])                          | Managed by you in server routes                                      |
+| **Resumable uploads / large files** | ✅ TUS protocol, resumable up to >50GB ([Supabase][2])                          | Depends on backend and service plan                                  |
+| **Image optimization**              | ⚡ On-the-fly image transforms ([Supabase][3])                                  | ❌ None built-in                                                      |
+| **Client integrations**             | Standard Supabase SDK (`supabase.storage`)                                     | ✅ UploadButton & hooks for Next.js/React ([v6.uploadthing.com][4])   |
+| **Dashboard for uploads**           | Basic file browser in Supabase UI                                              | 📊 Dedicated upload dashboard (with tracking) ([uploadthing][5])     |
+| **Preset UI components**            | ❌ Not provided — you build UI                                                  | ✅ Prebuilt upload components                                         |
+| **Pricing model**                   | Included with *Supabase Pro* Storage allocation (effectively free up to quota) | 📦 Tiered storage plans (2 GB free, then $10+/mo) ([uploadthing][5]) |
+| **Storage quotas**                  | Based on Supabase plan (Pro includes storage allowance)                        | Defined by UploadThing plan                                          |
+| **Custom upload logic**             | You implement via SDK/Edge functions                                           | Built-in route handlers & callbacks                                  |
+| **Best use case**                   | General file storage tied closely to app backend                               | **Quick uploads** with UI components & minimal boilerplate           |
+
+🤔 When to Choose Which (for PicklePlay)
+📍 Use Supabase Storage if:
+
+- You want all backend services under Supabase (auth, DB, storage) for easier management.
+
+- You don’t mind building custom upload UI and logic.
+
+- You want tight access control via RLS and built-in CDN.
+
+📍 Use UploadThing if:
+
+- You want fast development with built-in UI upload components.
+
+- You want to offload upload logic/callbacks and don’t mind paying for storage.
+
+- You need standardized upload flows across frameworks (e.g., React, Expo).
+
+🔥Since you’re already on Supabase Pro with storage included, Supabase Storage is generally the best choice for long-term cost, integration, and security — and you can always layer UploadThing components later if you want easier upload UIs
+
+
+
+VIDEO HOSTING (Tutorials) [to be decided]
+
+YouTube API (Best for "How to Play Pickleball" videos)
+YouTube Data API - Embed tutorial videos
+Player API - Custom video player
+Alternatives:
+
+Vimeo API - Professional video hosting
+Cloudflare Stream - Paid video streaming
+Mux - Video infrastructure
+Pricing:
+
+YouTube: FREE (embed existing videos)
+Vimeo: ₱400/month (250GB storage)
+Cloudflare Stream: ₱285/month (1,000 minutes)
+
+ERROR MONITORING
+Sentry
+Error Tracking - JavaScript/API errors
+Performance Monitoring - API response times
+Session Replay - Reproduce user bugs
+Release Tracking - Monitor deployments
+
+
+ANALYTICS (Optional but Recommended) [To be decided]
+PostHog (All-in-one Product Analytics)
+Event Tracking - User actions
+Feature Flags - A/B testing
+Session Recording - User behavior
+Heatmaps - Click tracking
+Alternatives:
+
+Google Analytics 4 - FREE web analytics
+Mixpanel - User analytics
+Plausible - Privacy-focused analytics
+Pricing:
+
+PostHog: Free (1M events/month), ₱1,140/month (10M events)
+Google Analytics: FREE
+Plausible: ₱513/month (10,000 pageviews)
+
+
+| Feature                               | **Google Analytics (GA4)**     | **PostHog**                                 |
+| ------------------------------------- | ------------------------------ | ------------------------------------------- |
+| **Core focus**                        | Web & mobile traffic analytics | Full product analytics (behavior + funnels) |
+| **Event tracking**                    | ✅ (built-in)                   | ✅ (very flexible)                           |
+| **Session recordings**                | ❌ (requires third-party)       | ✅                                           |
+| **Heatmaps**                          | ❌                              | ✅                                           |
+| **Funnels & conversion paths**        | ✅                              | ✅                                           |
+| **Feature flags**                     | ❌                              | ✅                                           |
+| **User privacy controls (GDPR, PII)** | Managed config                 | Fully in your control                       |
+| **Data ownership**                    | Shared with Google             | You own your data (self-hosted or cloud)    |
+| **Cloud vs self-host**                | Cloud only                     | Cloud or self-host                          |
+| **Mobile app support**                | Yes                            | Yes                                         |
+| **Ease of setup**                     | Easy                           | Moderate                                    |
+| **Pricing**                           | Free + optional paid tiers     | Free self-hosted / Paid cloud               |
+
+📌 Which Should You Use for PicklePlay?
+💡 Short-term (MVP) — use Google Analytics
+
+✔ Great for initial traffic analysis
+✔ Easy setup
+✔ Free & requires no backend infrastructure
+
+💡 Product/Feature Focus (Growth stage) — use PostHog
+
+✔ Full event tracking
+✔ Funnels & retention analysis
+✔ Session recordings + heatmaps
+✔ Useful for improving UX & feature prioritization
+
+
+| Aspect                | Google Analytics | PostHog               |
+| --------------------- | ---------------- | --------------------- |
+| Data Ownership        | Google           | You (self-host)       |
+| Custom Event Tracking | Good             | Excellent             |
+| Funnels & retention   | Yes              | Yes + deeper insights |
+| Session recordings    | No               | Yes                   |
+| Heatmaps              | ❌                | ✅                     |
+| Feature flags/A/B     | ❌                | ✅                     |
+| Mobile + web          | Yes              | Yes                   |
+| Marketing insights    | ⭐⭐⭐              | ⭐⭐                    |
+| Product analytics     | ⭐⭐               | ⭐⭐⭐                   |
+
+
+🤖 AI FEATURES (Based on your "Noupe/Tawt.to" mention)
+If you want AI-powered features:
+OpenAI API (ChatGPT integration)
+
+Player skill assessment suggestions
+Court recommendation engine
+Automated customer support chatbot
+Content moderation for community posts
+Pricing: ~₱285-₱1,140/month depending on usage
+
+Alternatives:
+
+Anthropic Claude API - Similar to ChatGPT
+Google Gemini API - Multimodal AI
+Replicate - Run open-source AI models
+
+
+
+🔐 AUTHENTICATION (Optional - If not using Supabase Auth)
+Supabase Auth (Included with Supabase - RECOMMENDED)
+Email/Password auth
+OAuth providers (Google, Facebook, Apple)
+Magic links
+Phone auth
+Alternatives:
+
+Clerk - Modern auth UI (₱1,425/month)
+Auth0 - Enterprise auth (₱1,710/month)
+NextAuth.js - Open source (FREE but DIY)
+Recommendation: Use Supabase Auth (already included, no extra cost)
+
+

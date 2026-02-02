@@ -146,6 +146,7 @@ export default function PlayersPage() {
   const [filterLevel, setFilterLevel] = useState<string>('all');
   const [players, setPlayers] = useState<PlayerStats[]>(MOCK_PLAYERS);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerStats | null>(null);
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [mounted, setMounted] = useState(false);
@@ -155,34 +156,14 @@ export default function PlayersPage() {
   }, []);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      setLoading(true);
-      try {
-        const data = await playerService.getPlayers({ 
-          level: filterLevel === 'all' ? undefined : filterLevel,
-          search: searchQuery || undefined
-        });
-        if (data) {
-          setPlayers(data);
-        } else {
-          // If no data (table doesn't exist), use mock but apply filters
-          const filtered = MOCK_PLAYERS.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 p.location.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesLevel = filterLevel === 'all' || p.level === filterLevel;
-            return matchesSearch && matchesLevel;
-          });
-          setPlayers(filtered);
-        }
-      } catch (err) {
-        console.error('Failed to fetch players:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const timer = setTimeout(fetchPlayers, 300); // Debounce search
-    return () => clearTimeout(timer);
+    // Filter mock data based on search and level
+    const filtered = MOCK_PLAYERS.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           p.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesLevel = filterLevel === 'all' || p.level === filterLevel;
+      return matchesSearch && matchesLevel;
+    });
+    setPlayers(filtered);
   }, [searchQuery, filterLevel]);
 
   const handlePlayerSelect = async (player: PlayerStats) => {
