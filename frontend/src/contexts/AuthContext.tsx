@@ -10,7 +10,6 @@ interface AuthContextType {
   user: DbUser | null;
   session: Session | null;
   isLoading: boolean;
-  isLoggingOut: boolean;
   isAuthModalOpen: boolean;
   authView: "login" | "signup";
   openAuthModal: (view?: "login" | "signup") => void;
@@ -34,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<DbUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "signup">("login");
   const supabase = createClient();
@@ -43,22 +41,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
     let initialCheckDone = false;
 
+    // Helper function to add timeout to promises
+    const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Operation timed out')), ms)
+      );
+      return Promise.race([promise, timeout]);
+    };
+
     const initializeAuth = async () => {
       try {
-        // Get initial session
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        // Get initial session with timeout
+        const { data: { session: initialSession } } = await withTimeout(
+          supabase.auth.getSession(),
+          10000 // 10 second timeout
+        );
         
         if (!isMounted) return;
 
         setSession(initialSession);
         
         if (initialSession?.user) {
-          // Fetch user data from public.users table
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', initialSession.user.id)
-            .single();
+          // Fetch user data from public.users table with timeout
+          const { data: userData } = await withTimeout(
+            supabase
+              .from('users')
+              .select('*')
+              .eq('id', initialSession.user.id)
+              .single(),
+            10000 // 10 second timeout
+          );
           
           if (isMounted) {
             setUser(userData || null);
@@ -160,8 +172,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', data.session.user.id)
         .single();
       
-      setUser(userData);
-      setSession(data.session);
+      if (userData) {
+        setUser(userData);
+        setSession(data.session);
+      }
     }
   };
 
@@ -231,18 +245,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      // Show smooth transition overlay
-      setIsLoggingOut(true);
-      
       // Clear state
       setUser(null);
       setSession(null);
       
       // Sign out from Supabase
       await supabase.auth.signOut();
-      
-      // Wait for fade animation to complete before navigating
-      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Clear browser history and replace with homepage
       // This prevents back button from going to protected pages
@@ -251,7 +259,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Logout error:", error);
       // Even if there's an error, navigate to clear state
-      await new Promise(resolve => setTimeout(resolve, 300));
       window.history.replaceState(null, '', '/');
       window.location.replace('/');
     }
@@ -263,7 +270,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         session,
         isLoading,
-        isLoggingOut,
         isAuthModalOpen,
         authView,
         openAuthModal,
@@ -273,20 +279,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
       }}
     >
-      {/* Logout Transition Overlay */}
-      {isLoggingOut && (
-        <div className="fixed inset-0 z-[9999] bg-white animate-in fade-in duration-300 flex items-center justify-center">
-          <div className="text-center animate-in zoom-in duration-500">
-            <div className="w-16 h-16 mx-auto mb-4">
-              <svg className="animate-spin w-full h-full text-[#a3e635]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>
-            <p className="text-[#0f2e22] font-semibold text-lg">Logging out...</p>
-          </div>
-        </div>
-      )}
       {children}
     </AuthContext.Provider>
   );

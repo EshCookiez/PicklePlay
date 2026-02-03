@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
   turbopack: {
-    root: ".",
+    root: path.resolve(__dirname),
   },
+  // Increase timeout for slow operations
+  staticPageGenerationTimeout: 120,
   images: {
     remotePatterns: [
       {

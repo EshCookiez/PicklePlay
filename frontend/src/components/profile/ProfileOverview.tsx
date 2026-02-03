@@ -101,7 +101,11 @@ const ProfileOverview: React.FC<Props> = ({ user, onEdit }) => {
                <div>
                   <div className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase mb-1">Member Since</div>
                   <div className="text-lg sm:text-xl font-bold text-white mt-1 sm:mt-1.5">
-                    {new Date(user.memberSince).getFullYear()}
+                    {user.created_at
+                      ? new Date(user.created_at).getFullYear()
+                      : user.memberSince
+                        ? new Date(user.memberSince).getFullYear()
+                        : ''}
                   </div>
                </div>
             </div>

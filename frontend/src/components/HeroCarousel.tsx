@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import SplitText from "../animate/SplitText";
 const slides = [
   {
     src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/banner2-9udq6hGbqmfwbCgB0GZdznI0Og0YVD.png",
@@ -28,37 +27,40 @@ export default function HeroCarousel() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [current, setCurrent] = useState(2);
+  const heroRef = useRef<HTMLElement>(null);
   
-  // Search functionality state
+  // Scroll to hero section
+  const scrollToHero = () => {
+    if (heroRef.current) {
+      heroRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchResult, setSearchResult] = useState('');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyMessage, setNearbyMessage] = useState('');
   
-  // Typing animation state
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-  
-  // Determine welcome text based on auth state
-  const welcomeText = user ? `Welcome, ${user.first_name || 'User'}` : 'Welcome to PicklePlay Philippines';
-  
-  // Typing animation effect
+  // Get user's geolocation on component mount
   useEffect(() => {
-    let index = 0;
-    setDisplayedText('');
-    setIsTyping(true);
-
-    const interval = setInterval(() => {
-      if (index < welcomeText.length) {
-        setDisplayedText(welcomeText.substring(0, index + 1));
-        index++;
-      } else {
-        setIsTyping(false);
-        clearInterval(interval);
-      }
-    }, 60);
-
-    return () => clearInterval(interval);
-  }, [welcomeText]);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setNearbyMessage('📍 Found your location - showing nearby courts');
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+          setNearbyMessage('📍 Enable location for courts near you');
+        }
+      );
+    }
+  }, []);
+  
   
   // Philippine places data
   const philippinePlaces = [
@@ -94,10 +96,25 @@ export default function HeroCarousel() {
     'Tandag', 'Tangub', 'Tarlac City', 'Taytay', 'Tuguegarao',
     'Urdaneta', 'Valencia', 'Victorias', 'Vigan', 'Zamboanga City'
   ];
+
+  // Sample courts data
+  const sampleCourts = [
+    { name: 'KAI Multipurpose Hall', distance: '1.0 miles away', location: 'Mandaluyong, NCR' },
+    { name: 'Flair Pickleball Club', distance: '1.1 miles away', location: 'Mandaluyong, NCR' },
+    { name: 'Rockwell Club, Amorsolo Square', distance: '1.2 miles away', location: 'Makati City, NCR' },
+    { name: 'Greenhills West Clubhouse', distance: '1.2 miles away', location: 'San Juan, NCR' },
+    { name: 'Street Pickleball Ortigas', distance: '1.7 miles away', location: 'Pasig City, NCR' },
+  ];
   
   // Filter places based on search query
   const filteredPlaces = philippinePlaces.filter(place =>
     place.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter courts based on search query
+  const filteredCourts = sampleCourts.filter(court =>
+    court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    court.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
   // Handle search
@@ -121,43 +138,13 @@ export default function HeroCarousel() {
 
   return (
     <>
-      <style jsx>{`
-        @keyframes bounceInCircle {
-          0%,
-          100% {
-            transform: translateY(0) scale(1, 1);
-          }
-          25% {
-            transform: translateY(-8px) scale(1.05, 0.95);
-          }
-          50% {
-            transform: translateY(-25px) scale(0.95, 1.05);
-          }
-          75% {
-            transform: translateY(-5px) scale(1.02, 0.98);
-          }
-        }
+      <style jsx>{``}</style>
+      
+      {showSuggestions && (filteredPlaces.length > 0 || filteredCourts.length > 0) && (
+        <div></div>
+      )}
 
-        @keyframes fadeInEntrance {
-          0% {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .ballBounce {
-          animation: bounceInCircle 1s ease-in-out infinite;
-        }
-
-        .contentFadeIn {
-          animation: fadeInEntrance 1.5s ease-out forwards;
-        }
-      `}</style>
-      <section className="relative w-full h-lvh md:h-screen bg-gray-200 overflow-hidden">
+      <section className="relative w-full h-lvh md:h-screen bg-gray-200" ref={heroRef}>
         {/* Video Background */}
         <video
           src="/images/home-video.mp4"
@@ -174,60 +161,37 @@ export default function HeroCarousel() {
         {/* Content */}
         <div className="absolute inset-0 flex items-center justify-center z-30 px-4">
           <div className="max-w-7xl mx-auto w-full">
-            <div className="flex flex-col items-center justify-center text-center contentFadeIn">
-              <div className="w-full max-w-7xl mb-8 mt-16 flex items-center justify-center mx-4 relative">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-full max-w-7xl mb-8 mt-8 flex items-center justify-center mx-4 relative cursor-pointer" onClick={scrollToHero}>
                 <Image
                   src="/images/PickleplayPH.png"
                   alt="Pickleplay Philippines"
                   width={1800}
                   height={900}
-                  className="w-full h-auto object-contain max-h-[300px] md:max-h-[450px]"
+                  className="w-full h-auto object-contain max-h-[300px] md:max-h-[450px] hover:scale-105 transition-transform"
                   style={{ width: 'auto', height: 'auto', maxHeight: '450px' }}
+                  priority
+                  loading="eager"
                 />
               </div>
 
-              {/* Welcome Message with Typing Animation */}
-              <div className="w-full mb-8 text-center animate-in fade-in duration-700">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black drop-shadow-lg mb-6">
-                  {user && displayedText.startsWith('Welcome,') ? (
-                    <>
-                      <span className="text-white">Welcome, </span>
-                      <span className="text-[#a3e635]">{displayedText.substring(9)}</span>
-                      {isTyping && <span className="animate-pulse text-[#a3e635]">|</span>}
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-white">{displayedText}</span>
-                      {isTyping && <span className="animate-pulse text-[#a3e635]">|</span>}
-                    </>
-                  )}
-                </h1>
-              </div>
               
               <div className="flex flex-col items-center justify-center mb-8">
-                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4 animate-in fade-in duration-700">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
                   FIND A LOCAL COURT NEAR YOU
                 </h2>
-                <p className="text-base sm:text-lg md:text-2xl text-white drop-shadow-lg max-w-4xl px-4 mb-16 text-center animate-in fade-in duration-700 delay-200">
+                <p className="text-base sm:text-lg md:text-2xl text-white drop-shadow-lg max-w-4xl px-4 mb-6 text-center">
                   Connect with pickleball courts in your area and start playing
                 </p>
-                {/* <span className="ballBounce relative inline-flex w-20 h-20 md:w-32 md:h-32 items-center justify-center flex-shrink-0">
-                  <Image
-                    src="/images/Ball.png"
-                    alt="Bouncing ball"
-                    fill
-                    className="object-contain"
-                  />
-                </span> */}
               </div>
               
               {/* Search Bar */}
-              <div className="w-full max-w-2xl mb-6 absolute bottom-0 left-1/2 transform -translate-x-1/2 z-40">
-                <div className="relative">
+              <div className="w-full max-w-2xl mb-6">
+                <div className="relative z-40">
                   <input
                     type="text"
-                    placeholder="Search for a place in the Philippines..."
-                    className="w-full px-4 py-3 pr-12 text-gray-900 bg-white border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Search for courts or places in the Philippines..."
+                    className="w-full px-5 py-4 pl-14 pr-14 text-gray-900 bg-white border border-gray-300 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg md:text-xl"
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -236,6 +200,23 @@ export default function HeroCarousel() {
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   />
+                  {/* Location Button */}
+                  <button
+                    onClick={() => {
+                      if (userLocation) {
+                        router.push(`/findcourts?lat=${userLocation.lat}&lng=${userLocation.lng}&near=true`);
+                      } else {
+                        alert('Please enable location access to find courts near you');
+                      }
+                    }}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-100 text-blue-500 rounded-lg hover:bg-gray-200 transition-colors"
+                    title="Find courts near you"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5z" />
+                    </svg>
+                  </button>
+                  {/* Search Button */}
                   <button
                     onClick={handleSearch}
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -244,71 +225,83 @@ export default function HeroCarousel() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </button>
-                </div>
-                
-                {/* Autocomplete Suggestions */}
-                {showSuggestions && filteredPlaces.length > 0 && (
-                  <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {filteredPlaces.map((place, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setSearchQuery(place);
-                          setShowSuggestions(false);
-                          handleSearch();
-                        }}
-                        className="w-full px-4 py-3 text-left hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition-colors"
-                      >
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {place}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {/* Search Results Section */}
-              {searchResult && (
-                <div className="w-full max-w-2xl mb-8 absolute bottom-20 left-1/2 transform -translate-x-1/2 z-40 animate-in fade-in duration-500">
-                  <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <Image
-                        src="/images/PinMarker.png"
-                        alt="Location Pin"
-                        width={24}
-                        height={24}
-                        className="mr-3"
-                        style={{ width: 'auto', height: 'auto' }}
-                      />
-                      <h3 className="text-xl font-semibold text-gray-900">{searchResult}</h3>
+                  {/* Autocomplete Dropdown */}
+                  {showSuggestions && (filteredPlaces.length > 0 || filteredCourts.length > 0) && (
+                    <div className="absolute z-[1000] w-full bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto top-full mt-2">
+                      
+                      {/* PLACES Section */}
+                      {filteredPlaces.length > 0 && (
+                        <div>
+                          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
+                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Places</p>
+                          </div>
+                          {filteredPlaces.slice(0, 3).map((place, index) => (
+                            <button
+                              key={`place-${index}`}
+                              onClick={() => {
+                                setSearchQuery(place);
+                                setSearchResult(place);
+                                router.push(`/findcourts?location=${place}`);
+                              }}
+                              className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center justify-between text-gray-900">
+                                <div className="flex items-center">
+                                  <svg className="w-5 h-5 mr-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                  <span className="font-medium">{place}, Philippines</span>
+                                </div>
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">View Courts</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* COURTS Section */}
+                      {filteredCourts.length > 0 && (
+                        <div>
+                          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-12">
+                            <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">Courts Near You</p>
+                          </div>
+                          {filteredCourts.slice(0, 5).map((court, index) => (
+                            <button
+                              key={`court-${index}`}
+                              onClick={() => {
+                                setSearchQuery(court.name);
+                                setShowSuggestions(false);
+                                router.push(`/findcourts?court=${court.name}`);
+                              }}
+                              className="w-full px-4 py-3 text-left hover:bg-green-50 border-b border-gray-100 transition-colors"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start flex-1">
+                                  <svg className="w-5 h-5 mr-3 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5z" />
+                                  </svg>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-900">{court.name}</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      <span>{court.distance}</span>
+                                      <span className="mx-2">•</span>
+                                      <span>{court.location}</span>
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded ml-2 flex-shrink-0">Open</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-600 mb-4">Find pickleball courts and players in {searchResult}</p>
-                    <button 
-                      onClick={() => router.push('/findcourts')}
-                      className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
-                    >
-                      View Courts in {searchResult}
-                    </button>
-                  </div>
+                  )}
                 </div>
-              )}
-              <div className="w-full max-w-2xl">
+
                 {/* SEARCH SECTION */}
-                {/* <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter a location"
-                    className="flex-1 px-6 py-4 rounded-full bg-white text-black placeholder-gray-400 border-2 border-[#0a56a7] focus:outline-none focus:ring-2 focus:ring-[#0a56a7]"
-                  />
-                  <button className="px-8 py-4 bg-[#0a56a7] text-white rounded-full font-semibold hover:opacity-90 transition">
-                    Search
-                  </button>
-                </div> */}
               </div>
             </div>
           </div>

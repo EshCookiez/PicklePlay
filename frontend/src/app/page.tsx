@@ -1,6 +1,6 @@
 import HeroCarousel from "@/components/HeroCarousel";
+import CourtGridSection from "@/components/CourtGridSection";
 import ExperienceSection from "@/components/ExperienceSection";
-import CourtsSection from "@/components/CourtsSection";
 import MapSection from "@/components/MapSection";
 import DownloadAppSection from "@/components/DownloadAppSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -14,8 +14,8 @@ export default function Home() {
     <>
       <ScrollToTop />
       <HeroCarousel />
+      <CourtGridSection />
       <ExperienceSection />
-      <CourtsSection />
       <MapSection />
       <DownloadAppSection />
       <FeaturesSection />
