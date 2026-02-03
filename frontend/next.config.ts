@@ -45,7 +45,8 @@ const nextConfig: NextConfig = {
   
   // Experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    // optimizeCss disabled - requires critters module which causes build issues
+    // optimizeCss: true,
   },
 };
 
