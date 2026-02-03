@@ -39,12 +39,14 @@ const ChangePasswordModal: React.FC<Props> = ({ isOpen, onClose }) => {
             type="password" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter current password"
           />
           <Input 
             label="New Password" 
             type="password" 
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password"
           />
           
           <div className="space-y-2 p-4 bg-[#0f2e22]/5 rounded-xl border border-[#0f2e22]/10">
@@ -61,6 +63,7 @@ const ChangePasswordModal: React.FC<Props> = ({ isOpen, onClose }) => {
             type="password" 
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
             error={confirmPassword && confirmPassword !== newPassword ? "Passwords do not match" : undefined}
           />
         </div>

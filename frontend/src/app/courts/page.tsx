@@ -196,18 +196,18 @@ export default function CourtsPage() {
     : []
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen min-h-[100dvh] bg-gradient-to-b from-blue-50 to-white">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 pb-24 lg:pb-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-1 sm:mb-2">
                 Find Pickleball Courts
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Discover and book the best pickleball courts near you
               </p>
             </div>
@@ -216,7 +216,7 @@ export default function CourtsPage() {
             <Button
               variant={useMockData ? "default" : "outline"}
               onClick={() => setUseMockData(!useMockData)}
-              className={`flex items-center gap-2 ${useMockData ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+              className={`flex items-center gap-2 self-start sm:self-auto text-sm ${useMockData ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
             >
               <Database className="w-4 h-4" />
               {useMockData ? 'Demo Mode' : 'Live Data'}
@@ -228,12 +228,12 @@ export default function CourtsPage() {
                   onFavorite={() => fetchFavorites()}
                 by Courts Section */}
         {!locationLoading && nearbyCourts.length > 0 && (
-          <div className="mb-8 bg-white rounded-xl p-6 border border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPinned className="w-6 h-6 text-blue-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Courts Near You</h2>
+          <div className="mb-4 sm:mb-6 md:mb-8 bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <MapPinned className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">Courts Near You</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {nearbyCourts.map(court => (
                 <CourtCard
                   key={court.id}
@@ -246,7 +246,7 @@ export default function CourtsPage() {
         )}
 
         {/* Main Content with Filters */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
           {/* Filters Sidebar */}
           <CourtFiltersSidebar
             filters={filters}
@@ -257,10 +257,10 @@ export default function CourtsPage() {
           />
 
           {/* Courts Grid */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Controls Bar */}
-            <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-xl border border-gray-200">
-              <div className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-xl border border-gray-200">
+              <div className="text-xs sm:text-sm text-gray-600">
                 {isLoading ? (
                   <span>Loading courts...</span>
                 ) : (
@@ -276,7 +276,7 @@ export default function CourtsPage() {
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  className={`touch-target ${viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                 >
                   <Grid className="w-4 h-4" />
                 </Button>
@@ -284,7 +284,7 @@ export default function CourtsPage() {
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  className={`touch-target ${viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                 >
                   <List className="w-4 h-4" />
                 </Button>
@@ -292,7 +292,7 @@ export default function CourtsPage() {
                   variant={viewMode === 'map' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('map')}
-                  className={viewMode === 'map' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  className={`touch-target ${viewMode === 'map' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                 >
                   <MapIcon className="w-4 h-4" />
                 </Button>
@@ -301,7 +301,7 @@ export default function CourtsPage() {
 
             {/* Map View */}
             {viewMode === 'map' && !isLoading && (
-              <div className="w-full h-[600px] mb-6">
+              <div className="w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] mb-4 sm:mb-6 rounded-xl overflow-hidden">
                 <MapView
                   courts={courtsWithDistance}
                   userLocation={userLocation}
@@ -312,20 +312,21 @@ export default function CourtsPage() {
 
             {/* Loading State */}
             {isLoading ? (
-              <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+              <div className={`grid gap-4 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
                 {Array.from({ length: 6 }).map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
               </div>
             ) : courts.length === 0 ? (
               /* Empty State */
-              <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-gray-200">
-                <AlertCircle className="w-16 h-16 text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Courts Found</h3>
-                <p className="text-gray-500 mb-4">Try adjusting your filters or search terms</p>
+              <div className="flex flex-col items-center justify-center py-10 sm:py-16 bg-white rounded-xl border border-gray-200 px-4">
+                <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2 text-center">No Courts Found</h3>
+                <p className="text-sm sm:text-base text-gray-500 mb-4 text-center">Try adjusting your filters or search terms</p>
                 <Button
                   onClick={() => handleFilterChange({})}
                   variant="outline"
+                  className="touch-target"
                 >
                   Clear All Filters
                 </Button>
@@ -333,7 +334,7 @@ export default function CourtsPage() {
             ) : viewMode !== 'map' ? (
               /* Courts Grid/List */
               <>
-                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
+                <div className={`grid gap-4 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
                   {courtsWithDistance.map(court => (
                     <CourtCard
                       key={court.id}

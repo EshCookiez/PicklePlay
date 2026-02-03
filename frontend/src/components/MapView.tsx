@@ -41,10 +41,10 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
 
   if (!isLoaded) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0f2e22] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading map...</p>
+      <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 rounded-xl">
+        <div className="text-center p-4">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-[#0f2e22] mx-auto mb-3 sm:mb-4"></div>
+          <p className="text-sm sm:text-base text-gray-600">Loading map...</p>
         </div>
       </div>
     );
@@ -56,7 +56,7 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
   };
 
   return (
-    <div className="w-full h-[600px] relative z-10">
+    <div className="w-full h-full min-h-[300px] relative z-10 rounded-xl overflow-hidden">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={mapCenter}
@@ -64,8 +64,9 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
         options={{
           fullscreenControl: true,
           zoomControl: true,
-          mapTypeControl: true,
-          streetViewControl: false
+          mapTypeControl: false,
+          streetViewControl: false,
+          gestureHandling: 'greedy'
         }}
       >
         {/* User Location Marker */}
@@ -109,17 +110,18 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
             position={{ lat: selectedCourt.lat, lng: selectedCourt.lng }}
             onCloseClick={() => setSelectedCourt(null)}
             options={{
-              pixelOffset: new google.maps.Size(0, -40)
+              pixelOffset: new google.maps.Size(0, -40),
+              maxWidth: 280
             }}
           >
-            <div className="p-4 bg-white rounded-lg">
-              <h3 className="font-bold text-lg text-gray-900">{selectedCourt.name}</h3>
-              <p className="text-sm text-gray-600 mt-1">{selectedCourt.city}</p>
-              <p className="text-sm text-gray-600 mt-2">{selectedCourt.address}</p>
-              <div className="flex gap-2 mt-4">
+            <div className="p-3 sm:p-4 bg-white rounded-lg max-w-[260px]">
+              <h3 className="font-bold text-base sm:text-lg text-gray-900 line-clamp-2">{selectedCourt.name}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">{selectedCourt.city}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2 line-clamp-2">{selectedCourt.address}</p>
+              <div className="flex gap-2 mt-3 sm:mt-4">
                 <button
                   onClick={() => router.push(`/courts/${selectedCourt.id}`)}
-                  className="flex-1 px-3 py-2 bg-[#0a56a7] text-white font-semibold rounded-lg hover:bg-[#0a56a7]/90 text-sm"
+                  className="flex-1 px-2 sm:px-3 py-2 bg-[#0a56a7] text-white font-semibold rounded-lg hover:bg-[#0a56a7]/90 active:scale-95 text-xs sm:text-sm transition-all touch-target"
                 >
                   View Details
                 </button>
@@ -128,7 +130,7 @@ export default function MapView({ center, userLocation, courts, onViewDetails }:
                     const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`;
                     window.open(url, "_blank");
                   }}
-                  className="flex-1 px-3 py-2 border border-[#0a56a7] text-[#0a56a7] font-semibold rounded-lg hover:bg-[#0a56a7]/10 text-sm"
+                  className="flex-1 px-2 sm:px-3 py-2 border border-[#0a56a7] text-[#0a56a7] font-semibold rounded-lg hover:bg-[#0a56a7]/10 active:scale-95 text-xs sm:text-sm transition-all touch-target"
                 >
                   Directions
                 </button>

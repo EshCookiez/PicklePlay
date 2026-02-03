@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { MapPin, Clock, Award, Users } from "lucide-react";
 
@@ -18,15 +21,23 @@ export default function CourtCard({
   players,
   image,
 }: CourtCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
   return (
-    <div className="group bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer">
-      <div className="relative h-40 md:h-48 bg-gray-200 overflow-hidden">
+    <div className="group bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer animate-fadeIn">
+      <div className="relative h-40 md:h-48 bg-gray-100 overflow-hidden">
+        {/* Skeleton placeholder */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%] animate-shimmer" />
+        )}
         <Image
           src={image}
           alt={name}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover group-hover:scale-110 transition-transform duration-300"
+          className={`object-cover group-hover:scale-110 transition-all duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setImageLoaded(true)}
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
       </div>
