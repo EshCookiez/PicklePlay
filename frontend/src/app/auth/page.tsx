@@ -283,7 +283,7 @@ export default function AuthPage() {
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="********"
                     />
                     <button
                       type="button"
@@ -577,7 +577,7 @@ export default function AuthPage() {
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="********"
                     />
                     <button
                       type="button"
@@ -621,7 +621,7 @@ export default function AuthPage() {
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="********"
                     />
                     <button
                       type="button"

@@ -85,7 +85,7 @@ export default function CourtGridSection() {
   ];
 
   return (
-    <section className="py-20 md:py-28 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+    <section className="py-12 sm:py-16 md:py-20 lg:py-28 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
       <style>{`
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
@@ -98,16 +98,21 @@ export default function CourtGridSection() {
           opacity: 0.7;
           pointer-events: none;
         }
+        @media (max-width: 768px) {
+          .bouncing-ball {
+            opacity: 0.4;
+          }
+        }
       `}</style>
       
-      {/* Bouncing Balls Background */}
-      {ballPositions.map((position, index) => (
+      {/* Bouncing Balls Background - fewer on mobile */}
+      {ballPositions.slice(0, typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : ballPositions.length).map((position, index) => (
         <div
           key={index}
-          className="bouncing-ball"
+          className="bouncing-ball hidden sm:block"
           style={{
-            width: `${position.size}px`,
-            height: `${position.size}px`,
+            width: `${position.size * 0.7}px`,
+            height: `${position.size * 0.7}px`,
             left: position.left,
             right: position.right,
             bottom: position.bottom,
@@ -122,33 +127,33 @@ export default function CourtGridSection() {
         />
       ))}
 
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-7xl md:text-8xl font-black mb-4 text-white drop-shadow-2xl uppercase" style={{ textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)', letterSpacing: '0.15em' }}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 relative z-10">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-black mb-2 sm:mb-4 text-white drop-shadow-2xl uppercase" style={{ textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)', letterSpacing: '0.08em' }}>
             COURT NEAR YOU
           </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl mx-auto px-4">
             Discover pickleball courts near you and connect with your local community
           </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0a56a7]"></div>
+          <div className="flex justify-center items-center py-8 sm:py-12">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#0a56a7]"></div>
           </div>
         ) : courts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No courts available at the moment</p>
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-gray-600 text-base sm:text-lg">No courts available at the moment</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {courts.map((court, idx) => (
               <MotionFade key={court.id} delay={0.1 * idx} y={40}>
                 <div
-                  className="group bg-white rounded-2xl border border-slate-200 p-8 shadow-lg hover:shadow-2xl hover:border-[#a3ff01] transition-all duration-300 h-full"
+                  className="group bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 md:p-8 shadow-lg hover:shadow-2xl hover:border-[#a3ff01] active:scale-[0.98] transition-all duration-300 h-full"
                 >
                   {/* Image Container */}
-                  <div className="relative h-40 md:h-48 bg-gray-200 overflow-hidden rounded-lg mb-6">
+                  <div className="relative h-36 sm:h-40 md:h-48 bg-gray-200 overflow-hidden rounded-lg mb-4 sm:mb-6">
                     <img
                       alt={court.name}
                       src={getCourtImage(court)}
@@ -159,38 +164,38 @@ export default function CourtGridSection() {
 
                   {/* Content Container */}
                   <div>
-                    <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#a3ff01] transition-colors duration-200">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-slate-900 group-hover:text-[#a3ff01] transition-colors duration-200 line-clamp-1">
                       {court.name}
                     </h3>
 
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                       {/* Location */}
                       <div className="flex items-center gap-2 text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
-                        <MapPin className="w-4 h-4 text-[#a3ff01]" />
-                        <span className="text-sm">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#a3ff01] flex-shrink-0" />
+                        <span className="text-xs sm:text-sm line-clamp-1">
                           {court.address || `${court.city}, Philippines`}
                         </span>
                       </div>
 
                       {/* Distance */}
                       <div className="flex items-center gap-2 text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
-                        <Clock className="w-4 h-4 text-[#a3ff01]" />
-                        <span className="text-sm">
+                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#a3ff01] flex-shrink-0" />
+                        <span className="text-xs sm:text-sm">
                           {calculateDistance(court.latitude, court.longitude)} km away
                         </span>
                       </div>
 
                       {/* Courts and Rating */}
-                      <div className="flex gap-4 pt-2">
-                        <div className="flex items-center gap-2">
-                          <Award className="w-4 h-4 text-[#a3ff01]" />
-                          <span className="text-sm font-semibold text-slate-700">
+                      <div className="flex gap-3 sm:gap-4 pt-1 sm:pt-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#a3ff01]" />
+                          <span className="text-xs sm:text-sm font-semibold text-slate-700">
                             {court.number_of_courts} Court{court.number_of_courts !== 1 ? "s" : ""}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-[#a3ff01]" />
-                          <span className="text-sm font-semibold text-slate-700">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#a3ff01]" />
+                          <span className="text-xs sm:text-sm font-semibold text-slate-700">
                             {court.rating.toFixed(1)} ⭐
                           </span>
                         </div>
@@ -198,7 +203,7 @@ export default function CourtGridSection() {
                     </div>
 
                     {/* Button */}
-                    <button className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                    <button className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-2.5 sm:py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl active:scale-95 transition-all duration-300 text-sm sm:text-base touch-target">
                       View Details
                     </button>
                   </div>
@@ -209,12 +214,12 @@ export default function CourtGridSection() {
         )}
 
         {/* Google Maps Button */}
-        <div className="flex justify-center mt-12">
+        <div className="flex justify-center mt-8 sm:mt-10 md:mt-12">
           <a
             href="https://www.google.com/maps"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 px-8 py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-2 transform hover:scale-105"
+            className="bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl active:scale-95 transition-all duration-300 inline-flex items-center gap-2 text-sm sm:text-base touch-target"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

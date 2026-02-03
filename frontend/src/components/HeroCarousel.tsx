@@ -146,7 +146,7 @@ export default function HeroCarousel() {
         <div></div>
       )}
 
-      <section className="relative w-full h-lvh md:h-screen bg-gray-200" ref={heroRef}>
+      <section className="relative w-full min-h-[100dvh] h-screen bg-gray-200" ref={heroRef}>
         {/* Video Background */}
         <video
           src="/images/home-video.mp4"
@@ -161,22 +161,22 @@ export default function HeroCarousel() {
         <div className="absolute inset-0 bg-black/50 pointer-events-none z-10"></div>
 
         {/* Content */}
-        <div className="absolute inset-0 flex items-center justify-center z-30 px-4">
+        <div className="absolute inset-0 flex items-center justify-center z-30 px-3 sm:px-4 md:px-6">
           <div className="max-w-7xl mx-auto w-full">
             <div className="flex flex-col items-center justify-center text-center">
               <MotionFade delay={0.1} y={-40}>
-                <div className="w-full max-w-7xl mb-8 mt-8 flex items-center justify-center mx-4 relative cursor-pointer" onClick={scrollToHero}>
+                <div className="w-full max-w-7xl mb-4 sm:mb-6 md:mb-8 mt-4 sm:mt-6 md:mt-8 flex items-center justify-center mx-2 sm:mx-4 relative cursor-pointer" onClick={scrollToHero}>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-0 mb-0">
-                      <h1 className="text-8xl md:text-[120px] font-black text-white mb-0 drop-shadow-lg leading-none" style={{ fontSize: 'clamp(80px, 20vw, 200px)' }}>
+                      <h1 className="text-6xl sm:text-7xl md:text-9xl lg:text-[140px] xl:text-[160px] 2xl:text-[200px] font-black text-white mb-0 drop-shadow-lg leading-none">
                         P
                       </h1>
-                      <Image src={PinMarker} alt="Pin Marker" className="w-32 h-32 md:w-52 md:h-52 object-contain -mx-1 md:-mx-2" style={{ marginBottom: 'clamp(80px, 20vw, 200px) * 0.15', filter: 'drop-shadow(0 0 20px #a3ff01)' }} />
-                      <h1 className="text-8xl md:text-[120px] font-black text-white mb-0 drop-shadow-lg leading-none" style={{ fontSize: 'clamp(80px, 20vw, 200px)' }}>
+                      <Image src={PinMarker} alt="Pin Marker" className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-32 lg:h-32 xl:w-40 xl:h-40 2xl:w-52 2xl:h-52 object-contain -mx-0.5 sm:-mx-1 md:-mx-2" style={{ filter: 'drop-shadow(0 0 20px #a3ff01)' }} />
+                      <h1 className="text-6xl sm:text-7xl md:text-9xl lg:text-[140px] xl:text-[160px] 2xl:text-[200px] font-black text-white mb-0 drop-shadow-lg leading-none">
                         CKLEPLAY
                       </h1>
                     </div>
-                    <h2 className="text-4xl md:text-[60px] font-bold text-[#a3ff01] drop-shadow-lg" style={{ fontSize: 'clamp(35px, 8vw, 90px)', letterSpacing: '0.35em' }}>
+                    <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-[60px] font-bold text-[#a3ff01] drop-shadow-lg tracking-[0.15em] sm:tracking-[0.25em] md:tracking-[0.35em]">
                       PHILIPPINES
                     </h2>
                   </div>
@@ -184,24 +184,24 @@ export default function HeroCarousel() {
               </MotionFade>
 
               <MotionFade delay={0.2} y={-20}>
-                <div className="flex flex-col items-center justify-center mb-8">
-                  <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-4">
+                <div className="flex flex-col items-center justify-center mb-4 sm:mb-6 md:mb-8">
+                  <h2 className="text-lg sm:text-xl md:text-2xl lg:text-4xl xl:text-5xl font-bold text-white drop-shadow-lg mb-2 sm:mb-3 md:mb-4 px-2">
                     FIND A LOCAL COURT NEAR YOU
                   </h2>
-                  <p className="text-base sm:text-lg md:text-2xl text-white drop-shadow-lg max-w-4xl px-4 mb-6 text-center">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-2xl text-white drop-shadow-lg max-w-4xl px-4 mb-3 sm:mb-4 md:mb-6 text-center leading-relaxed">
                     Connect with pickleball courts in your area and start playing
                   </p>
                 </div>
               </MotionFade>
 
               {/* Search Bar */}
-              <MotionFade delay={0.3} y={-10} className="w-full px-4">
-                <div className="w-full max-w-4xl mx-auto mb-6">
+              <MotionFade delay={0.3} y={-10} className="w-full px-3 sm:px-4">
+                <div className="w-full max-w-4xl mx-auto mb-4 sm:mb-6">
                   <div className="relative z-40">
                     <input
                       type="text"
-                      placeholder="Search for courts or places in the Philippines..."
-                      className="w-full px-5 py-4 pl-14 pr-14 text-gray-900 bg-white border border-gray-300 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg md:text-xl"
+                      placeholder="Search courts or places..."
+                      className="w-full px-4 py-3 sm:py-4 pl-12 sm:pl-14 pr-12 sm:pr-14 text-gray-900 bg-white border border-gray-300 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg md:text-xl"
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
@@ -219,19 +219,19 @@ export default function HeroCarousel() {
                           alert('Please enable location access to find courts near you');
                         }
                       }}
-                      className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-100 text-blue-500 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="absolute left-1.5 sm:left-2 top-1/2 transform -translate-y-1/2 p-1.5 sm:p-2 bg-gray-100 text-blue-500 rounded-lg hover:bg-gray-200 active:scale-95 transition-all touch-target"
                       title="Find courts near you"
                     >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5z" />
                       </svg>
                     </button>
                     {/* Search Button */}
                     <button
                       onClick={handleSearch}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      className="absolute right-1.5 sm:right-2 top-1/2 transform -translate-y-1/2 p-1.5 sm:p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:scale-95 transition-all touch-target"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </button>

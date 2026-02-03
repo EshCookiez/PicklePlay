@@ -126,29 +126,29 @@ export default function ProfilePage() {
   if (!authUser) return null;
 
   return (
-    <div className="flex flex-col min-h-screen font-sans text-slate-900 overflow-x-hidden animate-in fade-in duration-1000 relative">
-      {/* Decorative Background Ball Images */}
-      <div className="absolute top-10 left-10 w-20 h-20 opacity-8 pointer-events-none z-0">
+    <div className="flex flex-col min-h-screen min-h-[100dvh] font-sans text-slate-900 overflow-x-hidden animate-in fade-in duration-1000 relative">
+      {/* Decorative Background Ball Images - Hidden on mobile for performance */}
+      <div className="hidden md:block absolute top-10 left-10 w-20 h-20 opacity-8 pointer-events-none z-0">
         <Image src="/images/Ball.png" alt="Ball" width={80} height={80} className="object-contain" />
       </div>
-      <div className="absolute top-1/3 right-12 w-28 h-28 opacity-10 pointer-events-none z-0 transform rotate-45">
+      <div className="hidden md:block absolute top-1/3 right-12 w-28 h-28 opacity-10 pointer-events-none z-0 transform rotate-45">
         <Image src="/images/Ball.png" alt="Ball" width={112} height={112} className="object-contain" />
       </div>
-      <div className="absolute bottom-1/2 left-1/3 w-24 h-24 opacity-9 pointer-events-none z-0">
+      <div className="hidden lg:block absolute bottom-1/2 left-1/3 w-24 h-24 opacity-9 pointer-events-none z-0">
         <Image src="/images/Ball.png" alt="Ball" width={96} height={96} className="object-contain" />
       </div>
-      <div className="absolute bottom-20 right-20 w-20 h-20 opacity-7 pointer-events-none z-0 transform -rotate-12">
+      <div className="hidden lg:block absolute bottom-20 right-20 w-20 h-20 opacity-7 pointer-events-none z-0 transform -rotate-12">
         <Image src="/images/Ball.png" alt="Ball" width={80} height={80} className="object-contain" />
       </div>
-      <div className="absolute top-2/3 right-1/4 w-32 h-32 opacity-11 pointer-events-none z-0">
+      <div className="hidden xl:block absolute top-2/3 right-1/4 w-32 h-32 opacity-11 pointer-events-none z-0">
         <Image src="/images/Ball.png" alt="Ball" width={128} height={128} className="object-contain" />
       </div>
 
       {/* 2. Main Content */}
       <div className="flex-1 flex flex-col bg-white w-full overflow-x-hidden relative z-10">
-        {/* Navigation Tabs */}
-        <nav className="sticky top-16 lg:top-20 z-20 bg-white border-b border-gray-200 overflow-x-auto">
-          <div className="flex px-3 sm:px-4 lg:px-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
+        {/* Navigation Tabs - Scrollable on mobile */}
+        <nav className="sticky top-14 sm:top-16 lg:top-20 z-20 bg-white border-b border-gray-200 overflow-x-auto scrollbar-hide">
+          <div className="flex px-2 sm:px-3 lg:px-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
             {navItems.map((item) => {
               // Get the correct icon component
               const IconComponent = item.icon;
@@ -158,21 +158,21 @@ export default function ProfilePage() {
                 <button
                   key={item.id}
                   onClick={() => handleTabChange(item.id)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap ${isActive
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-4 text-xs sm:text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap touch-target ${isActive
                       ? 'border-[#0f2e22] text-[#0f2e22]'
                       : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-gray-300'
                     }`}
                 >
-                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-[#a3e635]' : 'text-slate-400'
+                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${isActive ? 'text-[#a3e635]' : 'text-slate-400'
                     }`} />
-                  <span className="hidden sm:inline">{item.label}</span>
+                  <span className="hidden xs:inline sm:inline">{item.label}</span>
                 </button>
               );
             })}
           </div>
         </nav>
 
-        <main className="flex-1 px-3 sm:px-4 lg:px-6 py-3 overflow-x-hidden mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
+        <main className="flex-1 px-2 sm:px-3 lg:px-6 py-3 sm:py-4 overflow-x-hidden mt-14 sm:mt-16 lg:mt-20 pb-24 lg:pb-6 max-w-full lg:max-w-7xl mx-auto w-full box-border">
           {/* Render content based on active tab - Keep admin components mounted to preserve state */}
           <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
             <ProfileOverview user={user} isStatusLoading={false} activeRole={activeRole} onEdit={() => setIsEditModalOpen(true)} />

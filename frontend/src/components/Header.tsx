@@ -137,10 +137,10 @@ export default function Header() {
         ? "backdrop-blur-lg bg-gradient-to-r from-[#0D3B8C]/85 via-[#1E40AF]/85 to-[#0D3B8C]/85 shadow-xl"
         : "bg-transparent backdrop-blur-none shadow-none"
       }`}>
-      <div className="max-w-7xl mx-auto px-4 lg:px-6">
-        <div className="flex items-center justify-between h-28">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+        <div className="flex items-center justify-between h-16 sm:h-20 md:h-24 lg:h-28">
           {/* Left Side - Logo + Brand */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
               {/* Logo */}
               <div
                 onClick={() => {
@@ -153,21 +153,21 @@ export default function Header() {
                     window.location.href = '/';
                   }
                 }}
-                className="flex items-center flex-shrink-0 hover:scale-105 transition-transform cursor-pointer py-2 group"
+                className="flex items-center flex-shrink-0 hover:scale-105 active:scale-95 transition-transform cursor-pointer py-2 group"
               >
                 <Image
                   alt="PicklePlay Logo"
-                  width={56}
-                  height={56}
+                  width={40}
+                  height={40}
                   src={logo}
-                  className="rounded-full shadow-lg border-2 border-[#FDE047] group-hover:shadow-xl group-hover:shadow-yellow-400/50"
+                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg border-2 border-[#FDE047] group-hover:shadow-xl group-hover:shadow-yellow-400/50"
                 />
               </div>
 
               {/* Brand Text */}
               <div className="hidden sm:flex flex-col">
-                <span className={`font-black text-2xl leading-none ${useWhiteNavbar ? 'text-[#1E40AF]' : 'text-white'}`}>PicklePlay</span>
-                <span className="text-sm text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
+                <span className={`font-black text-lg sm:text-xl md:text-2xl leading-none ${useWhiteNavbar ? 'text-[#1E40AF]' : 'text-white'}`}>PicklePlay</span>
+                <span className="text-xs sm:text-sm text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
               </div>
             </div>
 
@@ -379,13 +379,13 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMobileMenu}
-              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+              className="lg:hidden p-2.5 text-white hover:bg-white/10 rounded-xl active:scale-95 transition-all duration-200 touch-target"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
               )}
             </button>
           </div>
@@ -394,30 +394,30 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <nav className="lg:hidden bg-white/98 backdrop-blur-xl border-t border-gray-200 shadow-2xl max-h-[70vh] overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 py-4 space-y-2">
+        <nav className="lg:hidden bg-white/98 backdrop-blur-xl border-t border-gray-200 shadow-2xl max-h-[75dvh] overflow-y-auto smooth-scroll">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2">
             {Object.entries(dropdownContent).map(([menu, content]) => (
               <div key={menu}>
                 <button
                   onClick={() => toggleDropdown(menu)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-slate-700 font-bold hover:bg-gray-100 rounded-xl transition-all"
+                  className="w-full flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 text-slate-700 font-bold hover:bg-gray-100 active:bg-gray-200 rounded-xl transition-all touch-target"
                 >
-                  <span className="flex items-center gap-3">
+                  <span className="flex items-center gap-2 sm:gap-3">
                     <span className="text-[#a3e635]">
-                      {menu === 'Play' && <Trophy className="w-5 h-5" />}
-                      {menu === 'Connect' && <Users className="w-5 h-5" />}
-                      {menu === 'Improve' && <BookOpen className="w-5 h-5" />}
-                      {menu === 'Account' && <Activity className="w-5 h-5" />}
+                      {menu === 'Play' && <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />}
+                      {menu === 'Connect' && <Users className="w-4 h-4 sm:w-5 sm:h-5" />}
+                      {menu === 'Improve' && <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}
+                      {menu === 'Account' && <Activity className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </span>
-                    {menu}
+                    <span className="text-sm sm:text-base">{menu}</span>
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform text-[#a3e635] ${openDropdown === menu ? "" : "-rotate-90"}`} />
                 </button>
                 {openDropdown === menu && (
-                  <div className="mt-2 ml-4 space-y-1 pb-2">
+                  <div className="mt-1 sm:mt-2 ml-3 sm:ml-4 space-y-1 pb-2">
                     {content.categories.map((category, idx) => (
                       <div key={idx}>
-                        <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-2">
+                        <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider px-2 sm:px-3 mb-1.5 sm:mb-2">
                           {category.title}
                         </p>
                         <div className="space-y-1">
@@ -427,7 +427,7 @@ export default function Header() {
                                 key={itemIdx}
                                 href={item.href}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-[#a3e635]/15 hover:text-[#0f2e22] rounded-lg transition-all text-sm font-semibold"
+                                className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 text-slate-600 hover:bg-[#a3e635]/15 active:bg-[#a3e635]/25 hover:text-[#0f2e22] rounded-lg transition-all text-xs sm:text-sm font-semibold touch-target"
                               >
                                 <div className="text-[#a3e635]">
                                   {item.icon}
@@ -441,7 +441,7 @@ export default function Header() {
                                   setIsMobileMenuOpen(false);
                                   openAuthModal("login");
                                 }}
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-[#a3e635]/15 hover:text-[#0f2e22] rounded-lg transition-all text-sm font-semibold text-left"
+                                className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 text-slate-600 hover:bg-[#a3e635]/15 active:bg-[#a3e635]/25 hover:text-[#0f2e22] rounded-lg transition-all text-xs sm:text-sm font-semibold text-left touch-target"
                               >
                                 <div className="text-[#a3e635]">
                                   {item.icon}
@@ -458,31 +458,31 @@ export default function Header() {
               </div>
             ))}
 
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-200 my-3 sm:my-4" />
 
             {user ? (
-              <div className="px-4 py-3 space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-xl border border-gray-200">
                   {user.avatar_url ? (
                     <img 
                       src={user.avatar_url} 
                       alt={`${user.first_name} ${user.last_name}`}
-                      className="w-10 h-10 rounded-full object-cover border-2 border-gray-300"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-gray-300"
                     />
                   ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-slate-300">
-                      <User className="w-5 h-5 text-slate-400 stroke-[1.5]" />
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-slate-300">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 stroke-[1.5]" />
                     </div>
                   )}
-                  <div>
-                    <p className="text-slate-900 font-bold text-sm">{user.first_name} {user.last_name}</p>
-                    <p className="text-slate-500 text-xs font-medium">{user.role}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-slate-900 font-bold text-xs sm:text-sm truncate">{user.first_name} {user.last_name}</p>
+                    <p className="text-slate-500 text-[10px] sm:text-xs font-medium truncate">{user.role}</p>
                   </div>
                 </div>
                 <Link
                   href="/profile"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block w-full px-4 py-2.5 bg-[#0f2e22] text-white font-bold text-center hover:bg-[#1a4332] rounded-xl transition-all text-sm"
+                  className="block w-full px-3 sm:px-4 py-2.5 bg-[#0f2e22] text-white font-bold text-center hover:bg-[#1a4332] active:bg-[#0f2e22] rounded-xl transition-all text-xs sm:text-sm touch-target"
                 >
                   View Profile
                 </Link>
@@ -491,19 +491,19 @@ export default function Header() {
                     await logout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 text-red-600 font-bold text-center hover:bg-red-50 rounded-xl transition-all text-sm border border-red-200"
+                  className="w-full px-3 sm:px-4 py-2.5 text-red-600 font-bold text-center hover:bg-red-50 active:bg-red-100 rounded-xl transition-all text-xs sm:text-sm border border-red-200 touch-target"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <div className="px-4 space-y-2">
+              <div className="px-3 sm:px-4 space-y-2">
                 <button
                   onClick={() => {
                     openAuthModal("login");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 text-[#0f2e22] font-bold text-sm hover:bg-gray-100 rounded-xl transition-all border border-gray-200"
+                  className="w-full px-3 sm:px-4 py-2.5 text-[#0f2e22] font-bold text-xs sm:text-sm hover:bg-gray-100 active:bg-gray-200 rounded-xl transition-all border border-gray-200 touch-target"
                 >
                   Log in
                 </button>
@@ -512,7 +512,7 @@ export default function Header() {
                     openAuthModal("signup");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2.5 bg-[#a3e635] text-[#0f2e22] font-bold text-sm rounded-xl hover:bg-[#84cc16] transition-all shadow-md"
+                  className="w-full px-3 sm:px-4 py-2.5 bg-[#a3e635] text-[#0f2e22] font-bold text-xs sm:text-sm rounded-xl hover:bg-[#84cc16] active:bg-[#65a30d] transition-all shadow-md touch-target"
                 >
                   Sign Up
                 </button>

@@ -88,13 +88,13 @@ export default function CourtFiltersSidebar({
       {/* Mobile Toggle Button */}
       <Button
         onClick={onToggle}
-        className="lg:hidden fixed bottom-20 right-4 z-40 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white"
+        className="lg:hidden fixed bottom-24 right-3 z-40 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white touch-target"
         size="lg"
       >
-        <SlidersHorizontal className="w-5 h-5 mr-2" />
-        Filters
+        <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+        <span className="text-sm sm:text-base">Filters</span>
         {activeFilterCount > 0 && (
-          <span className="ml-2 px-2 py-0.5 bg-white text-blue-600 text-xs font-bold rounded-full">
+          <span className="ml-1.5 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-white text-blue-600 text-[10px] sm:text-xs font-bold rounded-full">
             {activeFilterCount}
           </span>
         )}
@@ -103,16 +103,16 @@ export default function CourtFiltersSidebar({
       {/* Overlay for mobile */}
       {isOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={onToggle}
         />
       )}
 
       {/* Filters Sidebar */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 h-screen lg:h-auto
-        w-80 bg-white border-r lg:border-r-0 lg:border border-gray-200 
-        rounded-none lg:rounded-xl p-6 space-y-6 overflow-y-auto
+        fixed lg:sticky top-0 left-0 h-[100dvh] lg:h-auto
+        w-[85vw] max-w-[320px] bg-white border-r lg:border-r-0 lg:border border-gray-200 
+        rounded-none lg:rounded-xl p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6 overflow-y-auto
         z-50 lg:z-0
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -120,10 +120,10 @@ export default function CourtFiltersSidebar({
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-5 h-5 text-blue-600" />
-            <h3 className="font-bold text-lg text-slate-900">Filters</h3>
+            <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <h3 className="font-bold text-base sm:text-lg text-slate-900">Filters</h3>
             {activeFilterCount > 0 && (
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-xs font-bold rounded-full">
+              <span className="px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 text-[10px] sm:text-xs font-bold rounded-full">
                 {activeFilterCount}
               </span>
             )}
@@ -132,14 +132,14 @@ export default function CourtFiltersSidebar({
             {activeFilterCount > 0 && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 active:text-blue-800 font-medium touch-target"
               >
                 Clear all
               </button>
             )}
             <button
               onClick={onToggle}
-              className="lg:hidden p-1 hover:bg-gray-100 rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 active:bg-gray-200 rounded-lg touch-target"
             >
               <X className="w-5 h-5" />
             </button>
@@ -147,23 +147,23 @@ export default function CourtFiltersSidebar({
         </div>
 
         {/* Search */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <Search className="w-4 h-4" />
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
+            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Search Courts
           </label>
           <Input
             placeholder="Court name, address..."
             value={localFilters.search || ''}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full"
+            className="w-full text-sm sm:text-base"
           />
         </div>
 
         {/* Location */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center gap-2">
+            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Location
           </label>
           <Select value={localFilters.city || 'all'} onValueChange={handleCityChange}>

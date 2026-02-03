@@ -6,7 +6,10 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-slate-200", className)}
+      className={cn(
+        "relative overflow-hidden rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%] animate-shimmer",
+        className
+      )}
       {...props}
     />
   )
@@ -15,10 +18,22 @@ function Skeleton({
 // Common skeleton components
 export function SkeletonCard() {
   return (
-    <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-      <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-4 w-1/2" />
-      <Skeleton className="h-8 w-full" />
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden animate-fadeIn">
+      {/* Image placeholder */}
+      <Skeleton className="h-40 md:h-48 w-full rounded-none" />
+      {/* Content */}
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-5 w-3/4" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+        <div className="flex gap-4 pt-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+        <Skeleton className="h-10 w-full rounded-lg" />
+      </div>
     </div>
   )
 }

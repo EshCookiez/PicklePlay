@@ -215,10 +215,10 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-md flex items-center justify-center">
+      <div className="relative w-full max-w-md flex items-center justify-center animate-in zoom-in-95 duration-300">
         {/* Flip Card Container */}
         <div
           style={{
@@ -313,7 +313,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="********"
                     />
                     <button
                       type="button"
@@ -614,7 +614,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="********"
                     />
                     <button
                       type="button"
@@ -658,7 +658,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="********"
                     />
                     <button
                       type="button"

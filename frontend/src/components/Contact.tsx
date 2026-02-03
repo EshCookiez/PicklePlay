@@ -31,10 +31,10 @@ export default function Contact() {
   };
 
   return (
-    <section className="py-20 md:py-20 bg-gradient-to-b from-blue-50 to-white" id="contact">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-blue-50 to-white" id="contact">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <AnimatedContent
             distance={50}
             direction="vertical"
@@ -44,15 +44,15 @@ export default function Contact() {
             animateOpacity
             threshold={0.2}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#0a56a7]">Get In Touch</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 text-[#0a56a7]">Get In Touch</h2>
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
               Have a question? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
             </p>
           </AnimatedContent>
         </div>
 
         {/* Contact Methods */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-12 md:mb-16">
           {contactMethods.map((method, idx) => {
             const IconComponent = method.icon;
             return (
@@ -67,14 +67,14 @@ export default function Contact() {
                 threshold={0.1}
                 delay={idx * 0.15}
               >
-                <div className="group bg-white rounded-xl border  border-gray-200 p-8 shadow-md hover:shadow-2xl transition-all duration-300 text-center h-full">
-                  <div className="flex justify-center mb-6">
-                    <div className={`p-4  bg-gradient-to-br from-[#a3ff01] to-blue-600  text-white  rounded-full group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                      <IconComponent className="w-8 h-8" />
+                <div className="group bg-white rounded-xl border border-gray-200 p-4 sm:p-6 md:p-8 shadow-md hover:shadow-2xl active:scale-[0.98] transition-all duration-300 text-center h-full">
+                  <div className="flex justify-center mb-4 sm:mb-6">
+                    <div className={`p-3 sm:p-4 bg-gradient-to-br from-[#a3ff01] to-blue-600 text-white rounded-full group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                      <IconComponent className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">{method.title}</h3>
-                  <p className="text-gray-600 group-hover:text-[#0a56a7] transition-colors duration-200 font-semibold">{method.details}</p>
+                  <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-gray-900">{method.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 group-hover:text-[#0a56a7] transition-colors duration-200 font-semibold">{method.details}</p>
                 </div>
               </AnimatedContent>
             );
@@ -82,7 +82,7 @@ export default function Contact() {
         </div>
 
         {/* Contact Form and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
           {/* Form */}
           <AnimatedContent
             distance={100}
@@ -93,11 +93,11 @@ export default function Contact() {
             animateOpacity
             threshold={0.2}
           >
-            <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-lg">
-              <h3 className="text-2xl font-bold mb-6 text-[#0a56a7]">Send us a Message</h3>
-              <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 md:p-8 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#0a56a7]">Send us a Message</h3>
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label htmlFor="name" className="block text-xs sm:text-sm font-semibold text-gray-900 mb-1.5 sm:mb-2">
                     Your Name
                   </label>
                   <input

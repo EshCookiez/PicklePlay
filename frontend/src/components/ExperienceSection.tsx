@@ -87,7 +87,7 @@ export default function ExperienceSection() {
       </section>
 
       {/* Community Section */}
-      <section className="w-full pt-0 pb-0 -mt-8 relative z-40 overflow-visible">
+      <section className="w-full pt-0 pb-0 relative z-40 overflow-visible">
         {/* Lime green background */}
         <div 
           className="absolute inset-0 pointer-events-none z-0"
@@ -102,30 +102,36 @@ export default function ExperienceSection() {
             background: "linear-gradient(to bottom, rgba(163, 230, 53, 0) 0%, rgba(163, 230, 53, 0.6) 50%, rgb(163, 230, 53) 100%)"
           }}
         ></div>
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-[5]">
-          <div className="flex-1 w-full max-w-none">
-            <MotionFade delay={0.1} y={40}>
-              <div className="relative rounded-xl overflow-visible z-50">
-                <img
-                  src="/images/Mowdel.png"
-                  alt="PicklePlay Community"
-                  className="w-full h-[580px] object-cover m-0 -mt-32 relative z-50"
-                />
-              </div>
-            </MotionFade>
-          </div>
-
-          <div className="flex-1 text-left mt-16">
-            <MotionFade delay={0.2} y={40}>
-              <h2 className="text-3xl md:text-5xl mb-4 text-white font-black">
-                Be Part of our Growing Community
-              </h2>
-              <p className="text-gray-700 mb-6 text-lg leading-relaxed">
-                Join thousands of pickleball enthusiasts who have made PicklePlay their home. 
-                Connect with players of all skill levels, share your passion, and be part of 
-                the fastest-growing sports community in the Philippines.
-              </p>
-            </MotionFade>
+        
+        {/* Two-column layout on desktop */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-[5]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-end">
+            {/* Column 1: Image - overlaps into gradient above, contained within column */}
+            <div className="flex justify-center md:justify-start order-2 md:order-1 -mt-20 sm:-mt-28 md:-mt-36 lg:-mt-44 xl:-mt-52 overflow-visible">
+              <MotionFade delay={0.1} y={40}>
+                <div className="relative w-[320px] sm:w-[400px] md:w-full md:max-w-[420px] lg:max-w-[500px] xl:max-w-[580px] 2xl:max-w-[650px]">
+                  <img
+                    src="/images/Mowdel.png"
+                    alt="PicklePlay Community"
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+              </MotionFade>
+            </div>
+            
+            {/* Column 2: Text content */}
+            <div className="flex-1 text-center md:text-left order-1 md:order-2 pb-8 sm:pb-12 md:pb-16 lg:pb-24 relative z-10">
+              <MotionFade delay={0.2} y={40}>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-4 text-white font-black">
+                  Be Part of our Growing Community
+                </h2>
+                <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg leading-relaxed px-2 sm:px-0">
+                  Join thousands of pickleball enthusiasts who have made PicklePlay their home. 
+                  Connect with players of all skill levels, share your passion, and be part of 
+                  the fastest-growing sports community in the Philippines.
+                </p>
+              </MotionFade>
+            </div>
           </div>
         </div>
       </section>
