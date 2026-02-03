@@ -10,10 +10,11 @@ import { courtService } from '@/services/courtService'
 import { bookingService } from '@/services/bookingService'
 import { mockCourts } from '@/data/mockCourts'
 import { useAuth } from '@/contexts/AuthContext'
-import { 
+import {
   MapPin, Phone, Mail, Globe, Calendar, MessageCircle, Loader, Check, X, AlertCircle,
   Heart, Share2, ArrowLeft, Zap, Wifi, Car, UtensilsCrossed, Shield, Camera, Clock, Users, Star
 } from 'lucide-react'
+import { favoriteService } from '@/services/favoriteService'
 import { Button } from '@/components/ui/button'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import Image from 'next/image'
@@ -32,7 +33,7 @@ export default function CourtDetailsPage() {
   const [distance, setDistance] = useState<number | null>(null)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
-  
+
   // Booking form state
   const [bookingDate, setBookingDate] = useState('')
   const [startTime, setStartTime] = useState('08:00')
@@ -42,7 +43,7 @@ export default function CourtDetailsPage() {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
   const [bookingError, setBookingError] = useState('')
   const [bookingSuccess, setBookingSuccess] = useState('')
-  
+
   // Message form state
   const [messageText, setMessageText] = useState('')
   const [isSubmittingMessage, setIsSubmittingMessage] = useState(false)
@@ -52,7 +53,19 @@ export default function CourtDetailsPage() {
       fetchCourt()
       checkUserLocation()
     }
-  }, [courtId])
+    if (courtId && user) {
+      checkFavoriteStatus()
+    }
+  }, [courtId, user])
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const isFav = await favoriteService.isFavorited(user!.id, courtId)
+      setIsFavorited(isFav)
+    } catch (error) {
+      console.error('Failed to check favorite status:', error)
+    }
+  }
 
   const fetchCourt = async () => {
     setIsLoading(true)
@@ -90,9 +103,21 @@ export default function CourtDetailsPage() {
     }
   }
 
-  const handleFavorite = () => {
-    setIsFavorited(!isFavorited)
-    // TODO: Call API to save favorite
+  const handleFavorite = async () => {
+    if (!user) {
+      alert('Please login to add favorites')
+      router.push('/auth')
+      return
+    }
+
+    try {
+      const success = await favoriteService.toggleFavorite(user.id, courtId)
+      if (success) {
+        setIsFavorited(!isFavorited)
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error)
+    }
   }
 
   const handleShare = () => {
@@ -157,7 +182,7 @@ export default function CourtDetailsPage() {
 
       if (result.success && result.booking) {
         setBookingSuccess(`Booking created! Booking ID: ${result.booking.id}. Proceeding to payment...`)
-        
+
         // Redirect to payment if not free
         if (!court.is_free) {
           // TODO: Integrate Xendit payment here
@@ -261,7 +286,7 @@ export default function CourtDetailsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <Button
@@ -329,9 +354,8 @@ export default function CourtDetailsPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-blue-500' : 'border-gray-200'
-                  }`}
+                  className={`relative h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 ${selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                    }`}
                 >
                   {img ? (
                     <Image src={img} alt={`View ${index + 1}`} fill className="object-cover" />
@@ -413,9 +437,9 @@ export default function CourtDetailsPage() {
                 <h2 className="text-xl font-bold text-slate-900 mb-4">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {court.amenities.map((amenity) => {
-                    const amenityInfo = amenityIcons[amenity] || { 
-                      icon: <Check className="w-5 h-5" />, 
-                      label: amenity 
+                    const amenityInfo = amenityIcons[amenity] || {
+                      icon: <Check className="w-5 h-5" />,
+                      label: amenity
                     }
                     return (
                       <div key={amenity} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -439,8 +463,8 @@ export default function CourtDetailsPage() {
                 </h2>
                 <div className="space-y-2">
                   {Object.entries(court.hours_of_operation).map(([day, hours]) => {
-                    const hoursText = typeof hours === 'string' 
-                      ? hours 
+                    const hoursText = typeof hours === 'string'
+                      ? hours
                       : `${(hours as any).open || ''} - ${(hours as any).close || ''}`
                     return (
                       <div key={day} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
@@ -463,7 +487,7 @@ export default function CourtDetailsPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl p-6 border border-gray-200 sticky top-4">
               <h3 className="text-xl font-bold text-slate-900 mb-4">Contact & Book</h3>
-              
+
               <div className="space-y-4 mb-6">
                 {court.address && (
                   <div className="flex items-start gap-3">
@@ -474,7 +498,7 @@ export default function CourtDetailsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {court.phone_number && (
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
@@ -486,7 +510,7 @@ export default function CourtDetailsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {court.email && (
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
@@ -498,15 +522,15 @@ export default function CourtDetailsPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {court.website && (
                   <div className="flex items-start gap-3">
                     <Globe className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="text-sm font-medium text-gray-700">Website</div>
-                      <a 
-                        href={court.website} 
-                        target="_blank" 
+                      <a
+                        href={court.website}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:underline break-all"
                       >
@@ -518,23 +542,23 @@ export default function CourtDetailsPage() {
               </div>
 
               <div className="space-y-3">
-                <Button 
+                <Button
                   onClick={handleBooking}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   Book Now
                 </Button>
-                <Button 
+                <Button
                   onClick={handleMessage}
-                  variant="outline" 
+                  variant="outline"
                   className="w-full"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Message Owner
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${court.latitude},${court.longitude}`, '_blank')}
                 >
@@ -556,7 +580,7 @@ export default function CourtDetailsPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {/* Date Selection */}
                 <div>
@@ -622,7 +646,7 @@ export default function CourtDetailsPage() {
                     </select>
                   </div>
                 )}
-                
+
                 {/* Notes */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -636,7 +660,7 @@ export default function CourtDetailsPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 {/* Price Summary */}
                 <div className="bg-blue-50 p-3 rounded-lg space-y-2">
                   <div className="flex justify-between text-sm">
@@ -673,16 +697,16 @@ export default function CourtDetailsPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
-                <Button 
-                  onClick={() => setShowBookingModal(false)} 
-                  variant="outline" 
+                <Button
+                  onClick={() => setShowBookingModal(false)}
+                  variant="outline"
                   className="flex-1"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={submitBooking}
                   disabled={isSubmittingBooking}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -711,7 +735,7 @@ export default function CourtDetailsPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -725,16 +749,16 @@ export default function CourtDetailsPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 <div className="text-xs text-gray-500">
                   Your message will be sent to the court owner. They typically respond within 24 hours.
                 </div>
-                
+
                 <div className="flex gap-3">
                   <Button onClick={() => setShowMessageModal(false)} variant="outline" className="flex-1">
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     onClick={submitMessage}
                     disabled={!messageText.trim() || isSubmittingMessage}
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
