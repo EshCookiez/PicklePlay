@@ -2,6 +2,7 @@
 
 import { Users, Target, Zap } from "lucide-react";
 import AnimatedContent from "../animate/AnimatedContent";
+import { MotionFade } from "../animate/MotionFade";
 import Image from "next/image";
 
 const values = [
@@ -28,33 +29,17 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <AnimatedContent
-            distance={50}
-            direction="vertical"
-            duration={0.6}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-          >
+          <MotionFade delay={0.1} y={-30}>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#0a56a7]">About PicklePlay</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Changing the way Philippines discovers and enjoys pickleball
             </p>
-          </AnimatedContent>
+          </MotionFade>
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
-          <AnimatedContent
-            distance={100}
-            direction="horizontal"
-            duration={0.8}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-          >
+          <MotionFade delay={0.2} x={-40}>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#0a56a7] to-[#a3ff01] rounded-2xl blur-2xl opacity-20"></div>
               <Image
@@ -65,18 +50,9 @@ export default function About() {
                 className="relative rounded-2xl shadow-2xl object-cover w-full"
               />
             </div>
-          </AnimatedContent>
+          </MotionFade>
 
-          <AnimatedContent
-            distance={100}
-            direction="horizontal"
-            duration={0.8}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-            delay={0.2}
-          >
+          <MotionFade delay={0.3} x={40}>
             <div>
               <h3 className="text-3xl font-bold mb-6 text-[#0a56a7]">What is PicklePlay?</h3>
               <p className="text-gray-700 mb-4 leading-relaxed">
@@ -102,7 +78,7 @@ export default function About() {
                 </div>
               </div>
             </div>
-          </AnimatedContent>
+          </MotionFade>
         </div>
 
         {/* Values Grid */}

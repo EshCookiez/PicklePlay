@@ -138,7 +138,7 @@ export default function Header() {
         : "bg-transparent backdrop-blur-none shadow-none"
       }`}>
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-28">
           {/* Left Side - Logo + Brand */}
           <div className="flex items-center gap-3">
               {/* Logo */}
@@ -166,8 +166,8 @@ export default function Header() {
 
               {/* Brand Text */}
               <div className="hidden sm:flex flex-col">
-                <span className={`font-black text-lg leading-none ${useWhiteNavbar ? 'text-[#1E40AF]' : 'text-white'}`}>PicklePlay</span>
-                <span className="text-xs text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
+                <span className={`font-black text-2xl leading-none ${useWhiteNavbar ? 'text-[#1E40AF]' : 'text-white'}`}>PicklePlay</span>
+                <span className="text-sm text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
               </div>
             </div>
 
@@ -180,7 +180,7 @@ export default function Header() {
               >
                 <button
                   onClick={() => toggleDropdown(menu)}
-                  className={`flex items-center gap-2 px-4 py-2 font-bold text-sm rounded-lg transition-all duration-200 group-hover:shadow-lg ${
+                  className={`flex items-center gap-2 px-5 py-2.5 font-bold text-base rounded-lg transition-all duration-200 group-hover:shadow-lg ${
                     useWhiteNavbar 
                       ? 'text-[#1E40AF] hover:bg-blue-50 hover:text-[#0D3B8C]'
                       : 'text-white hover:bg-white/20 hover:text-[#FDE047]'
@@ -298,52 +298,61 @@ export default function Header() {
 
                   {/* Profile Dropdown */}
                   {openDropdown === 'profile' && (
-                    <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-[#FDE047]/20 overflow-hidden z-50 backdrop-blur-sm">
-                      <div className="p-4 bg-gradient-to-r from-[#1E40AF] to-blue-700 text-white">
-                        <div className="flex items-center gap-3">
+                    <div className="absolute right-0 mt-3 w-80 bg-gradient-to-br from-[#f8fafc] via-white to-[#f0fdf4] rounded-xl shadow-2xl border border-[#a3ff01]/20 overflow-hidden z-50 backdrop-blur-sm">
+                      <div className="px-4 pt-4">
+                        <div className="flex items-center gap-3 mb-2">
                           {user.avatar_url ? (
                             <img 
                               src={user.avatar_url} 
                               alt={`${user.first_name} ${user.last_name}`}
-                              className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                              className="w-12 h-12 rounded-full object-cover border-2 border-[#a3ff01]/30"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-white/30">
-                              <User className="w-6 h-6 text-slate-400 stroke-[1.5]" />
+                            <div className="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center border-2 border-[#a3ff01]/30">
+                              <User className="w-6 h-6 text-[#a3ff01] stroke-[1.5]" />
                             </div>
                           )}
                           <div>
-                            <p className="font-bold text-sm truncate max-w-[150px]">{user.first_name} {user.last_name}</p>
-                            <p className="text-xs text-white/80">{user.role}</p>
+                            <p className="font-black text-sm text-[#0f2e22] truncate max-w-[150px]">{user.first_name} {user.last_name}</p>
+                            <p className="text-xs text-slate-600">{user.role}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="p-2">
+                      <div className="p-4 space-y-1">
                         <Link
                           href="/profile"
-                          className="flex items-center gap-3 px-4 py-2.5 text-[#1E40AF] hover:bg-blue-50 rounded-lg transition-all text-sm font-bold"
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#a3ff01]/15 transition-all group/item border border-transparent hover:border-[#a3ff01] hover:shadow-md hover:shadow-[#a3ff01]/10"
                           onClick={() => setOpenDropdown(null)}
                         >
-                          <Users className="w-4 h-4" />
-                          My Profile
+                          <Users className="w-5 h-5 text-[#a3ff01] flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-[#0f2e22] text-sm">My Profile</p>
+                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">View your profile</p>
+                          </div>
                         </Link>
                         <Link
                           href="/profile#settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-[#1E40AF] hover:bg-blue-50 rounded-lg transition-all text-sm font-bold"
+                          className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#a3ff01]/15 transition-all group/item border border-transparent hover:border-[#a3ff01] hover:shadow-md hover:shadow-[#a3ff01]/10"
                           onClick={() => setOpenDropdown(null)}
                         >
-                          <BarChart3 className="w-4 h-4" />
-                          Settings
+                          <BarChart3 className="w-5 h-5 text-[#a3ff01] flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-[#0f2e22] text-sm">Settings</p>
+                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">Manage preferences</p>
+                          </div>
                         </Link>
                         <button
                           onClick={async () => {
                             await logout();
                             setOpenDropdown(null);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all text-sm font-bold"
+                          className="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-red-50 transition-all group/item border border-transparent hover:border-red-300 hover:shadow-md hover:shadow-red-200/10"
                         >
-                          <Trophy className="w-4 h-4" />
-                          Logout
+                          <Trophy className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0 text-left">
+                            <p className="font-black text-red-600 text-sm">Logout</p>
+                            <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">Sign out of account</p>
+                          </div>
                         </button>
                       </div>
                     </div>

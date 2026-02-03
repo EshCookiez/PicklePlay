@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MotionFade } from "../animate/MotionFade";
 import { Award, Users, MapPin, Clock } from "lucide-react";
 import Image from "next/image";
 import Ball from "@/images/Ball.png";
+import PinMarker from "@/images/PinMarker.png";
 import { createClient } from "@/lib/supabase/client";
 
 interface Court {
@@ -83,7 +85,7 @@ export default function CourtGridSection() {
   ];
 
   return (
-    <section className="py-20 md:py-28 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <section className="py-20 md:py-28 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
       <style>{`
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
@@ -122,10 +124,10 @@ export default function CourtGridSection() {
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-            Court Finder / Location Directory
+          <h2 className="text-7xl md:text-8xl font-black mb-4 text-white drop-shadow-2xl uppercase" style={{ textShadow: '0 4px 8px rgba(0, 0, 0, 0.8)', letterSpacing: '0.15em' }}>
+            COURT NEAR YOU
           </h2>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Discover pickleball courts near you and connect with your local community
           </p>
         </div>
@@ -140,67 +142,68 @@ export default function CourtGridSection() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {courts.map((court) => (
-              <div
-                key={court.id}
-                className="group bg-gradient-to-br from-slate-800 to-slate-700 rounded-2xl border border-slate-600 p-8 shadow-2xl hover:shadow-2xl hover:border-[#a3ff01] transition-all duration-300 h-full backdrop-blur-xl"
-              >
-                {/* Image Container */}
-                <div className="relative h-40 md:h-48 bg-gray-200 overflow-hidden rounded-lg mb-6">
-                  <img
-                    alt={court.name}
-                    src={getCourtImage(court)}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
-                </div>
-
-                {/* Content Container */}
-                <div>
-                  <h3 className="text-xl font-bold mb-3 text-white group-hover:text-[#a3ff01] transition-colors duration-200">
-                    {court.name}
-                  </h3>
-
-                  <div className="space-y-3 mb-6">
-                    {/* Location */}
-                    <div className="flex items-center gap-2 text-slate-300 group-hover:text-white transition-colors duration-200">
-                      <MapPin className="w-4 h-4 text-[#a3ff01]" />
-                      <span className="text-sm">
-                        {court.address || `${court.city}, Philippines`}
-                      </span>
-                    </div>
-
-                    {/* Distance */}
-                    <div className="flex items-center gap-2 text-slate-300 group-hover:text-white transition-colors duration-200">
-                      <Clock className="w-4 h-4 text-[#a3ff01]" />
-                      <span className="text-sm">
-                        {calculateDistance(court.latitude, court.longitude)} km away
-                      </span>
-                    </div>
-
-                    {/* Courts and Rating */}
-                    <div className="flex gap-4 pt-2">
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4 h-4 text-[#a3ff01]" />
-                        <span className="text-sm font-semibold text-slate-200">
-                          {court.number_of_courts} Court{court.number_of_courts !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-[#a3ff01]" />
-                        <span className="text-sm font-semibold text-slate-200">
-                          {court.rating.toFixed(1)} ⭐
-                        </span>
-                      </div>
-                    </div>
+            {courts.map((court, idx) => (
+              <MotionFade key={court.id} delay={0.1 * idx} y={40}>
+                <div
+                  className="group bg-white rounded-2xl border border-slate-200 p-8 shadow-lg hover:shadow-2xl hover:border-[#a3ff01] transition-all duration-300 h-full"
+                >
+                  {/* Image Container */}
+                  <div className="relative h-40 md:h-48 bg-gray-200 overflow-hidden rounded-lg mb-6">
+                    <img
+                      alt={court.name}
+                      src={getCourtImage(court)}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                   </div>
 
-                  {/* Button */}
-                  <button className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    View Details
-                  </button>
+                  {/* Content Container */}
+                  <div>
+                    <h3 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-[#a3ff01] transition-colors duration-200">
+                      {court.name}
+                    </h3>
+
+                    <div className="space-y-3 mb-6">
+                      {/* Location */}
+                      <div className="flex items-center gap-2 text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
+                        <MapPin className="w-4 h-4 text-[#a3ff01]" />
+                        <span className="text-sm">
+                          {court.address || `${court.city}, Philippines`}
+                        </span>
+                      </div>
+
+                      {/* Distance */}
+                      <div className="flex items-center gap-2 text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
+                        <Clock className="w-4 h-4 text-[#a3ff01]" />
+                        <span className="text-sm">
+                          {calculateDistance(court.latitude, court.longitude)} km away
+                        </span>
+                      </div>
+
+                      {/* Courts and Rating */}
+                      <div className="flex gap-4 pt-2">
+                        <div className="flex items-center gap-2">
+                          <Award className="w-4 h-4 text-[#a3ff01]" />
+                          <span className="text-sm font-semibold text-slate-700">
+                            {court.number_of_courts} Court{court.number_of_courts !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#a3ff01]" />
+                          <span className="text-sm font-semibold text-slate-700">
+                            {court.rating.toFixed(1)} ⭐
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Button */}
+                    <button className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </MotionFade>
             ))}
           </div>
         )}

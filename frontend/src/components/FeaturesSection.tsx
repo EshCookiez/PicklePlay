@@ -2,6 +2,7 @@
 
 import { Zap, Users, Trophy, Clock } from "lucide-react";
 import AnimatedContent from "../animate/AnimatedContent";
+import { MotionFade } from "../animate/MotionFade";
 
 const features = [
   {
@@ -28,7 +29,7 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section className="py-16 md:py-24 bg-blue-50">
+    <section className="py-16 md:py-24 pb-24 md:pb-32 bg-blue-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0a56a7]">Why Choose PicklePlay?</h2>
@@ -38,18 +39,7 @@ export default function FeaturesSection() {
           {features.map((feature, idx) => {
             const IconComponent = feature.icon;
             return (
-              <AnimatedContent
-                key={idx}
-                distance={100}
-                direction="vertical"
-                duration={0.8}
-                ease="power3.out"
-                initialOpacity={0}
-                animateOpacity
-                scale={1}
-                threshold={0.1}
-                delay={idx * 0.15}
-              >
+              <MotionFade key={idx} delay={0.1 * idx} y={40}>
                 <div className="group bg-white rounded-xl border border-gray-200 p-6 shadow-md hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out">
                   <div className="flex justify-center mb-4">
                     <div className="p-4 bg-[#0a56a7] text-white rounded-full group-hover:bg-[#a3ff01] group-hover:text-[#0a56a7] group-hover:scale-125 transition-all duration-300 shadow-lg group-hover:shadow-xl">
@@ -59,7 +49,7 @@ export default function FeaturesSection() {
                   <h3 className="text-lg font-bold mb-2 text-center text-gray-900 group-hover:text-[#0a56a7] transition-colors duration-200">{feature.title}</h3>
                   <p className="text-gray-600 text-center group-hover:text-gray-700 transition-colors duration-200">{feature.description}</p>
                 </div>
-              </AnimatedContent>
+              </MotionFade>
             );
           })}
         </div>

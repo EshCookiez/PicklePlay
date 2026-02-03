@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Download } from "lucide-react";
 import appstoreLogo from "@/images/appstore.png";
 import googleplayLogo from "@/images/googleapp.png";
+import MobileAd from "@/images/MobileAd.png";
+import Ball from "@/images/Ball.png";
 
 export default function DownloadAppSection() {
   const [isVisible, setIsVisible] = useState(false);
@@ -54,6 +56,15 @@ export default function DownloadAppSection() {
           }
         }
 
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+
         .fadeInUp {
           animation: fadeInUp 1s ease-out forwards;
         }
@@ -77,15 +88,60 @@ export default function DownloadAppSection() {
           animation-delay: 0.3s;
           opacity: 0;
         }
+
+        .ball {
+          animation: bounce 3s infinite ease-in-out;
+        }
+
+        .ball-1 { animation-delay: 0s; }
+        .ball-2 { animation-delay: 0.2s; }
+        .ball-3 { animation-delay: 0.4s; }
+        .ball-4 { animation-delay: 0.6s; }
+        .ball-5 { animation-delay: 0.8s; }
+        .ball-6 { animation-delay: 1s; }
+        .ball-7 { animation-delay: 1.2s; }
+        .ball-8 { animation-delay: 1.4s; }
       `}</style>
       <section 
         ref={sectionRef}
         className="relative bg-gradient-to-br from-[#1157a7] to-[#1157a7] overflow-hidden m-0 py-32 md:py-40"
       >
+        {/* Scattered Ball Animations - Background */}
+        <Image src={Ball} alt="Ball" className="absolute top-10 left-8 w-16 h-16 ball ball-1 opacity-60" />
+        <Image src={Ball} alt="Ball" className="absolute top-32 right-24 w-12 h-12 ball ball-2 opacity-50" />
+        <Image src={Ball} alt="Ball" className="absolute top-48 left-1/3 w-14 h-14 ball ball-3 opacity-55" />
+        <Image src={Ball} alt="Ball" className="absolute top-64 right-1/4 w-10 h-10 ball ball-4 opacity-45" />
+        <Image src={Ball} alt="Ball" className="absolute bottom-40 left-20 w-12 h-12 ball ball-5 opacity-50" />
+        <Image src={Ball} alt="Ball" className="absolute bottom-32 right-32 w-16 h-16 ball ball-6 opacity-60" />
+        <Image src={Ball} alt="Ball" className="absolute top-1/2 left-12 w-10 h-10 ball ball-7 opacity-45" />
+        <Image src={Ball} alt="Ball" className="absolute bottom-20 left-1/2 w-14 h-14 ball ball-8 opacity-55" />
+        {/* Additional Balls */}
+        <Image src={Ball} alt="Ball" className="absolute top-1/4 right-10 w-20 h-20 ball ball-1 opacity-40" />
+        <Image src={Ball} alt="Ball" className="absolute top-3/4 left-1/4 w-16 h-16 ball ball-2 opacity-50" />
+        <Image src={Ball} alt="Ball" className="absolute top-2/3 right-40 w-12 h-12 ball ball-3 opacity-45" />
+        <Image src={Ball} alt="Ball" className="absolute bottom-1/2 right-1/3 w-14 h-14 ball ball-4 opacity-55" />
+        <Image src={Ball} alt="Ball" className="absolute top-1/3 left-1/2 w-10 h-10 ball ball-5 opacity-40" />
+        <Image src={Ball} alt="Ball" className="absolute bottom-1/4 left-1/3 w-16 h-16 ball ball-6 opacity-50" />
+
         {/* Gradient border at bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#a3ff01]/50 via-[#84cc16]/30 to-transparent z-20"></div>
         
-        <div className="relative z-10 max-w-7xl mx-auto p-0">
+        {/* Mobile Ad - Behind gradient, full width */}
+        <div className={`absolute bottom-0 right-32 flex justify-end z-0 ${
+          isVisible ? 'slideInRight' : ''
+        }`}>
+          <div className="relative w-full max-w-3xl m-0 p-0 pb-0">
+            <Image
+              src={MobileAd}
+              alt="PicklePlay Mobile App"
+              sizes="(max-width: 640px) 75vw, (max-width: 1024px) 65vw, 55vw"
+              className="w-full h-auto m-0 p-0 mb-0 object-contain"
+              priority
+            />
+          </div>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto p-0 pt-40">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 m-0 p-0">
             {/* Left Side - Download Content */}
             <div className="flex-1 text-center lg:text-left m-0 p-0">
@@ -141,28 +197,8 @@ export default function DownloadAppSection() {
 
                 <div className="mt-4 m-0 p-0">
                   <p className="text-xs text-white/70 m-0">
-                    Compatible with iOS 13+ and Android 8+
+                    Compatible to iOS and Android
                   </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side - Mobile Ad - STRETCHED WIDTH */}
-            <div className={`flex-1 flex justify-center lg:justify-end m-0 p-0 ${
-              isVisible ? 'slideInRight' : ''
-            }`}>
-              <div className="relative w-full max-w-3xl m-0 p-0">
-                <div className="relative w-full h-auto m-0 p-0 pb-0 mb-0">
-                  <Image
-                    src="/images/MobileAd.png"
-                    alt="PicklePlay Mobile App"
-                    width={1200}
-                    height={1600}
-                    sizes="(max-width: 640px) 95vw, (max-width: 1024px) 80vw, 80vw"
-                    className="w-full h-auto m-0 p-0 mb-0 object-contain"
-                    style={{ width: 'auto', height: 'auto' }}
-                    priority
-                  />
                 </div>
               </div>
             </div>
