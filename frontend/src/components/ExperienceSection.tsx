@@ -1,8 +1,10 @@
 "use client";
 
+
 import Image from "next/image";
 import Tournament from "@/images/Tournament.png";
 import Ball from "@/images/Ball.png";
+import { MotionFade } from "../animate/MotionFade";
 
 export default function ExperienceSection() {
   // Array of ball positions for scattered background design
@@ -30,51 +32,56 @@ export default function ExperienceSection() {
         {/* Scattered Ball Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
           {ballPositions.map((ball, idx) => (
-            <div
-              key={idx}
-              className="absolute"
-              style={{
-                top: ball.top,
-                left: ball.left,
-                right: ball.right,
-              }}
-            >
-              <Image
-                src={Ball}
-                alt="Decorative Ball"
-                width={ball.size}
-                height={ball.size}
-                className="w-full h-auto"
+            <MotionFade key={idx} delay={0.1 * idx} y={30}>
+              <div
+                className="absolute"
                 style={{
-                  opacity: ball.opacity,
-                  filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))",
+                  top: ball.top,
+                  left: ball.left,
+                  right: ball.right,
                 }}
-              />
-            </div>
+              >
+                <Image
+                  src={Ball}
+                  alt="Decorative Ball"
+                  width={ball.size}
+                  height={ball.size}
+                  className="w-full h-auto"
+                  style={{
+                    opacity: ball.opacity,
+                    filter: "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))",
+                  }}
+                />
+              </div>
+            </MotionFade>
           ))}
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-[5]">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-start gap-10 relative z-[5]">
           <div className="flex-1 text-left">
-            <h2 className="text-3xl md:text-5xl mb-4 text-[#0a56a7] font-serif italic tracking-wide">
-              Experience PicklePlay Tournament
-            </h2>
-            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
-              PICKLEPLAY — Compete in thrilling tournaments. Get ready to serve, volley, 
-              and smash your way to victory in our most exciting pickleball tournament
-              competitions and events.
-            </p>
+            <MotionFade delay={0.1} y={40}>
+              <h2 className="text-3xl md:text-5xl mb-4 text-[#0a56a7] font-black">
+                Experience PicklePlay Tournament
+              </h2>
+              <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+                PICKLEPLAY — Compete in thrilling tournaments. Get ready to serve, volley, 
+                and smash your way to victory in our most exciting pickleball tournament
+                competitions and events.
+              </p>
+            </MotionFade>
           </div>
 
-          <div className="flex-1 w-full max-w-xl">
-            <Image
-              src={Tournament}
-              alt="Pickleball Tournament"
-              width={800}
-              height={450}
-              priority
-              className="w-full h-auto rounded-xl"
-            />
+          <div className="flex-1 w-full max-w-3xl">
+            <MotionFade delay={0.2} y={40}>
+              <Image
+                src={Tournament}
+                alt="Pickleball Tournament"
+                width={800}
+                height={450}
+                priority
+                className="w-full h-auto rounded-xl"
+              />
+            </MotionFade>
           </div>
         </div>
       </section>
@@ -97,24 +104,28 @@ export default function ExperienceSection() {
         ></div>
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-10 relative z-[5]">
           <div className="flex-1 w-full max-w-none">
-            <div className="relative rounded-xl overflow-visible z-50"> {/* Changed from overflow-hidden to overflow-visible */}
-              <img
-                src="/images/Mowdel.png"
-                alt="PicklePlay Community"
-                className="w-full h-[580px] object-cover m-0 -mt-32 relative z-50"
-              />
-            </div>
+            <MotionFade delay={0.1} y={40}>
+              <div className="relative rounded-xl overflow-visible z-50">
+                <img
+                  src="/images/Mowdel.png"
+                  alt="PicklePlay Community"
+                  className="w-full h-[580px] object-cover m-0 -mt-32 relative z-50"
+                />
+              </div>
+            </MotionFade>
           </div>
 
           <div className="flex-1 text-left mt-16">
-            <h2 className="text-3xl md:text-5xl mb-4 text-[#0a56a7] font-serif italic tracking-wide">
-              Be Part of our Growing Community
-            </h2>
-            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
-              Join thousands of pickleball enthusiasts who have made PicklePlay their home. 
-              Connect with players of all skill levels, share your passion, and be part of 
-              the fastest-growing sports community in the Philippines.
-            </p>
+            <MotionFade delay={0.2} y={40}>
+              <h2 className="text-3xl md:text-5xl mb-4 text-white font-black">
+                Be Part of our Growing Community
+              </h2>
+              <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+                Join thousands of pickleball enthusiasts who have made PicklePlay their home. 
+                Connect with players of all skill levels, share your passion, and be part of 
+                the fastest-growing sports community in the Philippines.
+              </p>
+            </MotionFade>
           </div>
         </div>
       </section>
