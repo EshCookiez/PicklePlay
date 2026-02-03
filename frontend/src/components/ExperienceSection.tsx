@@ -35,7 +35,6 @@ export default function ExperienceSection() {
               className="absolute"
               style={{
                 top: ball.top,
-                bottom: ball.bottom,
                 left: ball.left,
                 right: ball.right,
               }}

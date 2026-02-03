@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -159,8 +159,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
         date_of_birth: signupData.dateOfBirth,
         location: signupData.location,
         phone_number: signupData.phoneNumber,
-        date_of_birth: signupData.dateOfBirth,
-        location: signupData.location,
+        
       });
 
       toast.success("Account created successfully!");
@@ -314,7 +313,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
                     <button
                       type="button"
@@ -615,7 +614,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
                     <button
                       type="button"
@@ -659,7 +658,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                         ? "border-red-500 focus:ring-red-200"
                         : "border-gray-300 focus:border-[#0a56a7] focus:ring-[#0a56a7]/20"
                         }`}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     />
                     <button
                       type="button"
@@ -786,3 +785,4 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
     </div>
   );
 }
+

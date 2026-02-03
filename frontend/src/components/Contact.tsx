@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Facebook } from "lucide-react";
 import AnimatedContent from "../animate/AnimatedContent";
 import { useState } from "react";
 
-const contactMethods = [
+const contactMethods: Array<{icon: any, title: string, details: string}> = [
 ];
 
 export default function Contact() {

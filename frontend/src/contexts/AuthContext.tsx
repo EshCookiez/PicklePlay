@@ -328,9 +328,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      // Show smooth transition overlay
-      setIsLoggingOut(true);
-
       // Clear state
       setUser(null);
       setSession(null);
