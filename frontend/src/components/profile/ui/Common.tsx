@@ -60,10 +60,7 @@ export const Input: React.FC<{
       readOnly={readOnly}
       placeholder={placeholder}
       className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border bg-white focus:outline-none focus:ring-4 focus:ring-[#a3e635]/20 focus:border-[#0f2e22] transition-all text-sm font-medium ${type === 'password' ? 'font-sans tracking-widest' : ''} ${error ? 'border-rose-500' : 'border-slate-200 text-slate-700'} ${readOnly ? 'bg-slate-50 text-slate-500' : ''}`}
-      style={type === 'password' ? { fontFamily: 'Arial, sans-serif', WebkitTextSecurity: 'disc', MozTextSecurity: 'disc', textSecurity: 'disc', WebkitTextSecurityOverride: 'asterisk', MozTextSecurityOverride: 'asterisk', textSecurityOverride: 'asterisk', WebkitTextSecurityProperty: 'asterisk', MozTextSecurityProperty: 'asterisk', textSecurityProperty: 'asterisk', WebkitTextSecurity: 'asterisk' } : undefined}
-      inputMode={type === 'password' ? 'text' : undefined}
       autoComplete={type === 'password' ? 'new-password' : undefined}
-      pattern={type === 'password' ? '.*' : undefined}
     />
     {error && <span className="text-[10px] font-bold text-rose-500 px-1">{error}</span>}
   </div>
