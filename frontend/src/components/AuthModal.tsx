@@ -130,12 +130,9 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
       });
 
       toast.success("Welcome back!");
-      // Close modal first
+      // Close modal and redirect immediately
       onClose();
-      // Navigate after a brief delay to ensure modal is closed
-      setTimeout(() => {
-        router.push("/");
-      }, 100);
+      router.push("/");
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.errors) {
@@ -159,18 +156,17 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
         last_name: signupData.lastName,
         email: signupData.email,
         password: signupData.password,
+        date_of_birth: signupData.dateOfBirth,
+        location: signupData.location,
         phone_number: signupData.phoneNumber,
         date_of_birth: signupData.dateOfBirth,
         location: signupData.location,
       });
 
       toast.success("Account created successfully!");
-      // Close modal first
+      // Close modal and redirect immediately
       onClose();
-      // Navigate after a brief delay to ensure modal is closed
-      setTimeout(() => {
-        router.push("/");
-      }, 100);
+      router.push("/");
     } catch (error: any) {
       console.error("Signup error:", error);
       if (error.errors) {

@@ -144,9 +144,12 @@ export default function Header() {
               {/* Logo */}
               <div
                 onClick={() => {
-                  if (pathname === '/') {
-                    window.location.reload();
+                  // Find and scroll to the hero section
+                  const heroSection = document.querySelector('section');
+                  if (heroSection) {
+                    heroSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   } else {
+                    // Fallback to home page
                     window.location.href = '/';
                   }
                 }}

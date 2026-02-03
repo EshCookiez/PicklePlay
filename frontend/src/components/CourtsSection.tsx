@@ -1,7 +1,10 @@
 "use client";
 
+
 import CourtCard from "./CourtCard";
 import CurvedLoop from "../animate/CurvedLoop";
+import Image from "next/image";
+import Ball from "@/images/Ball.png";
 
 const courts = [
   {
@@ -31,8 +34,48 @@ const courts = [
 ];
 
 export default function CourtsSection() {
+  // Ball positions and animation delays for bouncing effect
+  const ballPositions = [
+    { left: "8%", bottom: "10%", size: 60, delay: "0s" },
+    { right: "5%", bottom: "20%", size: 80, delay: "0.3s" },
+    { left: "35%", bottom: "30%", size: 50, delay: "0.5s" },
+    { left: "12%", bottom: "50%", size: 75, delay: "0.7s" },
+    { right: "30%", bottom: "40%", size: 70, delay: "0.2s" },
+    { left: "40%", bottom: "65%", size: 65, delay: "0.6s" },
+    { right: "10%", bottom: "75%", size: 60, delay: "0.4s" },
+    { left: "15%", bottom: "85%", size: 75, delay: "0.8s" },
+  ];
+
   return (
     <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
+      {/* Animated Bouncing Balls Background */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {ballPositions.map((ball, idx) => (
+          <div
+            key={idx}
+            className="absolute animate-bounce-slow"
+            style={{
+              left: ball.left,
+              right: ball.right,
+              bottom: ball.bottom,
+              animationDelay: ball.delay,
+              zIndex: 1,
+            }}
+          >
+            <Image
+              src={Ball}
+              alt="Decorative Ball"
+              width={ball.size}
+              height={ball.size}
+              className="w-full h-auto opacity-20"
+              style={{
+                filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
       {/* Curved Loop Background */}
       <div className="absolute inset-0 -top-10 opacity-20">
         <CurvedLoop 
@@ -64,3 +107,12 @@ export default function CourtsSection() {
     </section>
   );
 }
+// Add custom slow bounce animation
+// In your global CSS (e.g., globals.css), add:
+// @keyframes bounce-slow {
+//   0%, 100% { transform: translateY(0); }
+//   50% { transform: translateY(-40px); }
+// }
+// .animate-bounce-slow {
+//   animation: bounce-slow 3.5s infinite;
+// }

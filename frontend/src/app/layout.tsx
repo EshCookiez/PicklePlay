@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   title: "PicklePlay Philippines - Find Pickleball Courts Near You",
   description:
     "PicklePlay.ph helps you discover pickleball courts across the Philippines. Search by location, view court details, and get directions to start playing pickleball anywhere in the country!",
+  icons: {
+    icon: [
+      { url: "/images/PicklePlayLogo.jpg", type: "image/jpeg" },
+    ],
+    shortcut: "/images/PicklePlayLogo.jpg",
+    apple: "/images/PicklePlayLogo.jpg",
+  },
   openGraph: {
     title: "PicklePlay Philippines - Find Pickleball Courts Near You",
     description:

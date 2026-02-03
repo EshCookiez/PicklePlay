@@ -135,54 +135,7 @@ export default function About() {
           })}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 pt-12 border-t border-gray-200">
-          <AnimatedContent
-            distance={50}
-            direction="vertical"
-            duration={0.6}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-            delay={0}
-          >
-            <div className="text-center">
-              <p className="text-4xl font-bold text-[#0a56a7] mb-2">500+</p>
-              <p className="text-gray-600">Courts Listed</p>
-            </div>
-          </AnimatedContent>
-          <AnimatedContent
-            distance={50}
-            direction="vertical"
-            duration={0.6}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-            delay={0.1}
-          >
-            <div className="text-center">
-              <p className="text-4xl font-bold text-[#0a56a7] mb-2">10K+</p>
-              <p className="text-gray-600">Active Players</p>
-            </div>
-          </AnimatedContent>
-          <AnimatedContent
-            distance={50}
-            direction="vertical"
-            duration={0.6}
-            ease="power3.out"
-            initialOpacity={0}
-            animateOpacity
-            threshold={0.2}
-            delay={0.2}
-          >
-            <div className="text-center">
-              <p className="text-4xl font-bold text-[#0a56a7] mb-2">50+</p>
-              <p className="text-gray-600">Events Yearly</p>
-            </div>
-          </AnimatedContent>
-        </div>
+
       </div>
     </section>
   );

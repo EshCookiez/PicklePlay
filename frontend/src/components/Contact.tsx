@@ -5,24 +5,6 @@ import AnimatedContent from "../animate/AnimatedContent";
 import { useState } from "react";
 
 const contactMethods = [
-  {
-    icon: MapPin,
-    title: "Location",
-    details: "Cebu City, Philippines",
-    color: "from-[#0a56a7] to-blue-600",
-  },
-  {
-    icon: Phone,
-    title: "Phone",
-    details: "0919 990 9642",
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    details: "info@pickleplay.ph",
-    color: "from-[#0a56a7] to-blue-500",
-  },
 ];
 
 export default function Contact() {

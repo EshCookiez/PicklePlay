@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Download, Apple, PlayCircle } from "lucide-react";
+import { Download } from "lucide-react";
+import appstoreLogo from "@/images/appstore.png";
+import googleplayLogo from "@/images/googleapp.png";
 
 export default function DownloadAppSection() {
   const [isVisible, setIsVisible] = useState(false);
@@ -78,7 +80,7 @@ export default function DownloadAppSection() {
       `}</style>
       <section 
         ref={sectionRef}
-        className="relative bg-gradient-to-br from-[#1157a7] to-[#1157a7] overflow-hidden m-0 p-0"
+        className="relative bg-gradient-to-br from-[#1157a7] to-[#1157a7] overflow-hidden m-0 py-32 md:py-40"
       >
         {/* Gradient border at bottom */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#a3ff01]/50 via-[#84cc16]/30 to-transparent z-20"></div>
@@ -89,65 +91,58 @@ export default function DownloadAppSection() {
             <div className="flex-1 text-center lg:text-left m-0 p-0">
               <div className={`space-y-6 ${isVisible ? 'fadeInUp' : ''} m-0 p-0`}>
                 <div className="space-y-2 m-0 p-0">
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white m-0 p-0">
+                  <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white m-0 p-0">
                     Download Our App
                   </h2>
-                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white/90 m-0 p-0">
-                    Experience PicklePlay in Action
-                  </h3>
                 </div>
                 
                 <div className="space-y-4 max-w-2xl m-0 p-0">
-                  <p className="text-lg text-white/80 leading-relaxed m-0">
+                  <p className="text-xl sm:text-2xl text-white/80 leading-relaxed m-0">
                     <span className="font-bold text-white">PICKLEPLAY</span> — Your New Pickleball Playground. 
-                    Get ready to serve, volley, and smash your way to victory at the heart of Cebu's newest 
-                    and most thrilling pickleball destination.
+                    Get ready to serve, volley, and smash your way to victory across the Philippines' most exciting 
+                    and thriving pickleball courts nationwide.
+                  </p>
+                  <p className="text-sm text-white/70 italic m-0">
+                    Mobile app coming soon! Stay tuned for nationwide availability.
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start m-0 p-0">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start m-0 p-0 mt-6">
                   <a 
                     href="https://apps.apple.com/app/pickleplay-court-finder/id1234567890"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center justify-center gap-3 px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300 hover:scale-105 shadow-lg m-0 ${
+                    className={`flex items-center justify-center gap-3 px-6 py-4 bg-transparent rounded-xl transition-all duration-300 hover:scale-105 m-0 ${
                       isVisible ? 'delay-100 fadeInUp' : ''
                     }`}
                   >
-                    <Apple className="w-6 h-6" />
-                    <div className="text-left">
-                      <div className="text-xs opacity-80">Download on the</div>
-                      <div className="text-sm font-semibold">App Store</div>
-                    </div>
+                    <Image
+                      src={appstoreLogo}
+                      alt="App Store"
+                      className="h-12 w-auto object-contain"
+                    />
                   </a>
                   
                   <a 
                     href="https://play.google.com/store/apps/details?id=com.pickleplay.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center justify-center gap-3 px-6 py-4 bg-black text-white rounded-xl hover:bg-gray-900 transition-all duration-300 hover:scale-105 shadow-lg m-0 ${
+                    className={`flex items-center justify-center gap-3 px-6 py-4 bg-transparent rounded-xl transition-all duration-300 hover:scale-105 m-0 ${
                       isVisible ? 'delay-200 fadeInUp' : ''
                     }`}
                   >
-                    <PlayCircle className="w-6 h-6" />
-                    <div className="text-left">
-                      <div className="text-xs opacity-80">Get it on</div>
-                      <div className="text-sm font-semibold">Google Play</div>
-                    </div>
+                    <Image
+                      src={googleplayLogo}
+                      alt="Google Play"
+                      className="h-12 w-auto object-contain"
+                    />
                   </a>
                 </div>
 
-                <div className={`flex items-center justify-center lg:justify-start gap-6 m-0 p-0 ${
-                  isVisible ? 'delay-300 fadeInUp' : ''
-                }`}>
-                  <div className="flex items-center gap-2 m-0 p-0">
-                    <Download className="w-5 h-5 text-white/80" />
-                    <span className="text-white/80 text-sm">Free Download</span>
-                  </div>
-                  <div className="flex items-center gap-2 m-0 p-0">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-white/80 text-sm">Available Now</span>
-                  </div>
+                <div className="mt-4 m-0 p-0">
+                  <p className="text-xs text-white/70 m-0">
+                    Compatible with iOS 13+ and Android 8+
+                  </p>
                 </div>
               </div>
             </div>
@@ -156,15 +151,15 @@ export default function DownloadAppSection() {
             <div className={`flex-1 flex justify-center lg:justify-end m-0 p-0 ${
               isVisible ? 'slideInRight' : ''
             }`}>
-              <div className="relative w-full max-w-2xl m-0 p-0">
-                <div className="relative w-full h-auto m-0 p-0">
+              <div className="relative w-full max-w-3xl m-0 p-0">
+                <div className="relative w-full h-auto m-0 p-0 pb-0 mb-0">
                   <Image
                     src="/images/MobileAd.png"
                     alt="PicklePlay Mobile App"
                     width={1200}
                     height={1600}
-                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 50vw"
-                    className="w-full h-auto m-0 p-0 object-contain"
+                    sizes="(max-width: 640px) 95vw, (max-width: 1024px) 80vw, 80vw"
+                    className="w-full h-auto m-0 p-0 mb-0 object-contain"
                     style={{ width: 'auto', height: 'auto' }}
                     priority
                   />

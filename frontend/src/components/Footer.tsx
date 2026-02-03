@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Facebook } from "lucide-react";
+import PicklePlayLogo from "@/images/PicklePlayLogo.jpg";
 
 export default function Footer() {
   return (
@@ -8,11 +9,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <Image
-              src="https://pickleplay.ph/logo.jpg"
+              src={PicklePlayLogo}
               alt="PicklePlay Logo"
               width={120}
               height={120}
               className="rounded-full mb-4"
+              loading="eager"
             />
             <p className="text-white/80 text-sm">Find courts. Play pickleball. Build community.</p>
           </div>
@@ -62,8 +64,6 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>Cebu City, Philippines</li>
-              <li>0919 990 9642</li>
               <li>
                 <a
                   href="https://www.facebook.com/pickleplayofficial/"

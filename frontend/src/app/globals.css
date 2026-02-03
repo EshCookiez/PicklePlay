@@ -1,3 +1,10 @@
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-40px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 3.5s infinite;
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 
