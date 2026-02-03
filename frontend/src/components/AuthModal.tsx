@@ -7,6 +7,7 @@ import Image from "next/image";
 import logo from "../images/PicklePlayLogo.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { SkeletonInput, SkeletonButton } from "@/components/ui/skeleton";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -159,6 +160,8 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
         email: signupData.email,
         password: signupData.password,
         phone_number: signupData.phoneNumber,
+        date_of_birth: signupData.dateOfBirth,
+        location: signupData.location,
       });
 
       toast.success("Account created successfully!");
@@ -331,7 +334,6 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }: Au
                     Forgot password?
                   </a>
                 </div>
-
                 {/* Sign In Button */}
                 <button
                   type="submit"

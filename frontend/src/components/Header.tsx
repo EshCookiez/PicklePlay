@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase, Activity, Wallet, Receipt, User } from "lucide-react";
+import { Menu, X, ChevronDown, Bell, Search, Users, MessageSquare, BarChart3, Trophy, BookOpen, Briefcase, Activity, Wallet, Receipt, User, MapPin } from "lucide-react";
 import logo from "../images/PicklePlayLogo.jpg"
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -78,6 +78,7 @@ export default function Header() {
         {
           title: "COMMUNITY",
           items: [
+            { icon: <MapPin className="w-5 h-5" />, label: "Find Courts", desc: "Discover courts near you", href: "/courts" },
             { icon: <Users className="w-5 h-5" />, label: "Player Directory", desc: "Find partners based on skill", href: "/players" },
             { icon: <Trophy className="w-5 h-5" />, label: "Tournaments", desc: "Join local competitions", href: "/tournaments" },
           ]

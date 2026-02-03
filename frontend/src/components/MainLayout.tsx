@@ -13,7 +13,7 @@ function MainLayoutContent({ children }: { children: ReactNode }) {
   
   // Pages that should not have the sidebar
   const noSidebarPages = ['/auth', '/'];
-  const shouldShowSidebar = !noSidebarPages.includes(pathname) && user !== null && !isLoading;
+  const shouldShowSidebar = pathname && !noSidebarPages.includes(pathname) && user !== null && !isLoading;
 
   // Show loading state while checking authentication
   if (isLoading) {

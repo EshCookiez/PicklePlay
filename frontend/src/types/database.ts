@@ -7,7 +7,7 @@ export type UserRole = 'user' | 'coach' | 'admin' | 'super_admin' | 'court_owner
 export type UserStatus = 'active' | 'inactive' | 'suspended'
 export type CourtStatus = 'pending' | 'approved' | 'rejected' | 'suspended'
 export type CourtType = 'indoor' | 'outdoor' | 'both'
-export type CourtSurface = 'concrete' | 'asphalt' | 'sport_court' | 'wood' | 'other'
+export type CourtSurface = 'concrete' | 'asphalt' | 'sport_court' | 'wood' | 'acrylic' | 'other'
 
 export interface User {
   id: string
@@ -46,7 +46,7 @@ export interface Court {
   // Court Details
   number_of_courts: number
   amenities: string[] | null
-  hours_of_operation: Record<string, { open: string; close: string }> | null
+  hours_of_operation: Record<string, string | { open: string; close: string }> | null
   
   // Pricing
   is_free: boolean

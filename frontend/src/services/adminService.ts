@@ -81,7 +81,7 @@ export const adminService = {
     });
 
     // Map DBUser to admin User interface
-    const users: User[] = data.map(u => ({
+    const users: User[] = data.map((u: any) => ({
       id: u.id,
       name: `${u.first_name} ${u.last_name}`.trim(),
       email: u.email,

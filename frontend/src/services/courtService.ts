@@ -239,6 +239,26 @@ export const courtService = {
   },
 
   /**
+   * Get courts owned by a specific user
+   */
+  async getOwnerCourts(ownerId: string) {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('courts')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return {
+      data: data as Court[],
+      total: data?.length || 0
+    }
+  },
+
+  /**
    * Search courts by location (proximity)
    */
   async searchNearby(latitude: number, longitude: number, radiusKm: number = 10) {

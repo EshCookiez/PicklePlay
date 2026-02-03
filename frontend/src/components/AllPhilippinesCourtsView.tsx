@@ -3,16 +3,14 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Navigation, Filter, Search, MapPin, Star, Clock, Globe, ZoomIn, ZoomOut } from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import type { Court } from "./MapView";
 
 const MapView = dynamic(() => import("./MapView"), {
   ssr: false,
   loading: () => (
-    <div className="h-[600px] w-full bg-gradient-to-br from-blue-50 to-blue-100 animate-pulse rounded-3xl flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-[#0a56a7] rounded-full mx-auto mb-4 animate-pulse"></div>
-        <p className="text-[#0a56a7] font-semibold">Loading Philippines Map...</p>
-      </div>
+    <div className="h-[600px] w-full rounded-3xl overflow-hidden flex items-center justify-center">
+      <SkeletonCard />
     </div>
   ),
 });

@@ -26,6 +26,8 @@ import {
   Home,
   Menu,
   X,
+  MapPin,
+  Heart,
 } from "lucide-react";
 import logo from "@/images/PicklePlayLogo.jpg";
 
@@ -43,7 +45,6 @@ export default function Sidebar() {
     Connect: false,
     Improve: false,
     Account: false,
-    Dashboard: false,
   });
   const pathname = usePathname();
   const router = useRouter();
@@ -64,7 +65,6 @@ export default function Sidebar() {
         Connect: false,
         Improve: false,
         Account: false,
-        Dashboard: false,
         [menu]: true
       };
     });
@@ -72,11 +72,11 @@ export default function Sidebar() {
 
   const dropdownContent = {
     Play: [
+      { icon: <MapPin className="w-4 h-4" />, label: "Find Courts", href: "/courts" },
       { icon: <Users className="w-4 h-4" />, label: "Player Directory", href: "/players" },
       { icon: <Trophy className="w-4 h-4" />, label: "Tournaments", href: "/tournaments" },
     ],
     Connect: [
-      { icon: <Users className="w-4 h-4" />, label: "Player Directory", href: "/players" },
       { icon: <MessageSquare className="w-4 h-4" />, label: "Team Hub", href: "/teams" },
       { icon: <BarChart3 className="w-4 h-4" />, label: "Leaderboards", href: "/rankings" },
       { icon: <Trophy className="w-4 h-4" />, label: "Point Rewards", href: "/rewards" },
@@ -86,36 +86,14 @@ export default function Sidebar() {
       { icon: <BookOpen className="w-4 h-4" />, label: "Articles & Tips", href: "/articles" },
     ],
     Account: [
-      { icon: <Activity className="w-4 h-4" />, label: "Activity & Stats", href: "/activity" },
+      { icon: <Heart className="w-4 h-4" />, label: "Favorites", href: "/profile/favorites" },
       { icon: <Wallet className="w-4 h-4" />, label: "Wallet", href: "/wallet" },
       { icon: <Receipt className="w-4 h-4" />, label: "Billing", href: "/billing" },
     ],
   };
 
-  const dashboardLinks: SidebarLink[] = [
-    {
-      label: "Dashboard",
-      href: "#",
-      icon: <LayoutGrid className="w-5 h-5" />,
-      children: [
-        {
-          label: "Activity",
-          href: "/activity",
-          icon: <Activity className="w-4 h-4" />,
-        },
-        {
-          label: "Traffic",
-          href: "/traffic",
-          icon: <Activity className="w-4 h-4" />,
-        },
-        {
-          label: "Statistic",
-          href: "/statistic",
-          icon: <Activity className="w-4 h-4" />,
-        },
-      ],
-    },
-  ];
+  const dashboardLinks: SidebarLink[] = [];
+  // Note: Dashboard submenu removed - Activity, Traffic, Stats consolidated into /profile
 
   const handleLogout = () => {
     logout();

@@ -7,6 +7,7 @@ import { courtService } from '@/services/courtService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Court as DbCourt } from '@/types/database';
 import { globalCache } from '@/lib/cacheManager';
+import { SkeletonTable } from '@/components/ui/skeleton';
 import {
     MapPin,
     Plus,
@@ -429,8 +430,12 @@ function CourtManagement() {
         try {
             setActionLoading(courtId);
             await courtService.approveCourt(courtId, user.id);
-            await fetchCourts();
-            await fetchStats();
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+            const requestId = ++inflightRef.current;
+            await fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+            await fetchStats(requestId);
             alert('Court approved successfully!');
         } catch (error) {
             console.error('Error approving court:', error);
@@ -453,8 +458,12 @@ function CourtManagement() {
         try {
             setActionLoading(selectedCourt.id);
             await courtService.rejectCourt(selectedCourt.id, rejectReason);
-            await fetchCourts();
-            await fetchStats();
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+            const requestId = ++inflightRef.current;
+            await fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+            await fetchStats(requestId);
             setShowRejectModal(false);
             setRejectReason('');
             setSelectedCourt(null);
@@ -477,8 +486,12 @@ function CourtManagement() {
         try {
             setActionLoading(courtId);
             await courtService.suspendCourt(courtId, reason);
-            await fetchCourts();
-            await fetchStats();
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+            const requestId = ++inflightRef.current;
+            await fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+            await fetchStats(requestId);
             alert('Court suspended');
         } catch (error) {
             console.error('Error suspending court:', error);
@@ -498,8 +511,12 @@ function CourtManagement() {
         try {
             setActionLoading(courtId);
             await courtService.deleteCourt(courtId);
-            await fetchCourts();
-            await fetchStats();
+            lastFetchKeyRef.current = null;
+            globalCache.clearAll();
+            const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+            const requestId = ++inflightRef.current;
+            await fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+            await fetchStats(requestId);
             alert('Court deleted successfully');
         } catch (error) {
             console.error('Error deleting court:', error);
@@ -722,8 +739,12 @@ function CourtManagement() {
                                                             setShowCreateModal(false);
                                                             // reset form
                                                             setNewCourt(prev => ({ ...prev, name: '', description: '', address: '', city: '', state_province: '', postal_code: '', latitude: '', longitude: '', phone_number: '', email: '', website: '', booking_url: '', cover_image: '' }));
-                                                            await fetchCourts();
-                                                            await fetchStats();
+                                                            lastFetchKeyRef.current = null;
+                                                            globalCache.clearAll();
+                                                            const cacheKey = `courts_${statusFilter}_${typeFilter}_${debouncedSearchTerm.trim()}`;
+                                                            const requestId = ++inflightRef.current;
+                                                            await fetchCourts(requestId, debouncedSearchTerm.trim(), cacheKey);
+                                                            await fetchStats(requestId);
                                                             alert('Court created successfully. Pending moderation.');
                                                         } catch (err: any) {
                                                             setCreateError(err.message || 'Unexpected error');
@@ -987,8 +1008,8 @@ function CourtManagement() {
             {viewMode === 'list' && (
                 <div className="space-y-4">
                     {loading && !initialLoadDone.current ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0f2e22]"></div>
+                        <div className="space-y-3">
+                            <SkeletonTable rows={4} cols={5} />
                         </div>
                     ) : courts.length === 0 ? (
                         <Card className="p-12 text-center border-2 border-dashed border-slate-200">
@@ -997,9 +1018,10 @@ function CourtManagement() {
                         </Card>
                     ) : (
                         courts.map((court) => (
-                            <Card key={court.id} className="p-6 border-l-4 hover:shadow-lg transition-shadow" style={{
-                                borderColor: court.status === 'approved' ? '#10b981' : court.status === 'pending' ? '#f59e0b' : '#ef4444'
-                            }}>
+                            <Card key={court.id} className="p-6 border-l-4 hover:shadow-lg transition-shadow">
+                                <div style={{
+                                    borderLeft: `4px solid ${court.status === 'approved' ? '#10b981' : court.status === 'pending' ? '#f59e0b' : '#ef4444'}`
+                                }} className="-mx-6 -my-6 px-6 py-6">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                                     {/* Left: Info */}
                                     <div className="flex-1 space-y-4">
@@ -1061,7 +1083,7 @@ function CourtManagement() {
                                                 <h4 className="text-xs font-black text-blue-700 uppercase tracking-widest">Hours</h4>
                                                 {court.hours_of_operation && court.hours_of_operation.mon ? (
                                                     <div className="text-sm space-y-1">
-                                                        <div><span className="font-semibold">Mon-Sun:</span> {court.hours_of_operation.mon.open} - {court.hours_of_operation.mon.close}</div>
+                                                        <div><span className="font-semibold">Mon-Sun:</span> {typeof court.hours_of_operation.mon === 'string' ? court.hours_of_operation.mon : `${court.hours_of_operation.mon.open} - ${court.hours_of_operation.mon.close}`}</div>
                                                     </div>
                                                 ) : (
                                                     <div className="text-sm text-slate-600">Varies by day</div>
@@ -1202,6 +1224,7 @@ function CourtManagement() {
                                             </Button>
                                         )}
                                     </div>
+                                </div>
                                 </div>
                             </Card>
                         ))
