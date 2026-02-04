@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, Badge, Input, Button } from '@/components/profile/ui/Common';
 import { globalCache } from '@/lib/cacheManager';
+import { SkeletonTable } from '@/components/ui/skeleton';
 import {
     Search,
     Filter,
@@ -438,7 +439,7 @@ function UserManagement() {
                             <span>Fields</span>
                         </button>
                         <button 
-                            onClick={fetchUsers}
+                            onClick={handleManualRefresh}
                             disabled={loading}
                             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-blue-200 bg-white text-xs font-black uppercase text-[#1E40AF] hover:bg-blue-50 transition-colors disabled:opacity-50"
                         >
@@ -611,9 +612,8 @@ function UserManagement() {
 
                 <div className="overflow-x-auto">
                     {loading && !initialLoadDone.current ? (
-                        <div className="flex items-center justify-center py-12">
-                            <RefreshCw className="animate-spin text-[#1E40AF]" size={32} />
-                            <span className="ml-3 text-sm font-bold text-slate-600">Loading users...</span>
+                        <div className="py-12">
+                            <SkeletonTable rows={5} cols={6} />
                         </div>
                     ) : error ? (
                         <div className="flex flex-col items-center justify-center py-12">

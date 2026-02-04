@@ -1,15 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import L from "leaflet";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import paddleIcon from "../images/PinMarker.png";
-import { MapPin, Star } from "lucide-react";
-import "../styles/map.css";
-import type { Marker as LeafletMarker } from "leaflet";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from "@react-google-maps/api";
+import { Star, Navigation } from "lucide-react";
 import CourtDetailsModal from "./CourtDetailsModal";
 
 export type Court = {
@@ -21,6 +15,11 @@ export type Court = {
   lng: number;
 };
 
+const containerStyle = {
+  width: "100%",
+  height: "100%"
+};
+
 type MapViewProps = {
   center: [number, number];
   userLocation: [number, number] | null;
@@ -28,194 +27,118 @@ type MapViewProps = {
   onViewDetails?: (court: Court & { distance?: number | null }) => void;
 };
 
-function RecenterMap({ position }: { position: [number, number] }) {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(position, map.getZoom(), { animate: true });
-  }, [map, position]);
-
-  return null;
-}
-
 export default function MapView({ center, userLocation, courts, onViewDetails }: MapViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = useState(false);
+  const router = useRouter()
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+  });
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [selectedCourt, setSelectedCourt] = useState<Court & { distance?: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState({
+    lat: center[0],
+    lng: center[1]
+  });
 
-  // Create custom paddle icon for pickleball courts
-  const customPaddleIcon = useMemo(() => {
-    return L.icon({
-      iconUrl: paddleIcon.src,
-      iconRetinaUrl: paddleIcon.src,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
-      shadowUrl: markerShadow.src,
-      shadowSize: [41, 41],
-      shadowAnchor: [12, 41],
-      className: 'custom-paddle-marker'
-    });
-  }, []);
-
-  // Create custom user location icon
-  const userLocationIcon = useMemo(() => {
-    return L.divIcon({
-      html: `
-        <div class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg">
-          <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-        </div>
-      `,
-      className: 'custom-user-marker',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      popupAnchor: [0, -16]
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: markerIcon2x.src,
-      iconUrl: markerIcon.src,
-      shadowUrl: markerShadow.src,
-    });
-  }, [isClient]);
-
-  const courtMarkers = useMemo(
-    () =>
-      courts.map((court) => (
-        <Marker
-          key={court.id}
-          position={[court.lat, court.lng]}
-          icon={customPaddleIcon}
-        >
-          <Popup>
-            <div className="bg-white rounded-xl shadow-2xl border border-blue-100 p-6 min-w-[320px] max-w-[400px]">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0a56a7] to-[#0a56a7]/80 flex items-center justify-center text-white shadow-lg">
-                    <img src={paddleIcon.src} alt="Pickleball" className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-900">{court.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <MapPin className="w-4 h-4" />
-                        <span>{court.city}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span>4.8</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <button 
-                    onClick={() => window.close()}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Court Info */}
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-[#0a56a7]" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{court.address}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => onViewDetails && onViewDetails(court)}
-                    className="flex-1 px-4 py-3 bg-[#0a56a7] text-white font-semibold rounded-xl hover:bg-[#0a56a7]/90 transition-all duration-200 hover:scale-105 active:scale-95"
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-2H8l-3-3 3 3h2v2h8l3-3-3-3H8v2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 8H5" />
-                      </svg>
-                      <span>View Details</span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      // Get Directions functionality
-                      const destination = `${court.lat},${court.lng}`;
-                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-                      window.open(googleMapsUrl, '_blank');
-                    }}
-                    className="flex-1 px-4 py-3 border-2 border-[#0a56a7] text-[#0a56a7] font-semibold rounded-xl hover:bg-[#0a56a7]/10 transition-all duration-200 hover:scale-105 active:scale-95"
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9l9-9 9-9H3l3 3 3 3h2v2h8l3-3-3-3H8v2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3h6" />
-                      </svg>
-                      <span>Get Directions</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Popup>
-        </Marker>
-      )),
-    [courts]
-  );
-
-  if (!isClient) {
+  if (!isLoaded) {
     return (
-      <div 
-        ref={containerRef} 
-        className="h-[600px] w-full relative bg-gray-200 rounded-lg flex items-center justify-center text-gray-500"
-      >
-        Loading map...
+      <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 rounded-xl">
+        <div className="text-center p-4">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-[#0f2e22] mx-auto mb-3 sm:mb-4"></div>
+          <p className="text-sm sm:text-base text-gray-600">Loading map...</p>
+        </div>
       </div>
     );
   }
 
+  const handleCourtClick = (court: Court) => {
+    setSelectedCourt({ ...court, distance: 0 });
+    setMapCenter({ lat: court.lat, lng: court.lng });
+  };
+
   return (
-    <div ref={containerRef} className="h-[600px] w-full relative z-10">
-      <MapContainer 
-        center={center} 
-        zoom={12} 
-        scrollWheelZoom={false} 
-        style={{ height: "100%", width: "100%" }}
-        className="leaflet-container"
+    <div className="w-full h-full min-h-[300px] relative z-10 rounded-xl overflow-hidden">
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={mapCenter}
+        zoom={13}
+        options={{
+          fullscreenControl: true,
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          gestureHandling: 'greedy'
+        }}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <RecenterMap position={center} />
-        {courtMarkers}
+        {/* User Location Marker */}
         {userLocation && (
-          <Marker position={userLocation}>
-            <Popup>
-              <div className="space-y-1">
-                <p className="font-semibold text-[#0a56a7]">You are here</p>
-                <p className="text-sm text-gray-600">Showing nearby courts</p>
-              </div>
-            </Popup>
-          </Marker>
+          <MarkerF
+            position={{ lat: userLocation[0], lng: userLocation[1] }}
+            title="Your Location"
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 8,
+              fillColor: "#3b82f6",
+              fillOpacity: 1,
+              strokeColor: "#ffffff",
+              strokeWeight: 2
+            }}
+          />
         )}
-      </MapContainer>
+
+        {/* Court Markers */}
+        {courts.map((court) => (
+          <MarkerF
+            key={court.id}
+            position={{ lat: court.lat, lng: court.lng }}
+            title={court.name}
+            icon={{
+              path: 'M12 0C7.58 0 4 3.58 4 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z',
+              scale: 1.8,
+              fillColor: '#0a56a7',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 2,
+              anchor: new google.maps.Point(12, 24)
+            }}
+            onClick={() => handleCourtClick(court)}
+          />
+        ))}
+
+        {/* Court Info Window */}
+        {selectedCourt && (
+          <InfoWindowF
+            position={{ lat: selectedCourt.lat, lng: selectedCourt.lng }}
+            onCloseClick={() => setSelectedCourt(null)}
+            options={{
+              pixelOffset: new google.maps.Size(0, -40),
+              maxWidth: 280
+            }}
+          >
+            <div className="p-3 sm:p-4 bg-white rounded-lg max-w-[260px]">
+              <h3 className="font-bold text-base sm:text-lg text-gray-900 line-clamp-2">{selectedCourt.name}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">{selectedCourt.city}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2 line-clamp-2">{selectedCourt.address}</p>
+              <div className="flex gap-2 mt-3 sm:mt-4">
+                <button
+                  onClick={() => router.push(`/courts/${selectedCourt.id}`)}
+                  className="flex-1 px-2 sm:px-3 py-2 bg-[#0a56a7] text-white font-semibold rounded-lg hover:bg-[#0a56a7]/90 active:scale-95 text-xs sm:text-sm transition-all touch-target"
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={() => {
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`;
+                    window.open(url, "_blank");
+                  }}
+                  className="flex-1 px-2 sm:px-3 py-2 border border-[#0a56a7] text-[#0a56a7] font-semibold rounded-lg hover:bg-[#0a56a7]/10 active:scale-95 text-xs sm:text-sm transition-all touch-target"
+                >
+                  Directions
+                </button>
+              </div>
+            </div>
+          </InfoWindowF>
+        )}
+      </GoogleMap>
     </div>
   );
 }

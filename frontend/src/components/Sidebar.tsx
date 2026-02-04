@@ -26,6 +26,8 @@ import {
   Home,
   Menu,
   X,
+  MapPin,
+  Heart,
 } from "lucide-react";
 import logo from "@/images/PicklePlayLogo.jpg";
 
@@ -43,7 +45,6 @@ export default function Sidebar() {
     Connect: false,
     Improve: false,
     Account: false,
-    Dashboard: false,
   });
   const pathname = usePathname();
   const router = useRouter();
@@ -64,7 +65,6 @@ export default function Sidebar() {
         Connect: false,
         Improve: false,
         Account: false,
-        Dashboard: false,
         [menu]: true
       };
     });
@@ -72,11 +72,11 @@ export default function Sidebar() {
 
   const dropdownContent = {
     Play: [
+      { icon: <MapPin className="w-4 h-4" />, label: "Find Courts", href: "/courts" },
       { icon: <Users className="w-4 h-4" />, label: "Player Directory", href: "/players" },
       { icon: <Trophy className="w-4 h-4" />, label: "Tournaments", href: "/tournaments" },
     ],
     Connect: [
-      { icon: <Users className="w-4 h-4" />, label: "Player Directory", href: "/players" },
       { icon: <MessageSquare className="w-4 h-4" />, label: "Team Hub", href: "/teams" },
       { icon: <BarChart3 className="w-4 h-4" />, label: "Leaderboards", href: "/rankings" },
       { icon: <Trophy className="w-4 h-4" />, label: "Point Rewards", href: "/rewards" },
@@ -86,36 +86,14 @@ export default function Sidebar() {
       { icon: <BookOpen className="w-4 h-4" />, label: "Articles & Tips", href: "/articles" },
     ],
     Account: [
-      { icon: <Activity className="w-4 h-4" />, label: "Activity & Stats", href: "/activity" },
+      { icon: <Heart className="w-4 h-4" />, label: "Favorites", href: "/profile/favorites" },
       { icon: <Wallet className="w-4 h-4" />, label: "Wallet", href: "/wallet" },
       { icon: <Receipt className="w-4 h-4" />, label: "Billing", href: "/billing" },
     ],
   };
 
-  const dashboardLinks: SidebarLink[] = [
-    {
-      label: "Dashboard",
-      href: "#",
-      icon: <LayoutGrid className="w-5 h-5" />,
-      children: [
-        {
-          label: "Activity",
-          href: "/activity",
-          icon: <Activity className="w-4 h-4" />,
-        },
-        {
-          label: "Traffic",
-          href: "/traffic",
-          icon: <Activity className="w-4 h-4" />,
-        },
-        {
-          label: "Statistic",
-          href: "/statistic",
-          icon: <Activity className="w-4 h-4" />,
-        },
-      ],
-    },
-  ];
+  const dashboardLinks: SidebarLink[] = [];
+  // Note: Dashboard submenu removed - Activity, Traffic, Stats consolidated into /profile
 
   const handleLogout = () => {
     logout();
@@ -141,20 +119,20 @@ export default function Sidebar() {
       {/* Mobile Menu Toggle Button - Fixed at top */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+        className="lg:hidden fixed top-3 left-3 z-50 p-2.5 bg-white rounded-xl shadow-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all touch-target"
         aria-label="Toggle sidebar"
       >
         {isMobileOpen ? (
-          <X className="w-6 h-6 text-slate-700" />
+          <X className="w-5 h-5 text-slate-700" />
         ) : (
-          <Menu className="w-6 h-6 text-slate-700" />
+          <Menu className="w-5 h-5 text-slate-700" />
         )}
       </button>
 
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-black/60 z-30 backdrop-blur-sm"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -344,30 +322,30 @@ export default function Sidebar() {
 
       {/* Mobile Sidebar - Slide in from left */}
       <aside
-        className={`lg:hidden fixed left-0 top-0 h-screen w-72 backdrop-blur-md bg-white/98 border-r border-gray-200 text-slate-900 z-40 transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed left-0 top-0 h-[100dvh] w-[280px] max-w-[85vw] backdrop-blur-md bg-white/98 border-r border-gray-200 text-slate-900 z-40 transform transition-transform duration-300 ease-in-out ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col overflow-hidden">
           {/* Logo Section */}
-          <div className="flex items-center justify-center px-4 py-4 border-b border-gray-200 mt-14">
+          <div className="flex items-center justify-center px-4 py-4 border-b border-gray-200 mt-14 flex-shrink-0">
             <button 
               onClick={() => {
                 router.push('/');
                 setIsMobileOpen(false);
               }}
-              className="flex items-center gap-3 hover:scale-105 transition-transform cursor-pointer"
+              className="flex items-center gap-3 hover:scale-105 transition-transform cursor-pointer active:scale-95"
             >
               <Image
                 src={logo}
                 alt="PicklePlay Logo"
-                width={48}
-                height={48}
+                width={44}
+                height={44}
                 className="rounded-full shadow-lg border-2 border-[#FDE047]"
               />
               <div className="flex flex-col">
-                <span className="font-black text-lg leading-none text-slate-900">PicklePlay</span>
-                <span className="text-xs text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
+                <span className="font-black text-base leading-none text-slate-900">PicklePlay</span>
+                <span className="text-[10px] text-[#FDE047] font-bold tracking-wide">PHILIPPINES</span>
               </div>
             </button>
           </div>
@@ -541,22 +519,31 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200 z-40 safe-area-inset-bottom">
-        <div className="flex items-center justify-around py-2 px-2">
+      {/* Mobile Bottom Navigation - Fixed with safe area */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200 z-50 safe-area-inset-bottom shadow-lg">
+        <div className="flex items-center justify-around py-2 px-1 max-w-lg mx-auto">
           <Link
             href="/"
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-              pathname === "/" ? "text-[#a3e635]" : "text-slate-500"
+            className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-w-[56px] touch-target ${
+              pathname === "/" ? "text-[#0a56a7] bg-blue-50" : "text-slate-500 active:bg-gray-100"
             }`}
           >
             <Home className="w-5 h-5" />
             <span className="text-[10px] font-semibold">Home</span>
           </Link>
           <Link
+            href="/courts"
+            className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-w-[56px] touch-target ${
+              pathname?.startsWith("/courts") ? "text-[#0a56a7] bg-blue-50" : "text-slate-500 active:bg-gray-100"
+            }`}
+          >
+            <MapPin className="w-5 h-5" />
+            <span className="text-[10px] font-semibold">Courts</span>
+          </Link>
+          <Link
             href="/profile"
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-              pathname === "/profile" ? "text-[#a3e635]" : "text-slate-500"
+            className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-w-[56px] touch-target ${
+              pathname === "/profile" ? "text-[#0a56a7] bg-blue-50" : "text-slate-500 active:bg-gray-100"
             }`}
           >
             <User className="w-5 h-5" />
@@ -564,26 +551,17 @@ export default function Sidebar() {
           </Link>
           <Link
             href="/activity"
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-              pathname === "/activity" ? "text-[#a3e635]" : "text-slate-500"
+            className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-w-[56px] touch-target ${
+              pathname === "/activity" ? "text-[#0a56a7] bg-blue-50" : "text-slate-500 active:bg-gray-100"
             }`}
           >
             <Activity className="w-5 h-5" />
             <span className="text-[10px] font-semibold">Activity</span>
           </Link>
           <Link
-            href="/wallet"
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-              pathname === "/wallet" ? "text-[#a3e635]" : "text-slate-500"
-            }`}
-          >
-            <Wallet className="w-5 h-5" />
-            <span className="text-[10px] font-semibold">Wallet</span>
-          </Link>
-          <Link
             href="/settings"
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-              pathname === "/settings" ? "text-[#a3e635]" : "text-slate-500"
+            className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all min-w-[56px] touch-target ${
+              pathname === "/settings" ? "text-[#0a56a7] bg-blue-50" : "text-slate-500 active:bg-gray-100"
             }`}
           >
             <Settings className="w-5 h-5" />

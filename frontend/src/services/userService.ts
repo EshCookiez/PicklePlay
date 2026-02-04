@@ -115,35 +115,35 @@ export const userService = {
   /**
    * Update user role
    */
-  async updateUserRole(userId: number, role: UserRole) {
+  async updateUserRole(userId: string, role: UserRole) {
     return this.updateUser(userId, { role })
   },
 
   /**
    * Update user status
    */
-  async updateUserStatus(userId: number, status: UserStatus) {
+  async updateUserStatus(userId: string, status: UserStatus) {
     return this.updateUser(userId, { status })
   },
 
   /**
    * Suspend user
    */
-  async suspendUser(userId: number) {
+  async suspendUser(userId: string) {
     return this.updateUserStatus(userId, 'suspended')
   },
 
   /**
    * Activate user
    */
-  async activateUser(userId: number) {
+  async activateUser(userId: string) {
     return this.updateUserStatus(userId, 'active')
   },
 
   /**
    * Delete user (soft delete via status)
    */
-  async deleteUser(userId: number) {
+  async deleteUser(userId: string) {
     return this.updateUserStatus(userId, 'inactive')
   },
 

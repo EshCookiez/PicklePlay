@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   title: "PicklePlay Philippines - Find Pickleball Courts Near You",
   description:
     "PicklePlay.ph helps you discover pickleball courts across the Philippines. Search by location, view court details, and get directions to start playing pickleball anywhere in the country!",
+  icons: {
+    icon: "/images/PicklePlayLogo.jpg",
+    shortcut: "/images/PicklePlayLogo.jpg",
+    apple: "/images/PicklePlayLogo.jpg",
+  },
   openGraph: {
     title: "PicklePlay Philippines - Find Pickleball Courts Near You",
     description:
@@ -37,6 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-[#0a56a7] via-blue-50 to-[#0066ff]`}
       >

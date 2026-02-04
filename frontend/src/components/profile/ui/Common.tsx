@@ -59,7 +59,8 @@ export const Input: React.FC<{
       onChange={onChange}
       readOnly={readOnly}
       placeholder={placeholder}
-      className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border bg-white focus:outline-none focus:ring-4 focus:ring-[#a3e635]/20 focus:border-[#0f2e22] transition-all text-sm font-medium ${error ? 'border-rose-500' : 'border-slate-200 text-slate-700'} ${readOnly ? 'bg-slate-50 text-slate-500' : ''}`}
+      className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border bg-white focus:outline-none focus:ring-4 focus:ring-[#a3e635]/20 focus:border-[#0f2e22] transition-all text-sm font-medium ${type === 'password' ? 'font-sans tracking-widest' : ''} ${error ? 'border-rose-500' : 'border-slate-200 text-slate-700'} ${readOnly ? 'bg-slate-50 text-slate-500' : ''}`}
+      autoComplete={type === 'password' ? 'new-password' : undefined}
     />
     {error && <span className="text-[10px] font-bold text-rose-500 px-1">{error}</span>}
   </div>
