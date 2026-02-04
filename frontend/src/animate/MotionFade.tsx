@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+"use client";
+
 import React from "react";
 
 interface MotionFadeProps {
@@ -17,13 +18,31 @@ export const MotionFade: React.FC<MotionFadeProps> = ({
   y = 40,
   x = 0,
   className = "",
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y, x }}
-    animate={{ opacity: 1, y: 0, x: 0 }}
-    transition={{ delay, duration, type: "spring", stiffness: 60 }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+}) => {
+  const style = {
+    animation: `fadeIn ${duration}s ease-out ${delay}s forwards`,
+    opacity: 0,
+    "--start-y": `${y}px`,
+    "--start-x": `${x}px`,
+  } as React.CSSProperties;
+
+  return (
+    <>
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translate(var(--start-x), var(--start-y));
+          }
+          to {
+            opacity: 1;
+            transform: translate(0, 0);
+          }
+        }
+      `}</style>
+      <div style={style} className={className}>
+        {children}
+      </div>
+    </>
+  );
+};
