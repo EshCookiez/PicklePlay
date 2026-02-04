@@ -291,7 +291,7 @@ export default function CourtDetailsPage() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => router.back()}
+          onClick={() => router.push('/courts')}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

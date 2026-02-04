@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import CourtCard from '@/components/courts/CourtCard'
 import CourtFiltersSidebar from '@/components/courts/CourtFiltersSidebar'
 import { SkeletonCard } from '@/components/ui/skeleton'
@@ -31,6 +31,8 @@ const MapView = dynamic(() => import('@/components/courts/MapView'), {
 })
 
 export default function CourtsPage() {
+  const searchParams = useSearchParams()
+  const mapRef = useRef<HTMLDivElement>(null)
   const [courts, setCourts] = useState<Court[]>([])
   const [courtsWithDistance, setCourtsWithDistance] = useState<CourtWithDistance[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -51,6 +53,40 @@ export default function CourtsPage() {
 
   // Get unique cities for filter
   const cities = Array.from(new Set(courts.map(c => c.city).filter(Boolean))) as string[]
+
+  // Handle URL query parameters on mount
+  useEffect(() => {
+    if (!searchParams) return
+    
+    const courtName = searchParams.get('court')
+    const location = searchParams.get('location')
+    const viewMode = searchParams.get('view')
+    
+    // Set view mode if provided
+    if (viewMode === 'map') {
+      setViewMode('map')
+    }
+    
+    if (courtName) {
+      // If a specific court was clicked, set search filter for that court
+      setFilters(prev => ({ ...prev, search: decodeURIComponent(courtName) }))
+      setCurrentPage(1) // Reset to page 1
+    } else if (location) {
+      // If a location was searched, set city filter
+      setFilters(prev => ({ ...prev, city: decodeURIComponent(location) }))
+      setCurrentPage(1) // Reset to page 1
+    }
+  }, [searchParams])
+
+  // Scroll to map when view mode changes to map
+  useEffect(() => {
+    if (viewMode === 'map' && mapRef.current) {
+      // Wait for next frame to ensure DOM is fully updated
+      requestAnimationFrame(() => {
+        mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [viewMode])
 
   // Get user location on mount
   useEffect(() => {
@@ -301,7 +337,7 @@ export default function CourtsPage() {
 
             {/* Map View */}
             {viewMode === 'map' && !isLoading && (
-              <div className="w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] mb-4 sm:mb-6 rounded-xl overflow-hidden">
+              <div ref={mapRef} className="w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] mb-4 sm:mb-6 rounded-xl overflow-hidden">
                 <MapView
                   courts={courtsWithDistance}
                   userLocation={userLocation}
@@ -402,8 +438,6 @@ export default function CourtsPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

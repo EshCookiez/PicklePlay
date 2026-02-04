@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { courtService } from "@/services/courtService";
 import PinMarker from "@/images/PinMarker.png";
 const slides = [
   {
@@ -43,6 +44,41 @@ export default function HeroCarousel() {
   const [searchResult, setSearchResult] = useState('');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [nearbyMessage, setNearbyMessage] = useState('');
+  const [databaseCourts, setDatabaseCourts] = useState<any[]>([]);
+  const [databaseCities, setDatabaseCities] = useState<string[]>([]);
+  const [loadingCourts, setLoadingCourts] = useState(true);
+  
+  // Fetch courts and cities from database on component mount
+  useEffect(() => {
+    const fetchDatabaseData = async () => {
+      try {
+        setLoadingCourts(true);
+        // Fetch approved courts from database
+        const courtsResult = await courtService.getCourts({
+          status: 'approved',
+          limit: 50, // Get more courts for search suggestions
+        });
+        
+        setDatabaseCourts(courtsResult.data || []);
+        
+        // Extract unique cities from courts
+        const uniqueCities = Array.from(
+          new Set((courtsResult.data || []).map(court => court.city).filter(Boolean))
+        ) as string[];
+        
+        setDatabaseCities(uniqueCities.sort());
+      } catch (error) {
+        console.error('Error fetching courts from database:', error);
+        // Fall back to empty arrays if fetch fails
+        setDatabaseCourts([]);
+        setDatabaseCities([]);
+      } finally {
+        setLoadingCourts(false);
+      }
+    };
+
+    fetchDatabaseData();
+  }, []);
   
   // Get user's geolocation on component mount
   useEffect(() => {
@@ -63,8 +99,7 @@ export default function HeroCarousel() {
     }
   }, []);
   
-  
-  // Philippine places data
+  // Fallback Philippine places data (for places not in database)
   const philippinePlaces = [
     'Manila', 'Quezon City', 'Caloocan', 'Davao City', 'Cebu City',
     'Makati', 'Pasig', 'Taguig', 'Pasay', 'Mandaluyong',
@@ -99,24 +134,21 @@ export default function HeroCarousel() {
     'Urdaneta', 'Valencia', 'Victorias', 'Vigan', 'Zamboanga City'
   ];
 
-  // Sample courts data
-  const sampleCourts = [
-    { name: 'KAI Multipurpose Hall', distance: '1.0 miles away', location: 'Mandaluyong, NCR' },
-    { name: 'Flair Pickleball Club', distance: '1.1 miles away', location: 'Mandaluyong, NCR' },
-    { name: 'Rockwell Club, Amorsolo Square', distance: '1.2 miles away', location: 'Makati City, NCR' },
-    { name: 'Greenhills West Clubhouse', distance: '1.2 miles away', location: 'San Juan, NCR' },
-    { name: 'Street Pickleball Ortigas', distance: '1.7 miles away', location: 'Pasig City, NCR' },
-  ];
+  // Combine database cities with fallback cities, removing duplicates
+  const allCities = Array.from(
+    new Set([...databaseCities, ...philippinePlaces])
+  );
   
   // Filter places based on search query
-  const filteredPlaces = philippinePlaces.filter(place =>
+  const filteredPlaces = allCities.filter(place =>
     place.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Filter courts based on search query
-  const filteredCourts = sampleCourts.filter(court =>
+  // Filter courts from database based on search query
+  const filteredCourts = databaseCourts.filter(court =>
     court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    court.location.toLowerCase().includes(searchQuery.toLowerCase())
+    court.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (court.address && court.address.toLowerCase().includes(searchQuery.toLowerCase()))
   );
   
   // Handle search
@@ -126,6 +158,13 @@ export default function HeroCarousel() {
       setShowSuggestions(false);
     }
   };
+
+  // Navigate to courts page when search result is set
+  useEffect(() => {
+    if (searchResult.trim()) {
+      router.push(`/courts?location=${encodeURIComponent(searchResult)}`);
+    }
+  }, [searchResult, router]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -214,7 +253,7 @@ export default function HeroCarousel() {
                     <button
                       onClick={() => {
                         if (userLocation) {
-                          router.push(`/findcourts?lat=${userLocation.lat}&lng=${userLocation.lng}&near=true`);
+                          router.push(`/courts?lat=${userLocation.lat}&lng=${userLocation.lng}&near=true`);
                         } else {
                           alert('Please enable location access to find courts near you');
                         }
@@ -251,7 +290,7 @@ export default function HeroCarousel() {
                                 onClick={() => {
                                   setSearchQuery(place);
                                   setSearchResult(place);
-                                  router.push(`/findcourts?location=${place}`);
+                                  router.push(`/courts?location=${encodeURIComponent(place)}`);
                                 }}
                                 className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-100 transition-colors"
                               >
@@ -282,7 +321,8 @@ export default function HeroCarousel() {
                                 onClick={() => {
                                   setSearchQuery(court.name);
                                   setShowSuggestions(false);
-                                  router.push(`/findcourts?court=${court.name}`);
+                                  // Navigate directly to court details page
+                                  router.push(`/courts/${court.id}`);
                                 }}
                                 className="w-full px-4 py-3 text-left hover:bg-green-50 border-b border-gray-100 transition-colors"
                               >
@@ -294,13 +334,19 @@ export default function HeroCarousel() {
                                     <div className="flex-1 min-w-0">
                                       <p className="font-semibold text-gray-900">{court.name}</p>
                                       <p className="text-sm text-gray-500 mt-1">
-                                        <span>{court.distance}</span>
-                                        <span className="mx-2">•</span>
-                                        <span>{court.location}</span>
+                                        <span>{court.city}</span>
+                                        {court.type && (
+                                          <>
+                                            <span className="mx-2">•</span>
+                                            <span className="capitalize">{court.type}</span>
+                                          </>
+                                        )}
                                       </p>
                                     </div>
                                   </div>
-                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded ml-2 flex-shrink-0">Open</span>
+                                  {court.status === 'approved' && (
+                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded ml-2 flex-shrink-0">Open</span>
+                                  )}
                                 </div>
                               </button>
                             ))}

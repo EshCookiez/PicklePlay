@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MotionFade } from "../animate/MotionFade";
 import { Award, Users, MapPin, Clock } from "lucide-react";
 import Image from "next/image";
@@ -23,6 +24,7 @@ interface Court {
 }
 
 export default function CourtGridSection() {
+  const router = useRouter();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
@@ -203,7 +205,12 @@ export default function CourtGridSection() {
                     </div>
 
                     {/* Button */}
-                    <button className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-2.5 sm:py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl active:scale-95 transition-all duration-300 text-sm sm:text-base touch-target">
+                    <button 
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                        router.push(`/courts/${court.id}`);
+                      }}
+                      className="w-full bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 py-2.5 sm:py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl active:scale-95 transition-all duration-300 text-sm sm:text-base touch-target">
                       View Details
                     </button>
                   </div>
@@ -213,12 +220,10 @@ export default function CourtGridSection() {
           </div>
         )}
 
-        {/* Google Maps Button */}
+        {/* Search on Our Maps Button */}
         <div className="flex justify-center mt-8 sm:mt-10 md:mt-12">
-          <a
-            href="https://www.google.com/maps"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => router.push('/courts?view=map')}
             className="bg-gradient-to-r from-[#a3ff01] to-[#7fe100] text-slate-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold hover:from-white hover:to-[#a3ff01] hover:shadow-2xl active:scale-95 transition-all duration-300 inline-flex items-center gap-2 text-sm sm:text-base touch-target"
           >
             <svg
@@ -237,8 +242,8 @@ export default function CourtGridSection() {
               <line x1="9" y1="3" x2="9" y2="18"></line>
               <line x1="15" y1="6" x2="15" y2="21"></line>
             </svg>
-            Use Google Maps
-          </a>
+            Search on our Maps
+          </button>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { MapPin, Navigation } from "lucide-react";
 import type { Court } from "./MapView";
@@ -231,6 +232,7 @@ const courts: Court[] = [
 ];
 
 export default function MapSection() {
+  const router = useRouter();
   const [center, setCenter] = useState<[number, number]>([14.5995, 120.9842]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
@@ -353,7 +355,11 @@ export default function MapSection() {
                   key={court.id}
                   data-card-index={index}
                   type="button"
-                  onClick={() => setCenter([court.lat, court.lng])}
+                  onClick={() => {
+                    setCenter([court.lat, court.lng]);
+                    // Navigate to court details using court name search
+                    router.push(`/courts?court=${encodeURIComponent(court.name)}`);
+                  }}
                   className={`w-full text-left p-4 rounded-2xl border border-gray-100 hover:border-[#0a56a7]/40 hover:bg-blue-50/50 transition-all duration-200 group ${
                     visibleCards.has(index) ? 'cardPopup' : 'cardHidden'
                   }`}
